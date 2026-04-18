@@ -24,190 +24,193 @@ export default function Home() {
     'Yeshwanthpur': 'Yeshvanthapura'
   };
 
-  const quotes = [
-    { text: "Bengaluru doesn't need more promises, it needs accountability.", author: "Public Audit 2024" },
-    { text: "Your silence is their comfort. Your report is their deadline.", author: "Citizen Command" },
-    { text: "Fixing the city, one ward at a time.", author: "BrokenBanglore" }
+  const slogans = [
+    "WAKE UP BENGALURU",
+    "FIX THE ROADS",
+    "AUDIT THE LEADERS",
+    "NO MORE EXCUSES",
+    "RECLAIM YOUR WARD",
+    "CITIZENS ARE WATCHING"
   ];
 
   return (
-    <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-transparent">
-      {/* Hero Section */}
-      <section className="w-full bg-white px-4 md:px-8 py-20 md:py-32 flex flex-col items-center justify-center text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-[0.04] pointer-events-none"
-             style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }}>
+    <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-[#fdfbf6] text-black">
+      
+      {/* 1. VIBRANT HERO */}
+      <section className="w-full py-20 md:py-32 flex flex-col items-center justify-center text-center px-4">
+        <div className="bg-forest text-gold px-4 py-1 rounded-lg font-black text-xs uppercase tracking-widest mb-6 rotate-[-1deg] shadow-lg">
+          Official Administrative Scoreboard
         </div>
-
-        <div className="relative z-10 mb-6 inline-flex items-center gap-2 bg-red-100 text-red-900 border border-red-200 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-tight">
-          Your photo. Your ward. Their problem to fix.
-        </div>
-
-        <h1 className="font-display font-bold text-5xl md:text-7xl lg:text-8xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.9]">
-          Bengaluru is broken. <br className="hidden md:block"/>
-          <span className="text-forest relative inline-block">
-            We're fixing it.
-            <span className="absolute -bottom-4 left-0 w-full h-1 md:h-2 bg-gold -z-10"></span>
-          </span>
+        
+        <h1 className="font-display font-black text-6xl md:text-9xl leading-[0.85] uppercase tracking-tighter mb-8 max-w-5xl">
+          BENGALURU IS <br/>
+          <span className="text-forest underline decoration-gold decoration-8 underline-offset-8">BROKEN.</span>
         </h1>
 
-        <p className="text-lg md:text-2xl text-black font-bold max-w-2xl mb-12 relative z-10">
-          Report problems. Sign petitions. Reach your MLA. <br className="hidden md:block" /> Make the government move.
+        <p className="text-xl md:text-2xl font-bold max-w-2xl mb-12 opacity-70">
+          The government isn't moving fast enough. <br className="hidden md:block"/> We're here to push them.
         </p>
 
-        <div className="flex flex-col md:flex-row gap-4 relative z-10 w-full md:w-auto px-6">
-          <Link to="/report" className="bg-forest text-gold px-10 py-5 rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl hover:-translate-y-1 text-center uppercase tracking-tight">
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto px-6">
+          <Link to="/report" className="bg-black text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg-forest transition-all shadow-[8px_8px_0px_0px_#2B9348] hover:translate-y-1 hover:shadow-none uppercase tracking-tight">
             Report a Problem →
           </Link>
-          <Link to="/map" className="bg-white text-black border-4 border-black px-10 py-5 rounded-2xl font-black text-lg hover:bg-black hover:text-white transition-all text-center uppercase tracking-tight">
-            Explore the Map
+          <Link to="/map" className="bg-white text-black border-4 border-black px-10 py-5 rounded-2xl font-black text-xl hover:bg-black hover:text-white transition-all uppercase tracking-tight">
+            Explore Map
           </Link>
         </div>
       </section>
 
-      {/* Rebuilt Audit Hub - No Overlap */}
-      <section className="w-full py-16 px-4 md:px-8 bg-black/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-[40px] overflow-hidden shadow-2xl border-4 border-black min-h-[500px]">
-          
-          {/* Left Panel: High Impact Status */}
-          <div className="md:w-[350px] bg-forest text-gold p-8 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0">
-            <div>
-              <h2 className="font-display font-black text-5xl mb-4 leading-none tracking-tighter uppercase italic">
-                CIVIC <br/>
-                <span className="text-white">ACTION</span> <br/>
-                AUDIT
-              </h2>
-              <div className="w-16 h-2 bg-gold mb-8"></div>
-              <p className="text-sm font-black leading-tight uppercase tracking-tight text-white mb-2">Live Status Tracking</p>
-              <p className="text-xs font-bold text-white/50 uppercase leading-none">Testing Phase • Launch 2024</p>
+      {/* 2. THE STENCIL MARQUEE (Quotes Replacement) */}
+      <div className="w-full bg-forest border-y-8 border-black py-4 overflow-hidden">
+        <div className="flex whitespace-nowrap animate-marquee">
+           {[...slogans, ...slogans].map((s, i) => (
+             <span key={i} className="text-5xl md:text-8xl font-display font-black text-white uppercase tracking-tighter mx-12 italic opacity-90">
+               • {s} 
+             </span>
+           ))}
+        </div>
+      </div>
+
+      {/* 3. THE ACTION CANVAS (Audit Hub Replacement) */}
+      <section className="w-full py-24 px-4 md:px-8 bg-[#fdfbf6]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
+            <div className="relative">
+               <div className="absolute -top-12 -left-6 text-7xl opacity-10 font-display font-black uppercase pointer-events-none">ACTION</div>
+               <h2 className="font-display font-black text-5xl md:text-7xl text-black uppercase tracking-tighter leading-none">
+                 MLA <br/> <span className="text-forest shadow-sm">RESOLUTION</span> <br/> HUB
+               </h2>
+               <p className="text-lg font-bold text-black/40 mt-4 uppercase tracking-widest italic">Checkmate the leadership.</p>
             </div>
-            
-            <div className="mt-12 space-y-6">
-              <div className="flex justify-between items-end border-b-2 border-black/20 pb-2">
-                <span className="text-xs uppercase font-black tracking-widest text-gold text-left">Reports <br/> Filed</span>
-                <span className="text-4xl font-display font-black text-white">{stats.reports}</span>
-              </div>
-              <div className="flex justify-between items-end border-b-2 border-black/20 pb-2">
-                <span className="text-xs uppercase font-black tracking-widest text-gold text-left">Resolution <br/> Speed</span>
-                <span className="text-4xl font-display font-black text-white">0%</span>
-              </div>
-            </div>
+            <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-forest transition-all shadow-xl">
+               VIEW FULL AUDIT →
+            </Link>
           </div>
 
-          {/* Right Panel: Interactive Leader Hub */}
-          <div className="flex-1 p-8 md:p-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-              <div>
-                <h3 className="font-display font-black text-3xl md:text-4xl text-black uppercase tracking-tighter leading-none">MLA RESOLUTION HUB</h3>
-                <p className="text-black font-bold italic text-sm mt-3 opacity-60">Pick a zone. See who is working — or ignoring you.</p>
-              </div>
-              <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-colors flex-shrink-0">Full Audit →</Link>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(zoneLookup).map(([disp, key]) => {
-                const mla = completeMLAList.find(m => m.constituency === key);
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedZoneMLA(mla)}
-                    className={`p-5 rounded-2xl border-4 transition-all text-left flex flex-col justify-between h-36 ${selectedZoneMLA?.constituency === key ? 'border-black bg-gold shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-black/5 hover:border-black hover:bg-white'}`}
-                  >
-                    <div className="text-[10px] font-black text-black/50 uppercase tracking-widest leading-none">{disp}</div>
-                    <div className="font-display font-black text-xl text-black uppercase leading-none break-words">
-                        {mla ? mla.mla.split(' ').pop() : 'MLA'}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedZoneMLA ? (
-              <div className="mt-8 bg-white rounded-[32px] p-6 border-4 border-black flex flex-col md:flex-row items-center gap-8 animate-in zoom-in-95 duration-200 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-black bg-black">
-                  <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover" />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+             {/* Dynamic Status Sticker */}
+             <div className="lg:col-span-1 bg-gold p-8 rounded-[40px] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between min-h-[400px] rotate-[-2deg]">
+                <div>
+                   <h3 className="font-display font-black text-4xl text-black leading-none mb-6 italic">PLATFORM <br/> MISSION</h3>
+                   <p className="text-xs font-black uppercase text-black/60 tracking-widest mb-10 leading-relaxed">
+                     Every report is a strike. Every petition is a demand. We track the numbers so they can't hide from the truth.
+                   </p>
+                   
+                   <div className="space-y-6">
+                      <div className="bg-white/40 p-4 rounded-2xl border-2 border-black/10">
+                        <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Reports Stacked</div>
+                        <div className="text-5xl font-display font-black text-black">{stats.reports}</div>
+                      </div>
+                      <div className="bg-white/40 p-4 rounded-2xl border-2 border-black/10">
+                        <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">MLA Response Rate</div>
+                        <div className="text-5xl font-display font-black text-forest">0%</div>
+                      </div>
+                   </div>
                 </div>
-                <div className="flex-1 text-center md:text-left">
-                  <h4 className="font-display font-black text-3xl text-black mb-1 uppercase tracking-tight leading-none">{selectedZoneMLA.mla}</h4>
-                  <div className="text-xs font-black text-black/50 uppercase tracking-widest mb-4 mt-2">{selectedZoneMLA.constituency} • {selectedZoneMLA.party}</div>
-                  <div className="flex gap-8 justify-center md:justify-start">
-                    <div>
-                      <div className="text-2xl font-display font-black text-black">0/0</div>
-                      <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Fixed Issues</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-display font-black text-red-600">0%</div>
-                      <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Audit Score</div>
-                    </div>
+             </div>
+
+             {/* The Interactive Card Grid */}
+             <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-6">
+                {Object.entries(zoneLookup).map(([disp, key]) => {
+                  const mla = completeMLAList.find(m => m.constituency === key);
+                  const isSelected = selectedZoneMLA?.constituency === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedZoneMLA(mla)}
+                      className={`group relative p-6 rounded-[32px] border-4 transition-all flex flex-col items-center justify-center gap-3 ${isSelected ? 'border-black bg-white shadow-[8px_8px_0px_0px_#2B9348] -translate-x-1 -translate-y-1' : 'border-black/5 bg-white/50 hover:border-black hover:bg-white hover:scale-105'}`}
+                    >
+                      <div className="absolute top-4 right-6 text-[8px] font-black text-black/20 uppercase tracking-[0.2em]">{disp}</div>
+                      <div className="w-16 h-16 rounded-2xl border-2 border-black/5 overflow-hidden group-hover:border-black transition-colors grayscale group-hover:grayscale-0">
+                         {mla && <img src={mla.photo} className="w-full h-full object-cover" alt="mla" />}
+                      </div>
+                      <div className="font-display font-black text-xl uppercase leading-none text-center">
+                         {mla ? mla.mla.split(' ').pop() : 'MLA'}
+                      </div>
+                      <div className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? 'text-forest' : 'text-black/30'}`}>
+                        {isSelected ? 'SELECTED' : 'SELECT'}
+                      </div>
+                    </button>
+                  );
+                })}
+             </div>
+          </div>
+
+          {/* Action Pop-Card */}
+          {selectedZoneMLA && (
+            <div className="mt-12 bg-white rounded-[40px] p-8 md:p-12 border-8 border-black shadow-[20px_20px_0px_0px_rgba(43,147,72,1)] flex flex-col md:flex-row items-center gap-10 animate-in slide-in-from-bottom-5 duration-300">
+               <div className="w-40 h-40 md:w-56 md:h-56 rounded-full border-8 border-black shadow-xl overflow-hidden shrink-0 rotate-[3deg]">
+                 <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover" />
+               </div>
+               <div className="flex-1 text-center md:text-left">
+                  <div className="inline-block bg-black text-gold px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4">LEADER UNDER AUDIT</div>
+                  <h3 className="font-display font-black text-6xl md:text-7xl uppercase leading-none tracking-tighter mb-4">{selectedZoneMLA.mla}</h3>
+                  <div className="space-y-2 mb-8">
+                    <p className="text-2xl font-black uppercase text-forest tracking-tighter italic">{selectedZoneMLA.constituency} • {selectedZoneMLA.party}</p>
+                    <p className="text-sm font-bold text-black/40 uppercase tracking-widest leading-wide">Currently responsible for your ward's resolution progress.</p>
                   </div>
-                </div>
-                <Link to="/map" className="w-full md:w-auto bg-forest text-gold px-10 py-5 rounded-2xl font-black text-sm hover:scale-105 transition-transform shadow-lg uppercase tracking-widest border-2 border-black">
-                  ACT NOW →
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-8 bg-black/[0.02] border-4 border-dashed border-black/10 rounded-[32px] py-16 flex flex-col items-center justify-center text-center">
-                 <span className="text-4xl mb-4 grayscale">🏛️</span>
-                 <p className="text-black font-black uppercase tracking-[0.2em] text-sm opacity-20 italic">Select your area to begin the audit</p>
-              </div>
-            )}
-          </div>
+                  <Link to="/map" className="inline-block bg-forest text-gold px-12 py-6 rounded-2xl font-black text-2xl hover:scale-105 transition-transform uppercase tracking-tighter shadow-xl border-4 border-black">
+                     PUSH ACTION →
+                  </Link>
+               </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Voice of Bengaluru - Quotes Section */}
-      <section className="w-full py-24 px-4 md:px-8 bg-white overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="font-display font-black text-4xl md:text-6xl text-black uppercase tracking-tighter mb-12">
-            "Voices of Bengaluru"
+      {/* 4. THE BUBBLE STATS (Stats Replacement) */}
+      <section className="w-full py-32 px-4 md:px-8 border-t-8 border-black bg-[#fdfbf6]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16">
+          <div className="max-w-md text-center lg:text-left">
+             <h2 className="font-display font-black text-5xl md:text-[80px] leading-[0.85] uppercase tracking-tighter mb-6 underline decoration-forest/30">
+               OUR <br/> NUMBERS <br/> SO FAR.
+             </h2>
+             <p className="font-black uppercase tracking-[0.2em] text-black/30 text-sm">Real-time civic impact data for 2024.</p>
           </div>
-          <div className="grid gap-12">
-            {quotes.map((q, i) => (
-              <div key={i} className="flex flex-col items-center gap-4 group">
-                <div className="text-2xl md:text-4xl font-display font-black text-forest italic leading-tight group-hover:scale-105 transition-transform">
-                   "{q.text}"
-                </div>
-                <div className="text-xs font-black uppercase tracking-[0.3em] text-black/40">
-                  — {q.author}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom Stats Footer */}
-      <section className="w-full py-16 px-4 md:px-8 border-t-8 border-black bg-white">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
-          <div className="text-center">
-            <div className="text-6xl font-display font-black text-black mb-2 leading-none">0</div>
-            <div className="text-xs font-black text-black uppercase tracking-[0.2em]">REPORTS</div>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl font-display font-black text-forest mb-2 leading-none">0</div>
-            <div className="text-xs font-black text-black uppercase tracking-[0.2em]">PETITIONS</div>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl font-display font-black text-black mb-2 leading-none">0</div>
-            <div className="text-xs font-black text-black uppercase tracking-[0.2em]">CITIZENS</div>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl font-display font-black text-forest mb-2 leading-none">0%</div>
-            <div className="text-xs font-black text-black uppercase tracking-[0.2em]">SOLVED</div>
+          
+          <div className="flex-1 grid grid-cols-2 gap-4 w-full">
+            <div className="bg-white p-10 rounded-[50px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center group hover:bg-forest hover:text-white transition-all cursor-default translate-y-4">
+               <div className="text-[10px] font-black opacity-40 uppercase tracking-[0.3em] mb-4">REPORTS</div>
+               <div className="text-8xl font-display font-black leading-none">{stats.reports}</div>
+            </div>
+            <div className="bg-white p-10 rounded-[50px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center group hover:bg-gold transition-all cursor-default">
+               <div className="text-[10px] font-black opacity-40 uppercase tracking-[0.3em] mb-4 text-forest">PETITIONS</div>
+               <div className="text-8xl font-display font-black leading-none text-forest group-hover:text-black">{stats.petitions}</div>
+            </div>
+            <div className="bg-white p-10 rounded-[50px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center group hover:bg-forest hover:text-white transition-all cursor-default translate-y-4">
+               <div className="text-[10px] font-black opacity-40 uppercase tracking-[0.3em] mb-4">CITIZENS</div>
+               <div className="text-8xl font-display font-black leading-none">{stats.citizens}</div>
+            </div>
+            <div className="bg-white p-10 rounded-[50px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center group hover:bg-gold transition-all cursor-default">
+               <div className="text-[10px] font-black opacity-40 uppercase tracking-[0.3em] mb-4 text-forest">SOLVED</div>
+               <div className="text-8xl font-display font-black leading-none text-forest group-hover:text-black">0%</div>
+            </div>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto mt-20 pt-10 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start">
-             <div className="font-display font-black text-2xl text-black">BROKENBANGLORE</div>
-             <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mt-1">Built for Bengaluru by Citizens • Established 2024</p>
-          </div>
-          <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-black/60">
-             <a href="#" className="hover:text-forest transition-colors">Privacy</a>
-             <a href="#" className="hover:text-forest transition-colors">Audit Policy</a>
-             <a href="#" className="hover:text-forest transition-colors">Open Data</a>
-          </div>
+        <div className="max-w-7xl mx-auto mt-40 pt-16 border-t-4 border-black/5 flex flex-col md:flex-row justify-between items-center gap-10">
+           <div className="text-center md:text-left">
+              <div className="font-display font-black text-4xl tracking-tighter uppercase mb-1">BROKENBANGLORE</div>
+              <p className="text-xs font-black text-black/40 uppercase tracking-widest italic leading-none">Built for Bengaluru by Citizens • Mission Ops • Est. 2024</p>
+           </div>
+           <div className="flex gap-10 font-black text-[10px] uppercase tracking-widest text-black/60">
+              <a href="#" className="hover:text-forest transition-colors">Privacy</a>
+              <a href="#" className="hover:text-forest transition-colors">Audit Policy</a>
+              <a href="#" className="hover:text-forest transition-colors">Open Data</a>
+           </div>
         </div>
       </section>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 40s linear infinite;
+        }
+      `}} />
     </div>
   );
 }
