@@ -69,42 +69,49 @@ export default function Home() {
       <section className="w-full py-16 px-4 md:px-8 bg-black/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-[40px] overflow-hidden shadow-2xl border-4 border-black min-h-[500px]">
           
-          {/* Left Panel: Direct & Bold */}
+          {/* Left Panel: High Energy Citizen Voice */}
           <div className="md:w-[320px] bg-forest p-6 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
             
-            <div>
-              <div className="flex flex-col gap-1 mb-8">
-                <span className="bg-bright text-white px-4 py-1.5 font-display font-black text-4xl leading-none w-fit shadow-lg rotate-1">CIVIC</span>
-                <span className="bg-white text-forest px-4 py-1.5 font-display font-black text-4xl leading-none w-fit shadow-lg -rotate-1">ACTION</span>
+            <div className="animate-in slide-in-from-left duration-500">
+              <div className="flex flex-col gap-2 mb-10">
+                <span className="bg-gold text-black px-4 py-2 font-display font-black text-5xl leading-none w-fit shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-2 uppercase tracking-tighter">WE SEE</span>
+                <span className="bg-white text-forest px-4 py-2 font-display font-black text-5xl leading-none w-fit shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -rotate-3 uppercase tracking-tighter">YOU.</span>
               </div>
               
-              <div className="w-12 h-1.5 bg-gold mb-8"></div>
-              
-              <div className="space-y-4">
-                <div className="bg-black/20 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
-                  <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Status Tracking</p>
-                  <p className="text-sm font-bold text-black uppercase italic">Testing Phase • Launch 2024</p>
-                </div>
-                <div className="bg-black/20 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
-                   <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Audit Coverage</p>
-                   <p className="text-sm font-bold text-white uppercase italic">243 Wards Mapped</p>
+              <div className="space-y-6">
+                <p className="text-xl md:text-2xl font-black text-white leading-[1.1] uppercase tracking-tight">
+                  No more <span className="text-gold">Broken Roads</span><br/>
+                  No more <span className="text-gold">Garbage</span><br/>
+                  No more <span className="text-gold">Dark Streets</span>
+                </p>
+                
+                <div className="h-1 w-full bg-white/10 rounded-full">
+                  <div className="h-full bg-gold w-3/4 rounded-full animate-pulse"></div>
                 </div>
               </div>
             </div>
             
-            <div className="mt-12 space-y-8">
-              <div className="group cursor-help">
-                <div className="flex justify-between items-end border-b-2 border-white/10 pb-3 transition-colors group-hover:border-gold">
-                  <span className="text-xs uppercase font-black tracking-widest text-gold/80 group-hover:text-gold text-left">Reports <br/> Filed</span>
-                  <span className="text-5xl font-display font-black text-white leading-none">0</span>
-                </div>
+            <div className="mt-12 space-y-4">
+              <div className="flex flex-col gap-3">
+                 <div className="bg-white/10 border-2 border-dashed border-white/20 p-4 rounded-2xl">
+                    <p className="text-xs font-black text-gold uppercase tracking-[0.2em] mb-1">Our Goal:</p>
+                    <p className="text-lg font-black text-white uppercase leading-tight">FIX EVERYTHING NOW</p>
+                 </div>
+                 
+                 <div className="flex flex-wrap gap-2 text-white">
+                    <span className="bg-black text-white px-3 py-1.5 rounded-lg border border-white/10 text-[9px] font-black uppercase tracking-widest italic shadow-lg">Good Water</span>
+                    <span className="bg-bright text-white px-3 py-1.5 rounded-lg border border-white/10 text-[9px] font-black uppercase tracking-widest italic shadow-lg">Clean Parks</span>
+                    <span className="bg-gold text-black px-3 py-1.5 rounded-lg border border-black text-[9px] font-black uppercase tracking-widest italic shadow-lg">Safe Walks</span>
+                 </div>
               </div>
-              <div className="group cursor-help">
-                <div className="flex justify-between items-end border-b-2 border-white/10 pb-3 transition-colors group-hover:border-gold">
-                  <span className="text-xs uppercase font-black tracking-widest text-gold/80 group-hover:text-gold text-left">Resolution <br/> Speed</span>
-                  <span className="text-5xl font-display font-black text-white leading-none">0%</span>
-                </div>
+
+              <div className="pt-6 border-t border-white/10">
+                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-3">Message To Government:</p>
+                 <div className="bg-white p-4 rounded-xl border-4 border-black text-black text-xs font-bold uppercase tracking-tighter leading-tight flex items-center gap-3 shadow-[8px_8px_0px_0px_rgba(212,175,55,1)]">
+                    <span className="text-2xl animate-bounce">📢</span>
+                    WE ARE ALL <br/> WATCHING YOU.
+                 </div>
               </div>
             </div>
           </div>
