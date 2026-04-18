@@ -1,17 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { completeMLAList, authorityData, sampleReports, getResponseRateColor, getResponseRateLabel } from '../data/wardData';
+import { getReports } from '../lib/reportsDb';
 
 export default function Accountability() {
-  const totalReports = 0;
-  const resolvedReports = 0;
-  const ignoredReports = 0;
-
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedMLA, setSelectedMLA] = useState(null);
 
-  // Sorting logic for MLA table
-  const sortedMLAs = [...completeMLAList].sort((a, b) => {
-    const rateA = a.resolvedReports / Math.max(a.totalReports, 1);
-    const rateB = b.resolvedReports / Math.max(b.totalReports, 1);
+  useEffect(() => {
+    getReports().then(data => {
+      setReports(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const totalReports = reports.length;
+  const resolvedReports = reports.filter(r => r.status === 'resolved').length;
+  const ignoredReports = reports.filter(r => r.status === 'open' || r.status === 'ignored').length;
+  const resolutionRate = totalReports > 0 ? Math.round((resolvedReports / totalReports) * 100) : 0;
+
+  // Process MLAs with real report data
+  const processedMLAs = completeMLAList.map(mla => {
+    const mlaReports = reports.filter(r => Number(r.ward_no) === Number(mla.ward));
+    const mlaTotal = mlaReports.length;
+    const mlaResolved = mlaReports.filter(r => r.status === 'resolved').length;
+    return {
+      ...mla,
+      totalReports: mlaTotal,
+      resolvedReports: mlaResolved
+    };
+  });
+
+  // Sorting logic for MLA table (Penalty applied: low resolution rate first)
+  const sortedMLAs = [...processedMLAs].sort((a, b) => {
+    const rateA = a.totalReports > 0 ? a.resolvedReports / a.totalReports : 1; // 1 means no reports yet (neutral)
+    const rateB = b.totalReports > 0 ? b.resolvedReports / b.totalReports : 1;
     return rateA - rateB; // worst first
   });
 
@@ -39,11 +62,11 @@ export default function Accountability() {
             </div>
             <div className="bg-white border-b-4 border-bright p-4 rounded-xl flex-shrink-0 min-w-[200px]">
               <div className="text-4xl font-display font-bold text-bright mb-1">{resolvedReports}</div>
-              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Resolved (0%)</div>
+              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Resolved ({resolutionRate}%)</div>
             </div>
             <div className="bg-white border-b-4 border-forest/30 p-4 rounded-xl flex-shrink-0 min-w-[200px]">
               <div className="text-4xl font-display font-bold text-forest mb-1">{ignoredReports}</div>
-              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Pending (0%)</div>
+              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Pending Audit</div>
             </div>
             <div className="bg-white border-b-4 border-gold p-4 rounded-xl flex-shrink-0 min-w-[200px]">
               <div className="text-4xl font-display font-bold text-gold mb-1">0</div>
@@ -59,7 +82,7 @@ export default function Accountability() {
         <section className="bg-white rounded-3xl p-6 md:p-8 border border-white shadow-md overflow-hidden">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h2 className="font-display font-bold text-3xl text-forest mb-2">MLA Resolution Audit</h2>
+              <h2 className="font-display font-bold text-3xl text-forest mb-2">Accountability Audit</h2>
               <p className="text-forest/70 font-medium">Objective tracking of citizen problem resolution.</p>
             </div>
             <select className="bg-white border border-ash/80 text-forest font-bold text-sm outline-none px-4 py-2 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-olive/50 hover:border-olive transition-colors">

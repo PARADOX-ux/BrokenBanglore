@@ -559,8 +559,20 @@ export default function Report() {
                    href={`mailto:${mlaEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`}
                    className="flex-1 bg-black text-white px-8 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest text-center hover:bg-forest transition-colors flex items-center justify-center gap-3"
                 >
-                  📧 Manual Follow-Up
+                  📧 Formal Notice
                 </a>
+                
+                {wd?.twitter && (
+                  <a 
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`.${wd.twitter} @BBMPCOMM Reference ${refNo}: Reported a ${formData.category} issue in ${formData.area} (Ward ${wd.ward}). Please investigate and resolve. #BrokenBanglore #FixBengaluru`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 bg-[#1DA1F2] text-white px-8 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest text-center hover:bg-blue-600 transition-colors flex items-center justify-center gap-3 shadow-xl"
+                  >
+                    ⚡ Social Pressure
+                  </a>
+                )}
+
                 <Link to="/map" className="flex-1 bg-forest text-gold px-8 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest text-center shadow-xl hover:scale-105 transition-transform border-4 border-black">
                   View Map Data
                 </Link>

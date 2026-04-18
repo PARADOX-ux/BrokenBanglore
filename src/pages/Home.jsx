@@ -4,10 +4,17 @@ import { completeMLAList, getStats } from '../data/wardData';
 
 export default function Home() {
   const [selectedZoneMLA, setSelectedZoneMLA] = useState(null);
+  const [reports, setReports] = useState([]);
   const [stats, setStats] = useState({ reports: 0, petitions: 0, citizens: 0, resolved: 0 });
 
   useEffect(() => {
     setStats(getStats());
+    
+    // Fetch real reports for MLA stats
+    import('../lib/reportsDb').then(m => {
+      m.getReports().then(setReports);
+    });
+
     const handler = (e) => setStats(e.detail);
     window.addEventListener('bb-stats-update', handler);
     return () => window.removeEventListener('bb-stats-update', handler);
@@ -120,7 +127,7 @@ export default function Home() {
           <div className="flex-1 p-8 md:p-12 relative">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
               <div>
-                <h3 className="font-display font-black text-3xl md:text-5xl text-black uppercase tracking-tighter leading-tight">MLA RESOLUTION <br className="hidden md:block"/> HUB</h3>
+                <h3 className="font-display font-black text-3xl md:text-5xl text-black uppercase tracking-tighter leading-tight">ACCOUNTABILITY <br className="hidden md:block"/> HUB</h3>
                 <p className="text-black/40 font-bold text-xs uppercase tracking-widest mt-4">Pick a zone. See who is working — or ignoring you.</p>
               </div>
               <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
@@ -169,14 +176,25 @@ export default function Home() {
                   <h4 className="font-display font-black text-3xl text-black mb-1 uppercase tracking-tight leading-none break-words">{selectedZoneMLA.mla}</h4>
                   <div className="text-xs font-black text-black/50 uppercase tracking-widest mb-4 mt-2">{selectedZoneMLA.constituency} • {selectedZoneMLA.party}</div>
                   <div className="flex gap-8 justify-center md:justify-start">
-                    <div>
-                      <div className="text-2xl font-display font-black text-black">0/0</div>
-                      <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Fixed Issues</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-display font-black text-red-600">0%</div>
-                      <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Audit Score</div>
-                    </div>
+                    {(() => {
+                      const mlaReports = reports.filter(r => Number(r.ward_no) === Number(selectedZoneMLA.ward));
+                      const total = mlaReports.length;
+                      const fixed = mlaReports.filter(r => r.status === 'resolved').length;
+                      const score = total > 0 ? Math.round((fixed / total) * 100) : 0;
+                      
+                      return (
+                        <>
+                          <div>
+                            <div className="text-2xl font-display font-black text-black">{fixed}/{total}</div>
+                            <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Fixed Issues</div>
+                          </div>
+                          <div>
+                            <div className={`text-2xl font-display font-black ${score >= 50 ? 'text-forest' : 'text-red-600'}`}>{score}%</div>
+                            <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Audit Score</div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
                 <Link to="/map" className="w-full md:w-auto bg-forest text-gold px-10 py-5 rounded-2xl font-black text-sm hover:scale-105 transition-transform shadow-lg uppercase tracking-widest border-2 border-black">
