@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-olive text-tea py-12 px-4 md:px-8 text-center mt-auto">
        <div className="font-display font-bold text-2xl mb-4 flex justify-center items-center gap-2">
-          BrokenBanglore <span className="text-red-500 animate-pulse-fast text-[16px]">🔴</span>
+          BrokenBanglore
        </div>
        <p className="font-display font-bold text-xl md:text-2xl text-gold mb-3 opacity-90 uppercase tracking-tight">Audit. Accountability. Action.</p>
        <div className="text-[10px] font-bold tracking-[0.3em] uppercase text-tea/40">

@@ -35,7 +35,6 @@ export default function Home() {
 
         {/* Urgency pill */}
         <div className="relative z-10 mb-6 inline-flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 px-4 py-1.5 rounded-full text-sm font-bold">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
           Your photo. Your ward. Their problem to fix.
         </div>
 
@@ -53,7 +52,7 @@ export default function Home() {
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto relative z-10">
           <Link to="/report" className="bg-forest text-gold px-8 py-4 rounded-xl font-bold font-display text-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all">
-            📸 Report a Problem →
+            Report a Problem
           </Link>
           <Link to="/map" className="bg-transparent border-2 border-[#1a3a2a] text-[#1a3a2a] px-8 py-4 rounded-xl font-bold font-display text-lg hover:bg-[#1a3a2a] hover:text-white transition-all">
             See What's Broken
