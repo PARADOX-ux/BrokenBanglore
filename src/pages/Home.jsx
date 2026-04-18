@@ -224,9 +224,16 @@ export default function Home() {
             TIME FOR ACTION
           </div>
           <p className="text-xl font-bold text-black/60 mb-10">Choose who to reach out to. They must listen to us.</p>
-          
+          <div className="flex flex-wrap gap-4 justify-center">
+             <a href="https://bbmp.gov.in" target="_blank" rel="noreferrer" className="bg-black text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all">Report to BBMP</a>
+             <a href="https://bwssb.karnataka.gov.in" target="_blank" rel="noreferrer" className="bg-black text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all">Contact BWSSB</a>
+          </div>
+        </div>
+      </section>
 
-        <div className="max-w-6xl mx-auto mt-20 pt-10 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6">
+      {/* Footer Info */}
+      <section className="w-full py-12 px-4 md:px-8 bg-white">
+        <div className="max-w-6xl mx-auto border-t border-black/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start">
              <div className="font-display font-black text-2xl text-black uppercase tracking-tighter">BROKENBANGLORE</div>
              <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mt-1">Built for Bengaluru by Citizens • Established 2024</p>
