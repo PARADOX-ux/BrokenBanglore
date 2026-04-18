@@ -68,52 +68,67 @@ export default function Home() {
       <section className="w-full py-16 px-4 md:px-8 bg-black/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-[40px] overflow-hidden shadow-2xl border-4 border-black min-h-[500px]">
           
-          {/* Left Panel */}
-          <div className="md:w-[350px] bg-forest text-gold p-8 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0">
+          {/* Left Panel: Direct & Bold */}
+          <div className="md:w-[350px] bg-forest p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
+            
             <div>
-              <h2 className="font-display font-black text-5xl mb-4 leading-none tracking-tighter uppercase italic">
-                CIVIC <br/>
-                <span className="text-white">ACTION</span> <br/>
-                AUDIT
-              </h2>
-              <div className="w-16 h-2 bg-gold mb-8"></div>
-              <p className="text-sm font-black leading-tight uppercase tracking-tight text-white mb-2">Live Status Tracking</p>
-              <p className="text-xs font-bold text-white/50 uppercase leading-none">Testing Phase • Launch 2024</p>
+              <div className="flex flex-col gap-1 mb-8">
+                <span className="bg-bright text-white px-4 py-1.5 font-display font-black text-4xl leading-none w-fit shadow-lg rotate-1">CIVIC</span>
+                <span className="bg-white text-forest px-4 py-1.5 font-display font-black text-4xl leading-none w-fit shadow-lg -rotate-1">ACTION</span>
+              </div>
+              
+              <div className="w-12 h-1.5 bg-gold mb-8"></div>
+              
+              <div className="space-y-4">
+                <div className="bg-black/20 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                  <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Status Tracking</p>
+                  <p className="text-sm font-bold text-white uppercase italic">Testing Phase • Launch 2024</p>
+                </div>
+              </div>
             </div>
             
-            <div className="mt-12 space-y-6">
-              <div className="flex justify-between items-end border-b-2 border-black/20 pb-2">
-                <span className="text-xs uppercase font-black tracking-widest text-gold text-left">Reports <br/> Filed</span>
-                <span className="text-4xl font-display font-black text-white">{stats.reports}</span>
+            <div className="mt-12 space-y-8">
+              <div className="group cursor-help">
+                <div className="flex justify-between items-end border-b-2 border-white/10 pb-3 transition-colors group-hover:border-gold">
+                  <span className="text-xs uppercase font-black tracking-widest text-gold/80 group-hover:text-gold text-left">Reports <br/> Filed</span>
+                  <span className="text-5xl font-display font-black text-white leading-none">{stats.reports}</span>
+                </div>
               </div>
-              <div className="flex justify-between items-end border-b-2 border-black/20 pb-2">
-                <span className="text-xs uppercase font-black tracking-widest text-gold text-left">Resolution <br/> Speed</span>
-                <span className="text-4xl font-display font-black text-white">0%</span>
+              <div className="group cursor-help">
+                <div className="flex justify-between items-end border-b-2 border-white/10 pb-3 transition-colors group-hover:border-gold">
+                  <span className="text-xs uppercase font-black tracking-widest text-gold/80 group-hover:text-gold text-left">Resolution <br/> Speed</span>
+                  <span className="text-5xl font-display font-black text-white leading-none">0%</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Panel */}
-          <div className="flex-1 p-8 md:p-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+          {/* Right Panel: Clean Interactive Grid */}
+          <div className="flex-1 p-8 md:p-12 relative">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
               <div>
-                <h3 className="font-display font-black text-3xl md:text-4xl text-black uppercase tracking-tighter leading-none">MLA RESOLUTION HUB</h3>
-                <p className="text-black font-bold italic text-sm mt-3 opacity-60">Pick a zone. See who is working — or ignoring you.</p>
+                <h3 className="font-display font-black text-3xl md:text-5xl text-black uppercase tracking-tighter leading-tight">MLA RESOLUTION <br className="hidden md:block"/> HUB</h3>
+                <p className="text-black/40 font-bold text-xs uppercase tracking-widest mt-4">Pick a zone. See who is working — or ignoring you.</p>
               </div>
-              <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-colors flex-shrink-0">Full Audit →</Link>
+              <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {Object.entries(zoneLookup).map(([disp, key]) => {
                 const mla = completeMLAList.find(m => m.constituency === key);
+                const isSelected = selectedZoneMLA?.constituency === key;
                 return (
                   <button
                     key={key}
                     onClick={() => setSelectedZoneMLA(mla)}
-                    className={`p-5 rounded-2xl border-4 transition-all text-left flex flex-col justify-between h-36 ${selectedZoneMLA?.constituency === key ? 'border-black bg-gold shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-black/5 hover:border-black hover:bg-white'}`}
+                    className={`p-6 rounded-3xl border-2 transition-all text-left flex flex-col justify-between h-40 group ${isSelected ? 'border-black bg-[#fdfbf6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-black/5 hover:border-black/30 hover:bg-white hover:shadow-lg'}`}
                   >
-                    <div className="text-[10px] font-black text-black/50 uppercase tracking-widest leading-none">{disp}</div>
-                    <div className="font-display font-black text-xl text-black uppercase leading-none break-words">
+                    <div className="flex justify-between items-start w-full">
+                      <div className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none mb-4">{disp}</div>
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-forest animate-pulse"></div>}
+                    </div>
+                    <div className="font-display font-black text-xl text-black uppercase leading-[0.9] break-words group-hover:text-forest transition-colors">
                         {mla ? mla.mla.split(' ').pop() : 'MLA'}
                     </div>
                   </button>
