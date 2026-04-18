@@ -25,14 +25,50 @@ function lsSave(reports) {
  */
 export async function submitReport(reportData) {
   const refNo = `BB-${Date.now().toString(36).toUpperCase()}`;
-  const record = { ...reportData, ref_no: refNo, status: 'open', created_at: new Date().toISOString() };
+  let finalPhotoUrl = reportData.photoUrl; // Default if already provided as URL
+
+  if (isSupabaseConfigured() && reportData.photo instanceof File) {
+    try {
+      const fileExt = reportData.photo.name.split('.').pop();
+      const fileName = `${refNo}.${fileExt}`;
+      const filePath = `reports/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('evidence')
+        .upload(filePath, reportData.photo, { 
+          cacheControl: '3600',
+          upsert: true 
+        });
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('evidence')
+          .getPublicUrl(filePath);
+        finalPhotoUrl = publicUrl;
+      } else {
+        console.error('Photo upload failed:', uploadError.message);
+      }
+    } catch (e) {
+      console.error('Unexpected storage error:', e);
+    }
+  }
+
+  const record = { 
+    ...reportData, 
+    ref_no: refNo, 
+    status: 'open', 
+    created_at: new Date().toISOString(),
+    photo: finalPhotoUrl || reportData.photoPreview || null // Prefer uploaded URL
+  };
+  
+  // Clean up non-database fields before inserting
+  delete record.photoPreview;
 
   if (isSupabaseConfigured()) {
     const { data, error } = await supabase.from('reports').insert([record]).select().single();
     if (!error) {
       incrementStat('reports');
       incrementStat('citizens');
-      // Trigger automated email via Supabase Edge Function
       await sendComplaintEmail(data);
     }
     return { data, refNo, error };

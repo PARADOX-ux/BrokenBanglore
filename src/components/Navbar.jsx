@@ -16,7 +16,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] bg-cream border-b-2 border-black w-full h-16 md:h-20 flex items-center justify-between px-4 md:px-8">
-      <Link to="/" className="font-display font-black md:text-2xl text-xl flex items-center gap-2 text-black uppercase tracking-tighter">
+      <Link to="/" className="font-display font-black text-sm md:text-base flex items-center gap-1 text-black uppercase tracking-tighter">
         BrokenBanglore
       </Link>
       

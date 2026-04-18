@@ -460,7 +460,8 @@ export default function Report() {
                     lng: formData.position?.lng,
                     area_name: formData.area,
                     ward_no: formData.wardData?.ward,
-                    photo: formData.photoPreview, // Using preview URL for now as placeholder for storage
+                    photo: formData.photo, // Pass the File object for upload
+                    photoPreview: formData.photoPreview, // Pass the preview URL for immediate display
                   });
                   nextStep();
                 }}
