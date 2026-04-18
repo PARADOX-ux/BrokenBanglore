@@ -70,7 +70,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-[40px] overflow-hidden shadow-2xl border-4 border-black min-h-[500px]">
           
           {/* Left Panel: Direct & Bold */}
-          <div className="md:w-[350px] bg-forest p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
+          <div className="md:w-[320px] bg-forest p-6 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
             
             <div>
@@ -119,7 +119,7 @@ export default function Home() {
               <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 h-[550px] overflow-y-auto pr-4 custom-scrollbar bg-black/5 p-4 rounded-[2rem] border-2 border-dashed border-black/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 h-[500px] overflow-y-auto pr-2 custom-scrollbar bg-black/5 p-3 md:p-4 rounded-[2rem] border-2 border-dashed border-black/10">
               {completeMLAList.map((mla) => {
                 const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
@@ -127,18 +127,18 @@ export default function Home() {
                     key={mla.mla}
                     onClick={() => setSelectedZoneMLA(mla)}
                     onMouseEnter={() => setSelectedZoneMLA(mla)}
-                    className={`p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[240px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-white hover:border-black/30 hover:shadow-lg'}`}
+                    className={`p-4 md:p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[200px] md:min-h-[240px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-white hover:border-black/30 hover:shadow-lg'}`}
                   >
                     <div className="absolute top-0 right-0 w-16 h-16 bg-black opacity-[0.03] -mr-8 -mt-8 rounded-full"></div>
                     
                     {/* Leader Photo in Selection Grid */}
-                    <div className={`w-20 h-20 rounded-2xl overflow-hidden mb-4 border-2 transition-transform group-hover:scale-105 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
+                    <div className={`w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden mb-3 md:mb-4 border-2 transition-transform group-hover:scale-105 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
                       <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
 
                     <div className="flex-1">
-                      <div className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] leading-none mb-2">{mla.constituency}</div>
-                      <div className="font-display font-black text-lg text-black uppercase leading-tight group-hover:text-forest transition-colors break-words">
+                      <div className="text-[9px] md:text-[10px] font-black text-black/40 uppercase tracking-[0.2em] leading-none mb-1 md:mb-2">{mla.constituency}</div>
+                      <div className="font-display font-black text-base md:text-lg text-black uppercase leading-tight group-hover:text-forest transition-colors break-words">
                           {mla.mla}
                       </div>
                     </div>
@@ -155,8 +155,8 @@ export default function Home() {
             </div>
 
             {selectedZoneMLA ? (
-              <div className="mt-8 bg-white rounded-[32px] p-6 border-4 border-black flex flex-col md:flex-row items-center gap-8 animate-in zoom-in-95 duration-200 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-black bg-black">
+              <div className="mt-8 bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border-4 border-black flex flex-col md:flex-row items-center gap-6 md:gap-8 animate-in zoom-in-95 duration-200 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-black bg-black">
                   <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 text-center md:text-left">

@@ -177,6 +177,14 @@ export default function Map() {
     // Force reset to ensure it NEVER gets stuck, even if the ref logic fails
     layer.setStyle(wardStyle);
     setHoveredData(null);
+    
+    // Clear side card on hover-out as requested
+    // Only if it's an overview (hover-based) and not a full report selected
+    setSelectedReport(prev => {
+      if (prev && prev.id.startsWith('ward-')) return null;
+      return prev;
+    });
+    setWardReports([]);
   };
 
   const handleWardClick = async (e) => {
@@ -250,15 +258,15 @@ export default function Map() {
             <div className="font-display font-black text-xl uppercase tracking-tighter leading-none mb-1">Select the Problem Spot</div>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Tap exactly where the issue is. We log GPS automatically.</div>
           </div>
-          <button onClick={() => setIsPickMode(false)} className="bg-black text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95">Cancel</button>
+          <button onClick={() => setIsPickMode(false)} className="bg-black text-white px-3 py-1.5 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95 shrink-0">Cancel</button>
         </div>
       ) : (
-        <div className="absolute top-6 left-4 z-[400] bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2.5 md:p-3 flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <div className="flex gap-4 items-center w-full md:w-auto">
+        <div className="absolute top-4 left-4 right-4 z-[400] bg-white border-2 md:border-4 border-black rounded-lg md:rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2 md:p-3 flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center">
+          <div className="flex gap-2 items-center w-full md:w-auto">
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="bg-black text-white text-[11px] font-black outline-none cursor-pointer px-4 py-2 rounded-xl uppercase tracking-widest border-2 border-black"
+              className="w-full md:w-auto bg-black text-white text-[9px] md:text-[11px] font-black outline-none cursor-pointer px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl uppercase tracking-widest border-2 border-black"
             >
               <option value="all">ALL AUDITS</option>
               {categories.map(cat => (
@@ -267,13 +275,13 @@ export default function Map() {
             </select>
           </div>
           
-          <div className="flex gap-6 items-center pl-0 md:pl-6 border-l-0 md:border-l-4 border-black/10 text-[10px] font-black text-black uppercase tracking-widest">
-            <div className="flex items-center gap-2 bg-[#0a1f14] text-gold px-3 py-1.5 rounded-lg border-2 border-black">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span> 
-              <span>243 <span className="hidden xs:inline">Wards</span> MAPPED</span>
+          <div className="flex gap-4 md:gap-6 items-center flex-wrap pt-2 md:pt-0 md:pl-6 border-t-2 md:border-t-0 md:border-l-4 border-black/10 text-[9px] md:text-[10px] font-black text-black uppercase tracking-widest w-full md:w-auto">
+            <div className="flex items-center gap-2 bg-[#0a1f14] text-gold px-2 md:px-3 py-1 md:py-1.5 rounded-lg border-2 border-black">
+              <span className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-white animate-pulse"></span> 
+              <span>243 <span className="hidden md:inline">Wards</span> Mapped</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-red-600 inline-block w-2.5 h-2.5 rounded-full bg-red-600"></span>
+              <span className="text-red-600 inline-block w-2 md:w-2.5 h-2 md:h-2.5 rounded-full bg-red-600"></span>
               <span className="opacity-40">FEED:</span>
               <span>{allReports.filter(r => r.status === 'open').length} ACTIVE</span>
             </div>
@@ -396,37 +404,11 @@ export default function Map() {
       </div>
       )}
 
-      {/* NammaKasa-style Ward Stats Card (Bottom Left) */}
-      {hoveredData ? (
-        <div className="absolute bottom-6 left-6 z-[400] bg-white p-5 rounded-2xl shadow-2xl border-4 border-black w-64 animate-in slide-in-from-left-4 duration-200 pointer-events-none">
-           <div className="font-display font-black text-2xl text-black leading-none mb-1 uppercase tracking-tighter">{hoveredData.area}</div>
-           <div className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-4">BBMP Ward #{hoveredData.ward}</div>
-           
-           <div className="flex gap-4 border-t-2 border-black/5 pt-4">
-              <div>
-                 <div className="text-xl font-display font-black text-black">0</div>
-                 <div className="text-[8px] font-black uppercase tracking-widest text-black/40">Reports</div>
-              </div>
-              <div>
-                 <div className="text-xl font-display font-black text-black">OPEN</div>
-                 <div className="text-[8px] font-black uppercase tracking-widest text-black/40">Status</div>
-              </div>
-              <div className="ml-auto flex flex-col items-center justify-center bg-black/5 px-3 py-1 rounded-xl">
-                 <div className="w-2.5 h-2.5 rounded-full mb-1" style={{backgroundColor: hoveredData.mla?.partyColor}}></div>
-                 <span className="text-[9px] font-black text-black uppercase tracking-tighter">{hoveredData.mla?.party}</span>
-              </div>
-           </div>
-        </div>
-      ) : (
-        <div className="absolute bottom-6 left-6 z-[400] bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-2xl border-4 border-black w-64 pointer-events-none">
-           <div className="text-[10px] font-black uppercase tracking-[0.3em] text-black/30 mb-2">Exploration Audit</div>
-           <p className="text-xs font-bold text-black leading-tight">Hover over wards for leader info. Evidence markers drop automatically on report.</p>
-        </div>
-      )}
+      {/* Removed Bottom Left Audit Box as requested */}
 
       {/* The nammakasa-style Floating Accountability Card */}
       {selectedReport && (
-        <div className="absolute top-20 bottom-4 right-4 md:right-8 w-full max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300">
+        <div className="absolute top-20 bottom-4 right-4 md:right-8 left-4 md:left-auto max-w-none md:max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300">
           
           {/* Card Header */}
           <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
