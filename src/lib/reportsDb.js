@@ -58,11 +58,12 @@ export async function submitReport(reportData) {
     ref_no: refNo, 
     status: 'open', 
     created_at: new Date().toISOString(),
-    photo: finalPhotoUrl || reportData.photoPreview || null // Prefer uploaded URL
+    photo_url: finalPhotoUrl || reportData.photoPreview || null // Prefer uploaded URL
   };
   
   // Clean up non-database fields before inserting
   delete record.photoPreview;
+  delete record.photo; // Remove the File object
 
   if (isSupabaseConfigured()) {
     const { data, error } = await supabase.from('reports').insert([record]).select().single();
