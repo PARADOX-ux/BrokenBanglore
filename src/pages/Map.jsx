@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { categories, sampleReports, wardMLAData, completeMLAList, getMPByConstituency } from '../data/wardData';
 import { getReports, upvoteReport } from '../lib/reportsDb';
-import { latLngToCell, cellToBoundary } from 'h3-js';
 
 // Fix Leaflet icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -52,6 +51,7 @@ export default function Map() {
   const [wardReportsLoading, setWardReportsLoading] = useState(false);
   const [hoveredData, setHoveredData] = useState(null);
   const [geoJsonData, setGeoJsonData] = useState(null);
+  const [allReports, setAllReports] = useState([]);
   const geoJsonRef = useRef(null);
 
   // Confirm pick — save to localStorage and go back to report
@@ -114,6 +114,11 @@ export default function Map() {
       .then(res => res.json())
       .then(data => setGeoJsonData(data))
       .catch(err => console.error("Could not load wards GeoJSON", err));
+
+    // Fetch all global reports to show markers
+    getReports().then(data => {
+      setAllReports(data || []);
+    });
   }, []);
 
   // NammaKasa Area Interaction Handlers
@@ -243,8 +248,8 @@ export default function Map() {
             ))}
           </select>
           <div className="hidden md:flex gap-4 items-center pl-4 border-l border-white/20 text-xs font-bold text-white/80">
-            <div><span className="text-red-400">0</span> Active</div>
-            <div><span className="text-green-400">0</span> Resolved</div>
+            <div><span className="text-red-400">{allReports.filter(r => r.status === 'open').length}</span> Active</div>
+            <div><span className="text-green-400">{allReports.filter(r => r.status === 'resolved').length}</span> Resolved</div>
           </div>
         </div>
       )}
@@ -263,6 +268,36 @@ export default function Map() {
           />
 
           {geoJsonLayer}
+          
+          {/* Render real markers for all global reports */}
+          {!isPickMode && allReports.map(report => (
+            <Marker 
+              key={report.id || report.ref_no} 
+              position={[report.lat, report.lng]}
+              icon={L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color: ${categories.find(c => c.id === report.category)?.color || '#2B9348'}; width: 12px; height: 12px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+              })}
+            >
+              <Popup className="custom-popup">
+                <div className="p-1">
+                  <div className="text-[10px] font-bold uppercase text-forest/50 mb-1">{report.category}</div>
+                  <div className="font-bold text-xs mb-1">{report.title}</div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {report.status === 'resolved' ? 'Fixed' : 'Open'}
+                    </span>
+                    <button 
+                      onClick={() => navigate(`/map?ward=${report.ward_no}`)}
+                      className="text-[9px] font-bold text-forest hover:underline"
+                    >View Ward →</button>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
 
           {/* Pick mode: capture bare-map clicks + show dropped pin */}
           {isPickMode && (
@@ -284,7 +319,7 @@ export default function Map() {
           {pickedPin ? (
             <div>
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 bg-forest/10 rounded-xl flex items-center justify-center text-xl shrink-0">📍</div>
+                <div className="w-10 h-10 bg-forest/10 rounded-xl flex items-center justify-center text-xs font-bold text-forest shrink-0">LOC</div>
                 <div>
                   <p className="font-bold text-[#1a3a2a] text-sm">
                     {pickedWard?.name ? `Ward ${pickedWard.ward} — ${pickedWard.name}` : 'Location pinned'}
@@ -298,7 +333,7 @@ export default function Map() {
                 onClick={confirmPick}
                 className="w-full bg-forest text-gold py-3 rounded-xl font-bold hover:bg-[#1a3a2a] transition-colors shadow-lg"
               >
-                ✅ Confirm This Location — Back to Report
+                Confirm This Location — Back to Report
               </button>
             </div>
           ) : (
@@ -313,7 +348,7 @@ export default function Map() {
            Home
          </a>
          <a href="/report" className="px-6 py-3 bg-forest text-gold rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-black transition-transform hover:scale-105">
-           <span>📸</span> Scan QR to Report
+           Scan QR to Report
          </a>
       </div>
       )}
@@ -321,7 +356,6 @@ export default function Map() {
       {/* NammaKasa-style Ward Stats Card (Bottom Left) */}
       {hoveredData ? (
         <div className="absolute bottom-6 left-6 z-[400] bg-white p-4 rounded-xl shadow-xl border-l-[6px] border-forest border-y border-r border-forest/10 w-64 animate-in slide-in-from-left-4 duration-200 pointer-events-none">
-           <div className="text-[10px] font-bold uppercase tracking-widest text-forest/40 mb-1">Ward Details</div>
            <div className="font-display font-bold text-xl text-forest mb-0.5">{hoveredData.area}</div>
            <div className="text-xs font-bold text-forest/60 mb-3">Ward #{hoveredData.ward}</div>
            
@@ -471,7 +505,7 @@ export default function Map() {
               href={`/report?ward=${selectedReport.ward}`}
               className="w-full bg-forest hover:bg-[#1a3a2a] text-gold py-3 rounded-lg font-bold text-sm text-center shadow-lg transition-colors"
             >
-              📸 Report a Problem Here
+              Report a Problem Here
             </a>
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${selectedReport.ward} has ${wardReports.length} unresolved civic complaints. ${selectedReport.mlaDetails?.mla} (MLA) and ${selectedReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBanglore`)}`}
@@ -479,7 +513,7 @@ export default function Map() {
               rel="noreferrer"
               className="w-full bg-black/5 hover:bg-black hover:text-white text-[#1a3a2a] py-2.5 rounded-lg font-bold text-sm text-center transition-colors border border-black/10"
             >
-              𝕏 Tweet MLA + MP about this Ward
+              Tweet MLA + MP about this Ward
             </a>
             <div className="text-center text-[9px] text-forest/40 font-bold flex items-center justify-center gap-1">
               <span className="w-1.5 h-1.5 bg-bright rounded-full"></span> Citizen-verified data

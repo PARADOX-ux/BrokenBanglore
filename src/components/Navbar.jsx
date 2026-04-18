@@ -14,11 +14,9 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-cream shadow-sm border-b border-ash/30 w-full max-w-[2560px] mx-auto h-16 md:h-20 flex items-center justify-between px-4 md:px-8">
-      <div className="flex items-center gap-2">
         <Link to="/" className="font-display font-bold md:text-2xl text-xl flex items-center gap-2 text-forest">
-          BrokenBanglore <span className="text-red-500 animate-pulse-fast text-sm">🔴</span>
+          BrokenBanglore
         </Link>
-      </div>
       
       <nav className="hidden md:flex items-center gap-8 font-semibold text-sm">
         {navLinks.map((link) => (
