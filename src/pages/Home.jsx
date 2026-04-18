@@ -27,7 +27,8 @@ export default function Home() {
   const quotes = [
     { text: "Bengaluru doesn't need more promises, it needs accountability.", author: "Public Audit 2024" },
     { text: "Your silence is their comfort. Your report is their deadline.", author: "Citizen Command" },
-    { text: "Fixing the city, one ward at a time.", author: "BrokenBanglore" }
+    { text: "If we don't fix it, our children will pay for it.", author: "Voice of Bengaluru" },
+    { text: "Pressure works. Public data works. BrokenBanglore works.", author: "Community Lead" }
   ];
 
   return (
@@ -83,7 +84,11 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="bg-black/20 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
                   <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Status Tracking</p>
-                  <p className="text-sm font-bold text-white uppercase italic">Testing Phase • Launch 2024</p>
+                  <p className="text-sm font-bold text-black uppercase italic">Testing Phase • Launch 2024</p>
+                </div>
+                <div className="bg-black/20 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                   <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Audit Coverage</p>
+                   <p className="text-sm font-bold text-white uppercase italic">243 Wards Mapped</p>
                 </div>
               </div>
             </div>
@@ -92,7 +97,7 @@ export default function Home() {
               <div className="group cursor-help">
                 <div className="flex justify-between items-end border-b-2 border-white/10 pb-3 transition-colors group-hover:border-gold">
                   <span className="text-xs uppercase font-black tracking-widest text-gold/80 group-hover:text-gold text-left">Reports <br/> Filed</span>
-                  <span className="text-5xl font-display font-black text-white leading-none">{stats.reports}</span>
+                  <span className="text-5xl font-display font-black text-white leading-none">0</span>
                 </div>
               </div>
               <div className="group cursor-help">
@@ -114,22 +119,35 @@ export default function Home() {
               <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(zoneLookup).map(([disp, key]) => {
-                const mla = completeMLAList.find(m => m.constituency === key);
-                const isSelected = selectedZoneMLA?.constituency === key;
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 h-[500px] overflow-y-auto pr-4 custom-scrollbar bg-black/5 p-4 rounded-[2rem] border-2 border-dashed border-black/10">
+              {completeMLAList.map((mla) => {
+                const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
                   <button
-                    key={key}
+                    key={mla.mla}
                     onClick={() => setSelectedZoneMLA(mla)}
-                    className={`p-6 rounded-3xl border-2 transition-all text-left flex flex-col justify-between h-40 group ${isSelected ? 'border-black bg-[#fdfbf6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-black/5 hover:border-black/30 hover:bg-white hover:shadow-lg'}`}
+                    onMouseEnter={() => setSelectedZoneMLA(mla)}
+                    className={`p-4 rounded-2xl border-2 transition-all text-left flex flex-col justify-between h-52 group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/5 bg-white/40 hover:border-black/20 hover:bg-white'}`}
                   >
-                    <div className="flex justify-between items-start w-full">
-                      <div className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none mb-4">{disp}</div>
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-forest animate-pulse"></div>}
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-black opacity-[0.03] -mr-8 -mt-8 rounded-full"></div>
+                    
+                    {/* Leader Photo in Selection Grid */}
+                    <div className={`w-14 h-14 rounded-xl overflow-hidden mb-3 border-2 transition-transform group-hover:scale-110 ${isSelected ? 'border-forest' : 'border-black/10'}`}>
+                      <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
-                    <div className="font-display font-black text-xl text-black uppercase leading-[0.9] break-words group-hover:text-forest transition-colors">
-                        {mla ? mla.mla.split(' ').pop() : 'MLA'}
+
+                    <div>
+                      <div className="text-[8px] font-black text-black/30 uppercase tracking-[0.2em] leading-none mb-1">{mla.constituency}</div>
+                      <div className="font-display font-black text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors">
+                          {mla.mla}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-3">
+                       <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border border-black/10 ${mla.party === 'BJP' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                         {mla.party}
+                       </span>
+                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse"></div>}
                     </div>
                   </button>
                 );

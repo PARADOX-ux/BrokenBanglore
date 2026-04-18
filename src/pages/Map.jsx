@@ -151,8 +151,21 @@ export default function Map() {
       mla: mlaData
     });
 
-    if (selectedReport) {
-      handleWardClick(e);
+    // Automatically update the side card on hover as requested
+    setSelectedReport({
+      id: `ward-${wardNo}`,
+      title: `${wardProps.KGISWardName || wardProps.name} Overview`,
+      category: "geographical area",
+      catColor: mlaData.partyColor || "#2B9348",
+      area: `BBMP Ward #${wardNo}`,
+      ward: wardNo,
+      authority: "Bruhat Bengaluru Mahanagara Palike",
+      status: "pending",
+      mlaDetails: mlaData
+    });
+
+    if (selectedReport && selectedReport.id.startsWith('ward-')) {
+       // already handled by setSelectedReport above
     }
   };
 
@@ -231,29 +244,39 @@ export default function Map() {
       
       {/* Pick Mode Banner (replacing filter bar) */}
       {isPickMode ? (
-        <div className="absolute top-4 left-4 right-4 z-[400] bg-[#1a3a2a] text-white rounded-2xl shadow-2xl p-3 flex items-center gap-3 border border-gold/30">
-          <span className="text-2xl">📍</span>
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[400] bg-red-600 text-white p-5 rounded-2xl shadow-2xl border-4 border-black flex gap-6 items-center w-[90%] max-w-lg">
+          <div className="text-3xl animate-bounce">📍</div>
           <div className="flex-1">
-            <div className="font-bold text-sm">Pick Mode — Tap your problem location</div>
-            <div className="text-white/60 text-xs">Click any ward or tap the map to drop a pin</div>
+            <div className="font-display font-black text-xl uppercase tracking-tighter leading-none mb-1">Select the Problem Spot</div>
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Tap exactly where the issue is. We log GPS automatically.</div>
           </div>
-          <a href="/report" className="text-white/40 hover:text-white font-bold text-sm">Cancel ✕</a>
+          <button onClick={() => setIsPickMode(false)} className="bg-black text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95">Cancel</button>
         </div>
       ) : (
-        <div className="absolute top-4 left-4 z-[400] bg-black/60 backdrop-blur-md rounded-lg shadow-2xl p-2.5 flex gap-4 border border-white/10">
-          <select
-            value={activeCategory}
-            onChange={(e) => setActiveCategory(e.target.value)}
-            className="bg-transparent text-sm font-bold text-white outline-none cursor-pointer p-1"
-          >
-            <option value="all" className="bg-black text-white">All Issues</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id} className="bg-black text-white">{cat.label}</option>
-            ))}
-          </select>
-          <div className="hidden md:flex gap-4 items-center pl-4 border-l border-white/20 text-xs font-bold text-white/80">
-            <div><span className="text-red-400">{allReports.filter(r => r.status === 'open').length}</span> Active</div>
-            <div><span className="text-green-400">{allReports.filter(r => r.status === 'resolved').length}</span> Resolved</div>
+        <div className="absolute top-6 left-4 z-[400] bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2.5 md:p-3 flex flex-col md:flex-row gap-4 items-start md:items-center">
+          <div className="flex gap-4 items-center w-full md:w-auto">
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="bg-black text-white text-[11px] font-black outline-none cursor-pointer px-4 py-2 rounded-xl uppercase tracking-widest border-2 border-black"
+            >
+              <option value="all">ALL AUDITS</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.label.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex gap-6 items-center pl-0 md:pl-6 border-l-0 md:border-l-4 border-black/10 text-[10px] font-black text-black uppercase tracking-widest">
+            <div className="flex items-center gap-2 bg-[#0a1f14] text-gold px-3 py-1.5 rounded-lg border-2 border-black">
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span> 
+              <span>243 <span className="hidden xs:inline">Wards</span> MAPPED</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-red-600 inline-block w-2.5 h-2.5 rounded-full bg-red-600"></span>
+              <span className="opacity-40">FEED:</span>
+              <span>{allReports.filter(r => r.status === 'open').length} ACTIVE</span>
+            </div>
           </div>
         </div>
       )}
@@ -280,7 +303,7 @@ export default function Map() {
               position={[report.lat, report.lng]}
               icon={L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div style="background-color: ${report.severity === 'high' ? '#f97316' : report.severity === 'emergency' ? '#ef4444' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
+                html: `<div style="background-color: ${report.severity === 'emergency' ? '#ef4444' : report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
                 iconSize: [14, 14],
                 iconAnchor: [7, 7]
               })}
@@ -375,29 +398,29 @@ export default function Map() {
 
       {/* NammaKasa-style Ward Stats Card (Bottom Left) */}
       {hoveredData ? (
-        <div className="absolute bottom-6 left-6 z-[400] bg-white p-4 rounded-xl shadow-xl border-l-[6px] border-forest border-y border-r border-forest/10 w-64 animate-in slide-in-from-left-4 duration-200 pointer-events-none">
-           <div className="font-display font-bold text-xl text-forest mb-0.5">{hoveredData.area}</div>
-           <div className="text-xs font-bold text-forest/60 mb-3">Ward #{hoveredData.ward}</div>
+        <div className="absolute bottom-6 left-6 z-[400] bg-white p-5 rounded-2xl shadow-2xl border-4 border-black w-64 animate-in slide-in-from-left-4 duration-200 pointer-events-none">
+           <div className="font-display font-black text-2xl text-black leading-none mb-1 uppercase tracking-tighter">{hoveredData.area}</div>
+           <div className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-4">BBMP Ward #{hoveredData.ward}</div>
            
-           <div className="flex gap-4 border-t border-forest/5 pt-3">
+           <div className="flex gap-4 border-t-2 border-black/5 pt-4">
               <div>
-                 <div className="text-sm font-bold text-forest">0</div>
-                 <div className="text-[9px] font-bold uppercase text-forest/40">Reports</div>
+                 <div className="text-xl font-display font-black text-black">0</div>
+                 <div className="text-[8px] font-black uppercase tracking-widest text-black/40">Reports</div>
               </div>
               <div>
-                 <div className="text-sm font-bold text-forest">Open</div>
-                 <div className="text-[9px] font-bold uppercase text-forest/40">Status</div>
+                 <div className="text-xl font-display font-black text-black">OPEN</div>
+                 <div className="text-[8px] font-black uppercase tracking-widest text-black/40">Status</div>
               </div>
-              <div className="ml-auto flex items-center gap-1.5 bg-forest/5 px-2 py-1 rounded-md">
-                 <div className="w-2 h-2 rounded-full" style={{backgroundColor: hoveredData.mla?.partyColor}}></div>
-                 <span className="text-[10px] font-bold text-forest">{hoveredData.mla?.party}</span>
+              <div className="ml-auto flex flex-col items-center justify-center bg-black/5 px-3 py-1 rounded-xl">
+                 <div className="w-2.5 h-2.5 rounded-full mb-1" style={{backgroundColor: hoveredData.mla?.partyColor}}></div>
+                 <span className="text-[9px] font-black text-black uppercase tracking-tighter">{hoveredData.mla?.party}</span>
               </div>
            </div>
         </div>
       ) : (
-        <div className="absolute bottom-6 left-6 z-[400] bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-forest/10 w-64 pointer-events-none">
-           <div className="text-[10px] font-bold uppercase tracking-widest text-forest/40 mb-1">Explore Map</div>
-           <p className="text-xs font-medium text-forest/70">Tap markers to view ward-level accountability data and public photo evidence.</p>
+        <div className="absolute bottom-6 left-6 z-[400] bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-2xl border-4 border-black w-64 pointer-events-none">
+           <div className="text-[10px] font-black uppercase tracking-[0.3em] text-black/30 mb-2">Exploration Audit</div>
+           <p className="text-xs font-bold text-black leading-tight">Hover over wards for leader info. Evidence markers drop automatically on report.</p>
         </div>
       )}
 
@@ -427,13 +450,13 @@ export default function Map() {
               <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
-                  <div className="font-bold truncate">{selectedReport.mlaDetails?.mla || '—'}</div>
-                  <div className="text-white/50 text-[9px]">{selectedReport.mlaDetails?.party}</div>
+                  <div className="font-bold text-sm leading-tight break-words">{selectedReport.mlaDetails?.mla || '—'}</div>
+                  <div className="text-white/50 text-[9px] uppercase font-black">{selectedReport.mlaDetails?.party}</div>
                 </div>
                 <div>
                   <div className="text-white/40 uppercase tracking-widest text-[9px]">MP (Lok Sabha)</div>
-                  <div className="font-bold truncate">{selectedReport.mlaDetails?.mp || '—'}</div>
-                  <div className="text-white/50 text-[9px]">{selectedReport.mlaDetails?.mpConstituency}</div>
+                  <div className="font-bold text-sm leading-tight break-words">{selectedReport.mlaDetails?.mp || '—'}</div>
+                  <div className="text-white/50 text-[9px] uppercase font-black">{selectedReport.mlaDetails?.mpConstituency}</div>
                 </div>
               </div>
 

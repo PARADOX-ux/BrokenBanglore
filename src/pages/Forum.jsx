@@ -26,11 +26,55 @@ export default function Forum() {
   const [form, setForm] = useState({ title: '', body: '', author: '', ward: '', tab: 'Discussions' });
   const [submitted, setSubmitted] = useState(false);
 
+  const SEED_POSTS = [
+    {
+      id: 1,
+      title: "Broken streetlights in Indiranagar 2nd stage since 2 weeks",
+      body: "Walked home last night in pitch dark. Multiple elderly people live on this lane. Complained on Sahaya app but no update.",
+      author: "Rahul S.",
+      ward: "80 - Indiranagar",
+      tab: 'Discussions',
+      upvotes: 42,
+      replies: [],
+      votedBy: [],
+      ts: Date.now() - 3600000 * 5,
+    },
+    {
+      id: 2,
+      title: "How to file an RTI for ward fund allocation?",
+      body: "I want to know where the 2 crore allocated for road repairs went. Has anyone done this before in Ward 150?",
+      author: "Priya V.",
+      ward: "150 - Bellandur",
+      tab: 'Legal Help',
+      upvotes: 89,
+      replies: [],
+      votedBy: [],
+      ts: Date.now() - 86400000,
+    },
+    {
+      id: 3,
+      title: "STP water overflow near HSR layout park",
+      body: "Health hazard for kids playing in the park. Need to mobilize and tweet to BWSSB chief.",
+      author: "Suresh M.",
+      ward: "174 - HSR Layout",
+      tab: 'Organizing',
+      upvotes: 24,
+      replies: [],
+      votedBy: [],
+      ts: Date.now() - 3600000 * 24,
+    }
+  ];
+
   // Load from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem(FORUM_KEY);
-      if (raw) setPosts(JSON.parse(raw));
+      if (raw) {
+        setPosts(JSON.parse(raw));
+      } else {
+        setPosts(SEED_POSTS);
+        localStorage.setItem(FORUM_KEY, JSON.stringify(SEED_POSTS));
+      }
     } catch (e) {}
   }, []);
 
@@ -81,8 +125,8 @@ export default function Forum() {
   }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   return (
-    <div className="w-full min-h-screen bg-[#f5f3ea] py-12 px-4 md:px-8">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+    <div className="w-full min-h-screen bg-[#fdfbf6] py-12 px-4 md:px-8">
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 pt-16">
 
         {/* Main Feed */}
         <div className="flex-1 min-w-0">
@@ -134,10 +178,10 @@ export default function Forum() {
                         {post.ward && <span className="text-xs font-bold text-[#1a3a2a]/50">📍 {post.ward}</span>}
                         <span className="text-xs text-[#1a3a2a]/40 font-medium">{timeAgo(post.ts)}</span>
                       </div>
-                      <h3 className="font-bold text-lg text-[#1a3a2a] leading-tight mb-2">{post.title}</h3>
-                      {post.body && <p className="text-sm text-[#1a3a2a]/70 font-medium leading-relaxed line-clamp-3">{post.body}</p>}
-                      <div className="mt-3 flex items-center gap-1 text-xs font-bold text-[#1a3a2a]/50">
-                        <span className="w-6 h-6 rounded-full bg-forest/10 flex items-center justify-center text-forest font-black text-xs">
+                      <h3 className="font-black text-xl text-black leading-tight mb-2 uppercase tracking-tight">{post.title}</h3>
+                      {post.body && <p className="text-sm text-black/80 font-bold leading-relaxed line-clamp-3 mb-4">{post.body}</p>}
+                      <div className="mt-3 flex items-center gap-1 text-xs font-black text-black">
+                        <span className="w-6 h-6 rounded-full bg-forest text-gold flex items-center justify-center font-black text-xs">
                           {(post.author || 'A')[0]?.toUpperCase()}
                         </span>
                         {post.author || 'Anonymous Citizen'}

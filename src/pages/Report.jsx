@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { categories, getWardByArea, incrementStat } from '../data/wardData';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -6,6 +6,10 @@ export default function Report() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1);
+  const [useCamera, setUseCamera] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [cameraStream, setCameraStream] = useState(null);
   const [pickedLocation, setPickedLocation] = useState(null);
   const [formData, setFormData] = useState({
     category: null,
@@ -55,29 +59,39 @@ export default function Report() {
   // Auto-detect GPS location with Reverse Geocoding
   const detectLocation = async () => {
     if (navigator.geolocation) {
+      setFormData(f => ({ ...f, area: 'Detecting...', wardData: null }));
+      setPickedLocation({ lat: 0, lng: 0, wardName: 'Detecting location...' });
+
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
         const loc = { lat, lng };
         setFormData(f => ({ ...f, position: loc }));
         
         try {
-          // Add a signal that GPS is working
-          setPickedLocation({ lat, lng, wardName: 'Detecting area...' });
-          
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
           const data = await res.json();
-          const area = data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.city_district || 'Detected Area';
           
-          setFormData(f => ({ ...f, area: area }));
-          setPickedLocation({ lat, lng, wardName: area });
+          if (data && data.address) {
+            const area = data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.city_district || data.address.subdistrict || 'Detected Area';
+            const ward = getWardByArea(area);
+            
+            setFormData(f => ({ ...f, area: area, wardData: ward }));
+            setPickedLocation({ lat, lng, wardName: area });
+          } else {
+            setPickedLocation({ lat, lng, wardName: 'GPS Location' });
+          }
         } catch (e) {
+          console.error("Reverse geocoding failed", e);
           setPickedLocation({ lat, lng, wardName: 'GPS Location' });
         }
       }, (err) => {
         let msg = 'Could not detect location.';
         if (err.code === 1) msg = 'Location access denied. Please enable GPS and try again.';
+        if (err.code === 3) msg = 'GPS timeout. Try picking on the map instead.';
         alert(msg);
-      }, { enableHighAccuracy: true, timeout: 10000 });
+        setPickedLocation(null);
+        setFormData(f => ({ ...f, area: '' }));
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
     } else {
       alert('Geolocation is not supported by your browser.');
     }
@@ -95,6 +109,46 @@ export default function Report() {
     nextStep();
   };
 
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' }, 
+        audio: false 
+      });
+      setCameraStream(stream);
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      setUseCamera(true);
+    } catch (err) {
+      console.error("Camera error:", err);
+      alert("Could not access camera. Please allow permissions or upload a file instead.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setUseCamera(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob((blob) => {
+        const file = new File([blob], "evidence.jpg", { type: "image/jpeg" });
+        setFormData({ ...formData, photo: file, photoPreview: URL.createObjectURL(file) });
+        stopCamera();
+      }, 'image/jpeg');
+    }
+  };
+
   const renderStepIndicator = () => (
     <div className="flex gap-2 mb-8">
       {[1, 2, 3, 4, 5].map((s) => (
@@ -108,8 +162,8 @@ export default function Report() {
 
   return (
     <div className="max-w-3xl mx-auto w-full p-4 md:p-8 min-h-[calc(100vh-80px)] flex flex-col pt-24 md:pt-12">
-      <h1 className="font-display font-bold text-3xl md:text-5xl text-forest mb-2">Report a Problem</h1>
-      <p className="text-forest/70 mb-8 font-medium">We will notify the responsible MLA and Authority immediately.</p>
+      <h1 className="font-display font-black text-3xl md:text-5xl text-black mb-2 uppercase tracking-tighter">Report a Problem</h1>
+      <p className="text-black/60 mb-8 font-black uppercase text-xs tracking-widest italic">We will notify the responsible MLA and Authority immediately.</p>
       
       {step < 5 && renderStepIndicator()}
 
@@ -156,14 +210,18 @@ export default function Report() {
                 </div>
                 
                 {/* Bigger, more obvious Camera Button */}
+                {/* Bigger, more obvious Camera Button */}
                 <button 
-                  onClick={() => setStep(4)}
-                  className="flex items-center justify-center gap-3 w-full py-4 bg-teal-50 border-2 border-dashed border-teal-200 text-teal-700 rounded-xl hover:bg-teal-100 transition-colors group"
+                  onClick={() => {
+                    startCamera();
+                    setStep(4);
+                  }}
+                  className="flex items-center justify-center gap-3 w-full py-5 bg-forest text-gold rounded-2xl border-4 border-black hover:bg-black transition-all group shadow-xl"
                 >
                   <span className="text-3xl group-hover:scale-110 transition-transform">📸</span>
                   <div className="text-left">
-                    <p className="font-bold text-sm">Add Photo Evidence</p>
-                    <p className="text-xs opacity-70">Highly recommended for faster resolution</p>
+                    <p className="font-black text-lg leading-none uppercase tracking-tight">Open Camera</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Capture live evidence for faster resolution</p>
                   </div>
                 </button>
               </div>
@@ -322,232 +380,183 @@ export default function Report() {
         )}
 
 
-        {/* Step 4: Photo */}
+        {/* Step 4: Direct Camera / Evidence */}
         {step === 4 && (
-          <div className="animate-fade-in flex flex-col h-full">
-            <h2 className="font-display font-bold text-2xl mb-2">Upload Photo Evidence</h2>
-            <p className="text-olive/70 mb-6 text-sm">Reports with photos get fixed 3x faster by the authorities.</p>
-            
-            <div 
-              onClick={() => document.getElementById('fileInput').click()}
-              className="border-2 border-dashed border-forest/30 bg-white rounded-xl h-64 flex flex-col items-center justify-center gap-4 hover:border-forest/50 transition-colors cursor-pointer group relative overflow-hidden"
-            >
-              {formData.photoPreview ? (
-                <img src={formData.photoPreview} className="w-full h-full object-cover" alt="Preview" />
-              ) : (
+          <div className="animate-fade-in flex flex-col h-full items-center">
+            <h2 className="font-display font-black text-3xl mb-1 text-center uppercase tracking-tight">Direct Evidence</h2>
+            <p className="text-olive/70 mb-8 text-center text-sm font-bold italic">Capture the reality. Evidence forces action.</p>
+
+            <div className="w-full aspect-square md:aspect-video bg-black rounded-[2rem] overflow-hidden border-4 border-black relative shadow-2xl mb-8 group">
+              {useCamera ? (
                 <>
-                  <div className="w-16 h-16 bg-forest/5 rounded-full flex items-center justify-center text-2xl group-hover:bg-gold transition-colors">
-                    📸
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold">Click to upload or drag & drop</p>
-                    <p className="text-sm text-forest/60 mt-1">JPG, PNG up to 5MB</p>
+                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                  <canvas ref={canvasRef} className="hidden" />
+                  <div className="absolute inset-0 border-[20px] border-white/10 pointer-events-none"></div>
+                  
+                  {/* Camera Controls */}
+                  <div className="absolute bottom-10 left-0 right-0 flex justify-center items-center gap-12">
+                    <button onClick={stopCamera} className="bg-black/50 text-white w-12 h-12 rounded-full border-2 border-white/20 hover:bg-black/80">✕</button>
+                    <button 
+                      onClick={capturePhoto}
+                      className="w-24 h-24 bg-white rounded-full border-[10px] border-forest/20 flex items-center justify-center shadow-2xl active:scale-95 transition-all"
+                    >
+                      <div className="w-12 h-12 bg-red-600 rounded-full"></div>
+                    </button>
+                    <div className="w-12 h-12"></div>
                   </div>
                 </>
+              ) : formData.photoPreview ? (
+                <div className="relative h-full">
+                  <img src={formData.photoPreview} alt="Evidence" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all gap-4">
+                    <button onClick={startCamera} className="bg-gold text-forest px-8 py-3 rounded-2xl font-black uppercase text-sm tracking-widest shadow-xl">Retake Live</button>
+                    <label className="bg-white text-forest px-8 py-3 rounded-2xl font-black uppercase text-sm tracking-widest shadow-xl cursor-pointer">
+                      Pick Local
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) setFormData({...formData, photo: file, photoPreview: URL.createObjectURL(file)});
+                      }} />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-[#fdfbf6]">
+                  <div className="w-24 h-24 bg-forest/5 rounded-[2rem] flex items-center justify-center text-5xl mb-6 shadow-sm">📸</div>
+                  <button 
+                    onClick={startCamera}
+                    className="w-full max-w-sm bg-forest text-gold px-8 py-6 rounded-3xl font-black uppercase text-lg tracking-widest shadow-2xl hover:scale-105 transition-transform mb-4 border-4 border-black"
+                  >
+                    Open Live Camera
+                  </button>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-4">OR USE EXISTING EVIDENCE</p>
+                  <label className="text-forest underline font-black text-sm cursor-pointer hover:text-black transition-colors">
+                    Upload from Gallery
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) setFormData({...formData, photo: file, photoPreview: URL.createObjectURL(file)});
+                    }} />
+                  </label>
+                </div>
               )}
-              <input 
-                id="fileInput"
-                type="file" 
-                accept="image/*" 
-                className="hidden" 
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setFormData({...formData, photo: file, photoPreview: URL.createObjectURL(file)});
-                  }
-                }}
-              />
             </div>
 
-            <div className="text-center mt-6">
-              <p className="text-sm text-forest/70 font-medium">Capture the evidence to force MLA action.</p>
-            </div>
-
-            <div className="flex justify-between mt-auto pt-6 border-t border-ash/30">
-              <button onClick={prevStep} className="font-bold text-olive/70 hover:text-olive px-4 py-2">Back</button>
+            <div className="flex justify-between w-full mt-auto pt-8 border-t-2 border-black/10">
+              <button 
+                onClick={() => { stopCamera(); prevStep(); }} 
+                className="font-black text-olive/50 hover:text-black uppercase tracking-widest text-xs"
+              >
+                Back
+              </button>
               <button
                 onClick={() => {
+                  stopCamera();
                   incrementStat('reports');
                   incrementStat('citizens');
                   nextStep();
                 }}
-                className="bg-olive text-white px-8 py-3 rounded-xl font-bold hover:-translate-y-0.5 transition-transform"
+                className="bg-forest text-gold px-12 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:shadow-2xl transition-all disabled:opacity-20 border-4 border-black"
+                disabled={!formData.photo}
               >
-                Submit Report 🚀
+                Submit Evidence 🚀
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 5: Success + 5-Channel Escalation */}
+        {/* Step 5: Accountability Timeline (Refined) */}
         {step === 5 && (() => {
           const wd = formData.wardData;
           const refNo = `BB-${Date.now().toString(36).toUpperCase()}`;
           const issue = formData.title || 'Civic Issue';
           const area = formData.area || 'Bengaluru';
           const mlaName = wd?.mla || 'your MLA';
-          const mpName = wd?.mp || 'your MP';
           const ward = wd?.ward || '—';
-          const authorityEmail = wd?.authorityEmail || 'commissioner@bbmp.gov.in';
           const mlaEmail = `mla-${(wd?.constituency || 'office').toLowerCase().replace(/\s/g, '-')}@kla.kar.nic.in`;
 
-          const emailSubject = `[Citizen Complaint ${refNo}] ${issue} — Ward ${ward}, ${wd?.constituency || area}`;
-          const emailBody = `Dear ${mlaName} / BBMP Ward Commissioner,
-
-I am a citizen of Bengaluru filing a formal civic complaint.
-
-Reference No: ${refNo}
-Issue: ${issue}
-Category: ${formData.category || 'General'}
-Severity: ${formData.severity || 'Medium'}
-Location: ${area}${ward ? `, Ward ${ward}` : ''}
-
-This issue has been documented and is publicly visible on BrokenBanglore — a citizen accountability platform. I request acknowledgement within 7 working days and resolution within 30 days, failing which this complaint will be escalated to higher authorities and the media.
-
-View public report: https://brokenbanglore.in/map
-
-Regards,
-A Bengaluru Citizen`;
-
-          const waText = `Namaskara,
-
-This is a formal complaint regarding a civic issue in Ward ${ward} (${area}).
-
-Issue: ${issue}
-Reference No: ${refNo}
-Category: ${formData.category || 'General'}
-
-This report is publicly documented on BrokenBanglore: https://brokenbanglore.in/map
-
-I expect acknowledgement within 7 days. If unresolved in 30 days, this will be escalated to the BBMP Commissioner, media, and Chief Minister's office.
-
-#BrokenBanglore #FixBengaluru`;
-
-          const tweetText = `🔴 CIVIC COMPLAINT ${refNo}
-
-"${issue}" — Ward ${ward}, ${area}
-
-Responsible MLA: ${mlaName}
-Responsible MP: ${mpName}
-
-Publicly documented → https://brokenbanglore.in/map
-
-@NammaKarnataka @BBMPgov #BrokenBanglore #FixBengaluru`;
-
-          // Download formal complaint letter as text file (PDF lib too heavy for now)
-          const downloadLetter = () => {
-            const letter = `FORMAL CITIZEN COMPLAINT\n${'='.repeat(50)}\n\nReference No: ${refNo}\nDate: ${new Date().toLocaleDateString('en-IN')}\n\nTo,\nThe Ward Commissioner / MLA Office\nBBMP ${wd?.authority || 'Ward Office'} Zone\n\nSubject: Complaint regarding ${issue} — Ward ${ward}, ${area}\n\nDear Sir/Madam,\n\n${emailBody}\n\n${'='.repeat(50)}\nFiled via BrokenBanglore | brokenbanglore.in\nPowered by citizens of Bengaluru.`;
-            const blob = new Blob([letter], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `BrokenBanglore-Complaint-${refNo}.txt`;
-            a.click();
-          };
+          const emailSubject = `[URGENT: RESOLVE IN 7 DAYS] ${issue} — Ward ${ward}, ${area}`;
+          const emailBody = `Formal Citizen Notice: ${refNo}\n\nThis issue has been documented on BrokenBanglore. It is now part of the Public Action Audit.\n\nEscalation Warning:\n- Day 3: Public Twitter/Email Blast\n- Day 7: BBMP Commissioner Notice\n- Day 15: Formal RTI Filing\n\nResolve this now.`;
 
           return (
-            <div className="animate-fade-in flex flex-col py-4 text-left w-full">
-              {/* Success header */}
-              <div className="flex items-center gap-4 mb-6 bg-green-50 p-5 rounded-2xl border border-green-200">
-                <div className="w-14 h-14 bg-green-100 text-3xl flex items-center justify-center rounded-full shrink-0">✅</div>
-                <div>
-                  <h2 className="font-display font-bold text-2xl text-[#1a3a2a]">Complaint Registered!</h2>
-                  <p className="text-green-700 font-semibold text-sm mt-0.5">Reference: <span className="font-black tracking-wider">{refNo}</span> — Keep this safe for follow-up.</p>
+            <div className="animate-fade-in flex flex-col py-2 text-left w-full h-full">
+              <div className="bg-forest/5 border-4 border-black/5 rounded-[2.5rem] p-8 mb-8 text-center relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none"
+                     style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #000 1px, transparent 0)', backgroundSize: '24px 24px' }}>
+                </div>
+                <div className="text-6xl mb-4">📢</div>
+                <h2 className="font-display font-black text-4xl text-black uppercase tracking-tighter mb-2 leading-none">Report Filed</h2>
+                <p className="text-olive/50 font-black text-xs uppercase tracking-[0.3em] mb-4">REF: {refNo}</p>
+                <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-6 py-2 rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-600 animate-ping"></span>
+                  Live on Public Map
                 </div>
               </div>
 
-              {wd && (
-                <div className="bg-[#1a3a2a] text-white rounded-2xl p-4 mb-6 grid grid-cols-2 gap-3 text-sm">
-                  <div><div className="text-white/50 text-xs uppercase tracking-widest">Ward</div><div className="font-bold">{ward} • {wd.name || area}</div></div>
-                  <div><div className="text-white/50 text-xs uppercase tracking-widest">MLA (State)</div><div className="font-bold">{mlaName} <span className="text-gold text-xs">{wd.party}</span></div></div>
-                  <div><div className="text-white/50 text-xs uppercase tracking-widest">MP (Lok Sabha 2024)</div><div className="font-bold">{mpName} <span className="text-gold text-xs">BJP</span></div></div>
-                  <div><div className="text-white/50 text-xs uppercase tracking-widest">Authority</div><div className="font-bold">{wd.authority}</div></div>
-                  <div className="col-span-2 border-t border-white/10 pt-2"><div className="text-white/50 text-xs uppercase tracking-widest">Filer Information</div><div className="font-bold text-gold">Public Accountability Petitioner (Anonymous ID: {refNo.slice(-4)})</div></div>
+              {/* Accountability Clock / Pipeline */}
+              <div className="bg-white border-4 border-black rounded-[2.5rem] p-8 md:p-10 mb-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+                <h3 className="font-display font-black text-2xl text-black uppercase tracking-tight mb-8 flex items-center gap-3">
+                  <span className="text-3xl">⏱️</span> ACCOUNTABILITY PIPELINE
+                </h3>
+                
+                <div className="space-y-6 relative ml-4">
+                  <div className="absolute left-[15px] top-2 bottom-2 w-1 bg-black/10"></div>
+                  
+                  {/* Day 0 */}
+                  <div className="flex gap-6 relative z-10">
+                    <div className="w-8 h-8 rounded-full bg-forest text-gold flex items-center justify-center text-xs font-black shrink-0 shadow-lg border-2 border-black group">
+                      <div className="absolute inset-0 bg-gold rounded-full scale-0 group-hover:scale-100 opacity-20 transition-transform"></div>
+                      0
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-black text-sm uppercase tracking-tight text-forest">REPORT PUBLISHED</p>
+                      <p className="text-[11px] text-black/50 font-bold uppercase mt-1">Live Evidence Logged. Mirror notice sent to {mlaName}.</p>
+                    </div>
+                  </div>
+
+                  {/* Day 3 */}
+                  <div className="flex gap-6 relative z-10 group">
+                    <div className="w-8 h-8 rounded-full bg-white text-forest flex items-center justify-center text-xs font-black shrink-0 border-2 border-black shadow-sm group-hover:bg-gold group-hover:text-black transition-all">3</div>
+                    <div className="pt-1">
+                      <p className="font-black text-sm uppercase tracking-tight flex items-center gap-2">
+                        EMAIL & TWITTER BLAST ⚡
+                      </p>
+                      <p className="text-[11px] text-black/40 font-bold uppercase mt-1">Automated bot-tweet to @{mlaName.replace(/\s/g, '')}. Official email goes to Ward Office.</p>
+                    </div>
+                  </div>
+
+                  {/* Day 7 */}
+                  <div className="flex gap-6 relative z-10 group">
+                    <div className="w-8 h-8 rounded-full bg-white text-forest flex items-center justify-center text-xs font-black shrink-0 border-2 border-black shadow-sm group-hover:bg-gold transition-all">7</div>
+                    <div className="pt-1">
+                      <p className="font-black text-sm uppercase tracking-tight">COMMISSIONER ESCALATION</p>
+                      <p className="text-[11px] text-black/40 font-bold uppercase mt-1">Direct formal petition pushed to Zonal Deputy Commissioner.</p>
+                    </div>
+                  </div>
+
+                  {/* Day 15 */}
+                  <div className="flex gap-6 relative z-10 group">
+                    <div className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-xs font-black shrink-0 border-4 border-black group-hover:bg-red-600 group-hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(220,38,38,0.2)]">15</div>
+                    <div className="pt-1">
+                      <p className="font-black text-sm uppercase tracking-tight text-red-600">RTI FILING: CITIZEN AUDIT ⚖️</p>
+                      <p className="text-[11px] text-red-800/40 font-bold uppercase mt-1">We demand to see why you were ignored. RTI drafted automatically.</p>
+                    </div>
+                  </div>
                 </div>
-              )}
-
-              {/* The 5 escalation channels */}
-              <h3 className="font-display font-bold text-xl text-[#1a3a2a] mb-1">Now pressure them — all 5 channels.</h3>
-              <p className="text-[#1a3a2a]/60 text-sm font-medium mb-4">Each one creates a paper trail they cannot delete. Do all 5 for maximum impact.</p>
-
-              <div className="space-y-3 w-full">
-
-                {/* Channel 1: Email Ward Commissioner */}
-                <a
-                  href={`mailto:${authorityEmail}?cc=${mlaEmail}&subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`}
-                  className="flex items-center gap-4 bg-white border-2 border-forest/20 hover:border-forest hover:shadow-md rounded-2xl p-4 transition-all group w-full"
-                >
-                  <div className="w-12 h-12 bg-forest/10 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:bg-forest group-hover:text-white transition-all">📧</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-[#1a3a2a]">Email BBMP Ward Commissioner</div>
-                    <div className="text-xs text-[#1a3a2a]/50 font-medium">Formal complaint email — creates official paper trail. MLA office CC'd.</div>
-                  </div>
-                  <span className="text-xs font-black text-forest bg-forest/10 px-2 py-1 rounded-full shrink-0">Step 1</span>
-                </a>
-
-                {/* Channel 2: WhatsApp to Ward Office */}
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(waText)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-4 bg-white border-2 border-[#25D366]/20 hover:border-[#25D366] hover:shadow-md rounded-2xl p-4 transition-all group w-full"
-                >
-                  <div className="w-12 h-12 bg-[#25D366]/10 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:bg-[#25D366] group-hover:text-white transition-all">📲</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-[#1a3a2a]">WhatsApp to BBMP Ward Office</div>
-                    <div className="text-xs text-[#1a3a2a]/50 font-medium">Formal message pre-drafted. Send to your ward commissioner or councillor's WhatsApp.</div>
-                  </div>
-                  <span className="text-xs font-black text-[#25D366] bg-[#25D366]/10 px-2 py-1 rounded-full shrink-0">Step 2</span>
-                </a>
-
-                {/* Channel 3: Tweet MLA + MP */}
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-4 bg-white border-2 border-black/10 hover:border-black hover:shadow-md rounded-2xl p-4 transition-all group w-full"
-                >
-                  <div className="w-12 h-12 bg-black/5 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:bg-black group-hover:text-white transition-all">𝕏</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-[#1a3a2a]">Tweet — Tag MLA + MP publicly</div>
-                    <div className="text-xs text-[#1a3a2a]/50 font-medium">Public shaming on social media. Political reputations are on the line.</div>
-                  </div>
-                  <span className="text-xs font-black text-black bg-black/5 px-2 py-1 rounded-full shrink-0">Step 3</span>
-                </a>
-
-                {/* Channel 4: BBMP Jan Spandana (official govt portal) */}
-                <a
-                  href={`https://ipgrs.karnataka.gov.in/`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-4 bg-white border-2 border-blue-200 hover:border-blue-500 hover:shadow-md rounded-2xl p-4 transition-all group w-full"
-                >
-                  <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-all">🏛️</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-[#1a3a2a]">File on Jana Spandana (Official Govt Portal)</div>
-                    <div className="text-xs text-[#1a3a2a]/50 font-medium">Cross-file on Karnataka's official grievance portal. Legally binding. Use Ref: <strong>{refNo}</strong></div>
-                  </div>
-                  <span className="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-full shrink-0">Step 4</span>
-                </a>
-
-                {/* Channel 5: Download formal complaint letter */}
-                <button
-                  onClick={downloadLetter}
-                  className="flex items-center gap-4 bg-white border-2 border-gold/30 hover:border-gold hover:shadow-md rounded-2xl p-4 transition-all group w-full text-left"
-                >
-                  <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:bg-gold transition-all">📄</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-[#1a3a2a]">Download Formal Complaint Letter</div>
-                    <div className="text-xs text-[#1a3a2a]/50 font-medium">Printable complaint letter. Walk-in to the MLA office or ward office with this.</div>
-                  </div>
-                  <span className="text-xs font-black text-gold bg-gold/10 px-2 py-1 rounded-full shrink-0">Step 5</span>
-                </button>
               </div>
 
-              <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm">
-                <p className="font-bold text-amber-800 mb-1">⏱️ If ignored after 15 days:</p>
-                <p className="text-amber-700 font-medium">File an RTI application at <a href="https://rtionline.gov.in/" target="_blank" rel="noreferrer" className="underline font-bold">rtionline.gov.in</a> demanding a written response. Unanswered RTIs are a punishable offence under the RTI Act 2005.</p>
+              <div className="flex flex-col md:flex-row gap-4 mb-10">
+                <a 
+                   href={`mailto:${mlaEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`}
+                   className="flex-1 bg-black text-white px-8 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest text-center hover:bg-forest transition-colors flex items-center justify-center gap-3"
+                >
+                  📧 Manual Follow-Up
+                </a>
+                <Link to="/map" className="flex-1 bg-forest text-gold px-8 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest text-center shadow-xl hover:scale-105 transition-transform border-4 border-black">
+                  View Map Data
+                </Link>
               </div>
+            </div>
+          );
+        })()}
 
               <Link to="/map" className="mt-6 font-bold text-forest hover:text-[#1a3a2a] border-b-2 border-transparent hover:border-forest pb-1 transition-colors self-center">
                 View on Live Map →

@@ -4,11 +4,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-forest: #2B9348; /* Forest Green */
-  --color-bright: #55A630; /* Bright Green */
-  --color-strong: #80B918; /* Strong Green */
-  --color-gold: #E9C46A;   /* Bountiful Gold */
-  --color-cream: #F7F5EC;  /* Light Cream */
+  --color-forest: #0a1f14; /* Extreme Deep Green (Nearly Black) */
+  --color-bright: #2B9348; /* Shifted the old forest to bright */
+  --color-strong: #1a3a2a; 
+  --color-gold: #E9C46A;   
+  --color-cream: #fdfbf6;  /* Preferred True Cream */
   --color-ash: #d1d5db;    /* Ash Gray */
   --font-display: "Syne", sans-serif;
   --font-body: "DM Sans", sans-serif;
@@ -25,7 +25,7 @@
 
 @layer base {
   body {
-    @apply font-body bg-cream text-forest antialiased;
+    @apply font-body bg-cream text-black antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -45,17 +45,24 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-strong/10;
+  @apply bg-black/5 rounded-full;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-bright/40 rounded-full;
+  @apply bg-black/20 rounded-full border-2 border-transparent bg-clip-padding hover:bg-black/40 transition-colors;
 }
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-forest;
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-black/10 rounded-full hover:bg-black/20;
 }
 
 /* Leaflet Customizations */
