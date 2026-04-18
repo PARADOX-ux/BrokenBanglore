@@ -143,9 +143,7 @@ export default function Accountability() {
                     </div>
 
                     {/* Mobile rendering structure */}
-                    <div className="md:hidden flex flex-col relative pl-3">
-                      {/* Left border indicator */}
-                      <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-full" style={{backgroundColor: rateColor}}></div>
+                    <div className="md:hidden flex flex-col relative">
                       
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-4">
@@ -251,7 +249,7 @@ export default function Accountability() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 z-10 relative">
             <div className="space-y-4">
               {sampleReports.filter(r => r.status === 'open').sort((a,b) => b.daysOpen - a.daysOpen).slice(0, 3).map((report, idx) => (
-                <div key={report.id} className="bg-white p-5 rounded-2xl border-l-[6px] border-l-red-500 shadow-sm flex flex-col gap-3">
+                <div key={report.id} className="bg-white p-5 rounded-2xl border-4 border-black shadow-sm flex flex-col gap-3">
                   <div className="flex justify-between items-start gap-2">
                     <h4 className="font-bold text-lg leading-tight">{report.title}</h4>
                     <span className="shrink-0 bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-md border border-red-200">

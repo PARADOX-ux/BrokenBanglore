@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function Navbar() {
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -13,18 +15,19 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-cream shadow-sm border-b border-ash/30 w-full max-w-[2560px] mx-auto h-16 md:h-20 flex items-center justify-between px-4 md:px-8">
-        <Link to="/" className="font-display font-bold md:text-2xl text-xl flex items-center gap-2 text-forest">
-          BrokenBanglore
-        </Link>
+    <header className="fixed top-0 left-0 right-0 z-[100] bg-cream border-b-2 border-black w-full h-16 md:h-20 flex items-center justify-between px-4 md:px-8">
+      <Link to="/" className="font-display font-black md:text-2xl text-xl flex items-center gap-2 text-black uppercase tracking-tighter">
+        BrokenBanglore
+      </Link>
       
-      <nav className="hidden md:flex items-center gap-8 font-semibold text-sm">
+      {/* Desktop Nav */}
+      <nav className="hidden lg:flex items-center gap-8 font-black text-[10px] uppercase tracking-widest">
         {navLinks.map((link) => (
           <Link 
             key={link.path} 
             to={link.path}
             className={`hover:text-forest transition-colors pb-1 border-b-2 ${
-              location.pathname === link.path ? 'border-bright text-forest' : 'border-transparent text-forest/60'
+              location.pathname === link.path ? 'border-black text-black' : 'border-transparent text-black/40'
             }`}
           >
             {link.name}
@@ -32,11 +35,44 @@ export default function Navbar() {
         ))}
       </nav>
       
-      <div className="flex items-center">
-        <Link to="/signup" className="bg-forest text-gold font-bold px-6 py-2.5 rounded-xl rounded-tl-none text-sm hover:bg-black transition-all font-display shadow-md">
-          Sign Up
+      <div className="flex items-center gap-4">
+        <Link to="/signup" className="hidden sm:block bg-forest text-gold font-black px-6 py-2.5 rounded-xl border-2 border-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          Join Audit
         </Link>
+        
+        {/* Mobile Toggle */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="lg:hidden p-2 text-black bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+        >
+          {isMenuOpen ? '✕' : '☰'}
+        </button>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 top-16 bg-cream z-[99] p-8 lg:hidden animate-in fade-in slide-in-from-top-4 duration-200">
+          <div className="flex flex-col gap-6 items-center pt-10">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.path} 
+                to={link.path}
+                onClick={() => setIsMenuOpen(false)}
+                className="font-display font-black text-3xl uppercase tracking-tighter text-black hover:text-forest transition-colors"
+              >
+                {link.name}
+              </Link>
+            ))}
+            <Link 
+              to="/signup" 
+              onClick={() => setIsMenuOpen(false)}
+              className="mt-10 bg-forest text-gold font-black px-12 py-5 rounded-2xl border-4 border-black text-lg uppercase tracking-widest shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+            >
+              Join Audit
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

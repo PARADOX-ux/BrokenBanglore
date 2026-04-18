@@ -43,11 +43,11 @@ export default function Home() {
           Your photo. Your ward. Their problem to fix.
         </div>
 
-        <h1 className="font-display font-black text-5xl md:text-7xl lg:text-8xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.9]">
+        <h1 className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
           Bengaluru is broken. <br className="hidden md:block"/>
           <span className="text-forest relative inline-block">
             We're fixing it.
-            <span className="absolute -bottom-4 left-0 w-full h-1 md:h-2 bg-gold -z-10"></span>
+            <span className="absolute -bottom-4 left-0 w-full h-1 md:h-1.5 bg-gold -z-10"></span>
           </span>
         </h1>
 
@@ -119,7 +119,7 @@ export default function Home() {
               <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 h-[500px] overflow-y-auto pr-4 custom-scrollbar bg-black/5 p-4 rounded-[2rem] border-2 border-dashed border-black/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 h-[550px] overflow-y-auto pr-4 custom-scrollbar bg-black/5 p-4 rounded-[2rem] border-2 border-dashed border-black/10">
               {completeMLAList.map((mla) => {
                 const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
@@ -127,18 +127,18 @@ export default function Home() {
                     key={mla.mla}
                     onClick={() => setSelectedZoneMLA(mla)}
                     onMouseEnter={() => setSelectedZoneMLA(mla)}
-                    className={`p-4 rounded-2xl border-2 transition-all text-left flex flex-col justify-between h-52 group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/5 bg-white/40 hover:border-black/20 hover:bg-white'}`}
+                    className={`p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[240px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-white hover:border-black/30 hover:shadow-lg'}`}
                   >
                     <div className="absolute top-0 right-0 w-16 h-16 bg-black opacity-[0.03] -mr-8 -mt-8 rounded-full"></div>
                     
                     {/* Leader Photo in Selection Grid */}
-                    <div className={`w-14 h-14 rounded-xl overflow-hidden mb-3 border-2 transition-transform group-hover:scale-110 ${isSelected ? 'border-forest' : 'border-black/10'}`}>
+                    <div className={`w-20 h-20 rounded-2xl overflow-hidden mb-4 border-2 transition-transform group-hover:scale-105 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
                       <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
 
-                    <div>
-                      <div className="text-[8px] font-black text-black/30 uppercase tracking-[0.2em] leading-none mb-1">{mla.constituency}</div>
-                      <div className="font-display font-black text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors">
+                    <div className="flex-1">
+                      <div className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] leading-none mb-2">{mla.constituency}</div>
+                      <div className="font-display font-black text-lg text-black uppercase leading-tight group-hover:text-forest transition-colors break-words">
                           {mla.mla}
                       </div>
                     </div>
@@ -160,7 +160,7 @@ export default function Home() {
                   <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h4 className="font-display font-black text-3xl text-black mb-1 uppercase tracking-tight leading-none">{selectedZoneMLA.mla}</h4>
+                  <h4 className="font-display font-black text-3xl text-black mb-1 uppercase tracking-tight leading-none break-words">{selectedZoneMLA.mla}</h4>
                   <div className="text-xs font-black text-black/50 uppercase tracking-widest mb-4 mt-2">{selectedZoneMLA.constituency} • {selectedZoneMLA.party}</div>
                   <div className="flex gap-8 justify-center md:justify-start">
                     <div>
@@ -235,9 +235,9 @@ export default function Home() {
              <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mt-1">Built for Bengaluru by Citizens • Established 2024</p>
           </div>
           <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-black/60">
-             <a href="#" className="hover:text-forest transition-colors">Privacy</a>
-             <a href="#" className="hover:text-forest transition-colors">Policies</a>
-             <a href="#" className="hover:text-forest transition-colors">Open Data</a>
+             <a href="https://bbmp.gov.in" target="_blank" rel="noreferrer" className="hover:text-forest transition-colors">BBMP</a>
+             <a href="https://bwssb.karnataka.gov.in" target="_blank" rel="noreferrer" className="hover:text-forest transition-colors">BWSSB</a>
+             <a href="https://bescom.karnataka.gov.in" target="_blank" rel="noreferrer" className="hover:text-forest transition-colors">BESCOM</a>
           </div>
         </div>
       </section>
