@@ -66,8 +66,8 @@ export default function Home() {
       </section>
 
       {/* Audit Hub - Structured Grid */}
-      <section className="w-full py-16 px-4 md:px-8 bg-black/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-[40px] overflow-hidden shadow-2xl border-4 border-black min-h-[500px]">
+      <section className="w-full pt-12 md:pt-20 pb-20 px-4 md:px-8 bg-black/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-black">
           
           {/* Left Panel: High Energy Citizen Voice */}
           <div className="md:w-[320px] bg-forest p-6 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
@@ -126,7 +126,7 @@ export default function Home() {
               <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 h-[500px] overflow-y-auto pr-2 custom-scrollbar bg-black/5 p-3 md:p-4 rounded-[2rem] border-2 border-dashed border-black/10">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 h-[450px] overflow-y-auto pr-2 custom-scrollbar bg-black/5 p-3 md:p-4 rounded-[2rem] border-2 border-dashed border-black/10">
               {completeMLAList.map((mla) => {
                 const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
@@ -134,18 +134,17 @@ export default function Home() {
                     key={mla.mla}
                     onClick={() => setSelectedZoneMLA(mla)}
                     onMouseEnter={() => setSelectedZoneMLA(mla)}
-                    className={`p-4 md:p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[200px] md:min-h-[240px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'border-black/10 bg-white hover:border-black/30 hover:shadow-lg'}`}
+                    className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[160px] md:min-h-[200px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-x-0.5 -translate-y-0.5' : 'border-black/5 bg-white hover:border-black/20 hover:shadow-md'}`}
                   >
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-black opacity-[0.03] -mr-8 -mt-8 rounded-full"></div>
+                    <div className="absolute top-0 right-0 w-12 h-12 bg-black opacity-[0.02] -mr-6 -mt-6 rounded-full"></div>
                     
-                    {/* Leader Photo in Selection Grid */}
-                    <div className={`w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden mb-3 md:mb-4 border-2 transition-transform group-hover:scale-105 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
+                    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden mb-2 border-2 transition-transform group-hover:scale-105 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
                       <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
 
-                    <div className="flex-1">
-                      <div className="text-[9px] md:text-[10px] font-black text-black/40 uppercase tracking-[0.2em] leading-none mb-1 md:mb-2">{mla.constituency}</div>
-                      <div className="font-display font-black text-base md:text-lg text-black uppercase leading-tight group-hover:text-forest transition-colors break-words">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[8px] md:text-[9px] font-black text-black/30 uppercase tracking-[0.1em] mb-1 truncate">{mla.constituency}</div>
+                      <div className="font-body font-bold text-[10px] md:text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors break-words">
                           {mla.mla}
                       </div>
                     </div>
