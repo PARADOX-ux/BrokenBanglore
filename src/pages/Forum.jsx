@@ -75,10 +75,10 @@ export default function Forum() {
     activeTab === 'Trending' ? true : p.tab === activeTab
   ).sort((a, b) => activeTab === 'Trending' ? b.upvotes - a.upvotes : b.ts - a.ts);
 
-  const topContributors = [...posts.reduce((acc, p) => {
+  const topContributors = Object.entries(posts.reduce((acc, p) => {
     acc[p.author] = (acc[p.author] || 0) + 1;
     return acc;
-  }, {})].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   return (
     <div className="w-full min-h-screen bg-[#f5f3ea] py-12 px-4 md:px-8">

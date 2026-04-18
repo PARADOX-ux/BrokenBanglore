@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react';
 import { wardMLAData, getStats, incrementStat } from '../data/wardData';
 
 export default function Petitions() {
-  const [petitions] = useState([
-    { id: 1, title: 'Restore Bellandur Lake Ecosystem', description: 'Massive pollution and frothing are destroying our health. We demand immediate dredging and STP inspection.', ward: 'Mahadevapura', signatures: 428, goal: 1000, author: 'Dr. Ramesh Kumar', authorArea: 'Bellandur' },
-    { id: 2, title: 'Safe Pedestrian Crossings for ORR', description: 'At least 5 accidents occur weekly. We demand skywalks at 4 major junctions on Outer Ring Road.', ward: 'Bommanahalli', signatures: 890, goal: 1000, author: 'Citizens Collective', authorArea: 'HSR Layout' },
-    { id: 3, title: 'Ban illegal Garbage Burning in East Zone', description: 'Night-time burning is causing respiratory issues for children. BBMP must enforce the ban.', ward: 'Mahadevapura', signatures: 156, goal: 500, author: 'Anita S.', authorArea: 'Whitefield' }
-  ]);
+  const [petitions, setPetitions] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', author: '', ward: '', area: '', goal: '' });
   const [submitted, setSubmitted] = useState(false);

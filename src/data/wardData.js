@@ -222,10 +222,6 @@ export function getResponseRateLabel(total, resolved) {
 export const STATS_KEY = 'bb_platform_stats';
 
 export function getStats() {
-  try {
-    const raw = localStorage.getItem(STATS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
   return { reports: 0, petitions: 0, citizens: 0, resolved: 0 };
 }
 

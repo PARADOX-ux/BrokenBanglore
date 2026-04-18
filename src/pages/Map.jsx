@@ -150,6 +150,10 @@ export default function Map() {
       ward: wardNo,
       mla: mlaData
     });
+
+    if (selectedReport) {
+      handleWardClick(e);
+    }
   };
 
   const resetWard = (e) => {
