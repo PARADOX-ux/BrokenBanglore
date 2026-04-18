@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Syne:wght@700;800&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+@import "tailwindcss";
+
+@theme {
+  --color-forest: #2B9348; /* Forest Green */
+  --color-bright: #55A630; /* Bright Green */
+  --color-strong: #80B918; /* Strong Green */
+  --color-gold: #E9C46A;   /* Bountiful Gold */
+  --color-cream: #F7F5EC;  /* Light Cream */
+  --color-ash: #d1d5db;    /* Ash Gray */
+  --font-display: "Syne", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+  --animate-pulse-fast: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-marquee: marquee 25s linear infinite;
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+
+
+@layer base {
+  body {
+    @apply font-body bg-cream text-forest antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-forest;
+  }
+}
+
+@layer utilities {
+  .clip-garden {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  
+  .glass-card {
+    @apply bg-gold/30 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl rounded-tl-none;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-strong/10;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-bright/40 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-forest;
+}
+
+/* Leaflet Customizations */
+.leaflet-popup-content-wrapper {
+  @apply bg-transparent shadow-none p-0;
+}
+.leaflet-popup-content {
+  @apply m-0;
+}
+.leaflet-popup-tip-container {
+  display: none;
+}
+.leaflet-container {
+  font-family: inherit;
+}
