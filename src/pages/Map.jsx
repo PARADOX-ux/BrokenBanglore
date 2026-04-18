@@ -298,6 +298,7 @@ export default function Map() {
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                       {report.status === 'resolved' ? 'Fixed' : 'Open'}
                     </span>
+                  </div>
                   {(() => {
                     const mla = wardMLAData.find(m => Number(m.ward) === Number(report.ward_no));
                     return mla && (
