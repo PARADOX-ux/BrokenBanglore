@@ -17,6 +17,12 @@ export default function Footer() {
             <Link to="/report" className="hover:text-gold transition-colors">Reports</Link>
             <Link to="/petitions" className="hover:text-gold transition-colors">Petitions</Link>
             <Link to="/forum" className="hover:text-gold transition-colors">Forum</Link>
+            <button 
+              onClick={() => { if(window.confirm('Clear all local test data?')) { localStorage.clear(); window.location.reload(); } }}
+              className="hover:text-red-400 transition-colors uppercase"
+            >
+              Reset Data
+            </button>
           </div>
        </div>
     </footer>

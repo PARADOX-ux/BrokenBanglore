@@ -16,6 +16,8 @@ export default function Report() {
     area: '',
     address: '',
     wardData: null,
+    photo: null,
+    photoPreview: null,
   });
 
   // On mount: if we came back from Map pick mode, read the saved location
@@ -318,18 +320,39 @@ export default function Report() {
             <h2 className="font-display font-bold text-2xl mb-2">Upload Photo Evidence</h2>
             <p className="text-olive/70 mb-6 text-sm">Reports with photos get fixed 3x faster by the authorities.</p>
             
-            <div className="border-2 border-dashed border-olive/30 bg-white rounded-xl h-64 flex flex-col items-center justify-center gap-4 hover:border-olive/50 transition-colors cursor-pointer group">
-              <div className="w-16 h-16 bg-tea rounded-full flex items-center justify-center text-2xl group-hover:bg-gold transition-colors">
-                📸
-              </div>
-              <div className="text-center">
-                <p className="font-bold">Click to upload or drag & drop</p>
-                <p className="text-sm text-olive/60 mt-1">JPG, PNG up to 5MB</p>
-              </div>
+            <div 
+              onClick={() => document.getElementById('fileInput').click()}
+              className="border-2 border-dashed border-forest/30 bg-white rounded-xl h-64 flex flex-col items-center justify-center gap-4 hover:border-forest/50 transition-colors cursor-pointer group relative overflow-hidden"
+            >
+              {formData.photoPreview ? (
+                <img src={formData.photoPreview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-forest/5 rounded-full flex items-center justify-center text-2xl group-hover:bg-gold transition-colors">
+                    📸
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold">Click to upload or drag & drop</p>
+                    <p className="text-sm text-forest/60 mt-1">JPG, PNG up to 5MB</p>
+                  </div>
+                </>
+              )}
+              <input 
+                id="fileInput"
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setFormData({...formData, photo: file, photoPreview: URL.createObjectURL(file)});
+                  }
+                }}
+              />
             </div>
 
             <div className="text-center mt-6">
-              <p className="text-sm text-olive/70">Or you can skip this step and add it later.</p>
+              <p className="text-sm text-forest/70 font-medium">Capture the evidence to force MLA action.</p>
             </div>
 
             <div className="flex justify-between mt-auto pt-6 border-t border-ash/30">
@@ -431,6 +454,7 @@ Publicly documented → https://brokenbanglore.in/map
                   <div><div className="text-white/50 text-xs uppercase tracking-widest">MLA (State)</div><div className="font-bold">{mlaName} <span className="text-gold text-xs">{wd.party}</span></div></div>
                   <div><div className="text-white/50 text-xs uppercase tracking-widest">MP (Lok Sabha 2024)</div><div className="font-bold">{mpName} <span className="text-gold text-xs">BJP</span></div></div>
                   <div><div className="text-white/50 text-xs uppercase tracking-widest">Authority</div><div className="font-bold">{wd.authority}</div></div>
+                  <div className="col-span-2 border-t border-white/10 pt-2"><div className="text-white/50 text-xs uppercase tracking-widest">Filer Information</div><div className="font-bold text-gold">Public Accountability Petitioner (Anonymous ID: {refNo.slice(-4)})</div></div>
                 </div>
               )}
 
@@ -485,7 +509,7 @@ Publicly documented → https://brokenbanglore.in/map
 
                 {/* Channel 4: BBMP Jan Spandana (official govt portal) */}
                 <a
-                  href={`https://janaspandana.karnataka.gov.in`}
+                  href={`https://ipgrs.karnataka.gov.in/`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-4 bg-white border-2 border-blue-200 hover:border-blue-500 hover:shadow-md rounded-2xl p-4 transition-all group w-full"
@@ -514,7 +538,7 @@ Publicly documented → https://brokenbanglore.in/map
 
               <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm">
                 <p className="font-bold text-amber-800 mb-1">⏱️ If ignored after 15 days:</p>
-                <p className="text-amber-700 font-medium">File an RTI application at <a href="https://rti.india.gov.in" target="_blank" rel="noreferrer" className="underline">rti.india.gov.in</a> demanding a written response. Unanswered RTIs are a punishable offence under the RTI Act 2005.</p>
+                <p className="text-amber-700 font-medium">File an RTI application at <a href="https://rtionline.gov.in/" target="_blank" rel="noreferrer" className="underline font-bold">rtionline.gov.in</a> demanding a written response. Unanswered RTIs are a punishable offence under the RTI Act 2005.</p>
               </div>
 
               <Link to="/map" className="mt-6 font-bold text-forest hover:text-[#1a3a2a] border-b-2 border-transparent hover:border-forest pb-1 transition-colors self-center">

@@ -24,7 +24,6 @@ export default function Signup() {
   const [success, setSuccess] = useState('');
   const configured = isSupabaseConfigured();
 
-  // If already logged in, show profile
   if (isLoggedIn) {
     return (
       <div className="min-h-screen bg-[#f5f3ea] flex items-center justify-center px-4 py-20 font-body">
@@ -33,7 +32,7 @@ export default function Signup() {
           <h1 className="font-display font-bold text-2xl text-[#1a3a2a] mb-2">You're in, {displayName}!</h1>
           <p className="text-[#1a3a2a]/60 font-medium mb-8">You're now part of the BrokenBanglore movement.</p>
           <div className="space-y-3">
-            <Link to="/report" className="w-full bg-forest text-gold py-4 rounded-xl font-bold text-lg hover:bg-[#1a3a2a] transition-colors inline-block">
+            <Link to="/report" className="w-full bg-forest text-gold py-4 rounded-xl font-bold text-lg hover:bg-[#1a3a2a] transition-colors inline-block text-center no-underline">
               📸 Report a Problem →
             </Link>
             <button onClick={signOut} className="w-full border border-[#1a3a2a]/20 text-[#1a3a2a]/60 py-3 rounded-xl font-bold hover:border-red-400 hover:text-red-500 transition-colors">
@@ -57,23 +56,14 @@ export default function Signup() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    if (!configured) {
-      // Demo mode — show success without real auth
-      setSuccess('demo');
-      setLoading(false);
-      return;
-    }
+    if (!configured) { setSuccess('demo'); setLoading(false); return; }
 
     if (isLogin) {
       const { error: err } = await signInWithEmail(form.email, form.password);
       if (err) { setError(err.message); setLoading(false); return; }
       navigate('/');
     } else {
-      const { error: err } = await signUpWithEmail(form.email, form.password, {
-        full_name: form.name,
-        ward: form.ward,
-      });
+      const { error: err } = await signUpWithEmail(form.email, form.password, { full_name: form.name, ward: form.ward });
       if (err) { setError(err.message); setLoading(false); return; }
       setSuccess('email');
     }
@@ -83,22 +73,18 @@ export default function Signup() {
   return (
     <div className="min-h-screen bg-[#f5f3ea] flex items-center justify-center px-4 py-20 font-body">
       <div className="w-full max-w-md">
-
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block font-display font-bold text-2xl text-[#1a3a2a] mb-2">
+          <Link to="/" className="inline-block font-display font-bold text-2xl text-[#1a3a2a] mb-2 no-underline">
             BrokenBanglore 🔴
           </Link>
           {!configured && (
             <div className="mt-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold rounded-xl px-4 py-2">
-              ⚠️ Demo mode — Supabase not connected yet. Auth will simulate locally.
+              ⚠️ Demo mode active
             </div>
           )}
         </div>
 
         <div className="bg-white border border-[#1a3a2a]/10 rounded-3xl p-8 shadow-xl relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-gold/15 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-forest/10 rounded-full blur-3xl pointer-events-none"></div>
-
           <div className="relative z-10">
             <h1 className="font-display font-bold text-2xl text-[#1a3a2a] mb-6">
               {isLogin ? 'Welcome back' : 'Join the movement'}
@@ -108,35 +94,18 @@ export default function Signup() {
               <div className="text-center py-8">
                 <div className="text-5xl mb-4">📧</div>
                 <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-2">Check your inbox!</h2>
-                <p className="text-[#1a3a2a]/60 font-medium text-sm">We sent a confirmation link to <strong>{form.email}</strong>. Click it to activate your account.</p>
+                <p className="text-[#1a3a2a]/60 font-medium text-sm">We sent a confirmation link to <strong>{form.email}</strong>.</p>
               </div>
             ) : success === 'demo' ? (
               <div className="text-center py-8">
                 <div className="text-5xl mb-4">✅</div>
-                <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-2">Welcome to BrokenBanglore!</h2>
-                <p className="text-[#1a3a2a]/60 font-medium text-sm mb-6">Demo mode active. Connect Supabase to enable real accounts.</p>
-                <Link to="/report" className="bg-forest text-gold px-6 py-3 rounded-xl font-bold hover:bg-[#1a3a2a] transition-colors inline-block">
+                <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-2">Welcome!</h2>
+                <Link to="/report" className="bg-forest text-gold px-6 py-3 rounded-xl font-bold hover:bg-[#1a3a2a] transition-colors inline-block mt-4 no-underline">
                   📸 Report a Problem →
                 </Link>
               </div>
             ) : (
               <>
-                {/* Google Auth — the real button */}
-                <button
-                  onClick={handleGoogle}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 bg-white border-2 border-[#1a3a2a]/15 rounded-xl px-4 py-3.5 font-bold text-[#1a3a2a] hover:border-[#1a3a2a]/40 hover:bg-[#1a3a2a]/5 transition-all mb-5 shadow-sm disabled:opacity-50"
-                >
-                  <GoogleIcon />
-                  {loading ? 'Redirecting…' : 'Continue with Google'}
-                </button>
-
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="flex-1 h-px bg-[#1a3a2a]/10"></div>
-                  <span className="text-xs font-bold text-[#1a3a2a]/30 uppercase tracking-widest">or</span>
-                  <div className="flex-1 h-px bg-[#1a3a2a]/10"></div>
-                </div>
-
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold rounded-xl px-4 py-3 mb-4">
                     ⚠️ {error}
@@ -158,16 +127,18 @@ export default function Signup() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-widest text-[#1a3a2a]/40 mb-1.5">Password</label>
-                    <input type="password" required placeholder="min. 8 characters" minLength={8} value={form.password} onChange={e => setForm({...form, password: e.target.value})}
+                    <input type="password" required placeholder="min. 8 characters" value={form.password} onChange={e => setForm({...form, password: e.target.value})}
                       className="w-full bg-[#f5f3ea] border border-[#1a3a2a]/15 rounded-xl px-4 py-3 outline-none focus:border-forest focus:ring-2 focus:ring-forest/10 transition-all font-medium text-[#1a3a2a]" />
                   </div>
+                  
                   {!isLogin && (
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-[#1a3a2a]/40 mb-1.5">Your Area <span className="normal-case tracking-normal text-[#1a3a2a]/20">(optional)</span></label>
-                      <input type="text" placeholder="e.g. Indiranagar, HSR Layout" value={form.ward} onChange={e => setForm({...form, ward: e.target.value})}
+                      <label className="block text-xs font-bold uppercase tracking-widest text-[#1a3a2a]/40 mb-1.5">Your Area (optional)</label>
+                      <input type="text" placeholder="e.g. Indiranagar" value={form.ward} onChange={e => setForm({...form, ward: e.target.value})}
                         className="w-full bg-[#f5f3ea] border border-[#1a3a2a]/15 rounded-xl px-4 py-3 outline-none focus:border-forest focus:ring-2 focus:ring-forest/10 transition-all font-medium text-[#1a3a2a]" />
                     </div>
                   )}
+
                   <button type="submit" disabled={loading}
                     className="w-full bg-forest text-gold py-4 rounded-xl font-bold font-display text-lg shadow-lg hover:bg-[#1a3a2a] transition-all transform hover:-translate-y-0.5 disabled:opacity-60 mt-2"
                   >
@@ -175,39 +146,32 @@ export default function Signup() {
                   </button>
                 </form>
 
-                {!isLogin && (
-                  <p className="text-xs text-center text-[#1a3a2a]/30 font-medium mt-4">
-                    🔒 No spam. No selling. Your data stays private.
-                  </p>
-                )}
+                <div className="flex items-center gap-3 my-6">
+                  <div className="flex-1 h-px bg-[#1a3a2a]/10"></div>
+                  <span className="text-[10px] font-bold text-[#1a3a2a]/30 uppercase tracking-widest whitespace-nowrap px-2">or continue with</span>
+                  <div className="flex-1 h-px bg-[#1a3a2a]/10"></div>
+                </div>
+
+                <button
+                  onClick={handleGoogle}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 bg-white border-2 border-[#1a3a2a]/15 rounded-xl px-4 py-3.5 font-bold text-[#1a3a2a] hover:border-[#1a3a2a]/40 transition-all shadow-sm"
+                >
+                  <GoogleIcon />
+                  {loading ? 'Redirecting…' : 'One-Tap Login with Google'}
+                </button>
+
+                <div className="mt-6 text-center pt-5 border-t border-[#1a3a2a]/5">
+                  <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                    className="text-[#1a3a2a]/50 hover:text-forest text-sm font-bold transition-colors"
+                  >
+                    {isLogin ? "New here? Create an account" : "Already have an account? Log in"}
+                  </button>
+                </div>
               </>
             )}
-
-            {!success && (
-              <div className="mt-6 text-center pt-5 border-t border-[#1a3a2a]/5">
-                <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                  className="text-[#1a3a2a]/50 hover:text-forest text-sm font-bold transition-colors"
-                >
-                  {isLogin ? "New here? Create an account" : "Already have an account? Log in"}
-                </button>
-              </div>
-            )}
-
-            <div className="mt-4 text-center">
-              <Link to="/" className="text-[10px] uppercase tracking-tighter font-bold text-[#1a3a2a]/20 hover:text-forest transition-colors">
-                ← Back to Home
-              </Link>
-            </div>
           </div>
         </div>
-
-        {!isLogin && !success && (
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center text-xs font-bold text-[#1a3a2a]/50">
-            <div className="bg-white rounded-xl p-3 border border-[#1a3a2a]/10"><div className="text-lg mb-1">📸</div>Track reports</div>
-            <div className="bg-white rounded-xl p-3 border border-[#1a3a2a]/10"><div className="text-lg mb-1">✍️</div>Sign petitions</div>
-            <div className="bg-white rounded-xl p-3 border border-[#1a3a2a]/10"><div className="text-lg mb-1">⚖️</div>Hold MLAs accountable</div>
-          </div>
-        )}
       </div>
     </div>
   );

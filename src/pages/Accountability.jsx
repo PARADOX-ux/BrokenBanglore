@@ -22,8 +22,8 @@ export default function Accountability() {
       <div className="bg-strong/5 w-full px-4 md:px-8 pt-24 pb-12 border-b border-forest/10">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
-            <h1 className="font-display font-bold text-4xl md:text-6xl text-forest">Civic Performance Dashboard</h1>
-            <span className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200 shadow-sm mt-2 md:mt-4">
+            <h1 className="font-display font-bold text-4xl md:text-6xl text-forest uppercase tracking-tighter">The Blockbuster <br className="md:hidden"/> Accountability Audit</h1>
+            <span className="flex items-center gap-2 bg-bright/10 text-bright px-3 py-1 rounded-full text-xs font-bold border border-bright/20 shadow-sm mt-2 md:mt-4 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               Live Tracking
             </span>
@@ -41,8 +41,8 @@ export default function Accountability() {
               <div className="text-4xl font-display font-bold text-bright mb-1">{resolvedReports}</div>
               <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Resolved (0%)</div>
             </div>
-            <div className="bg-white border-b-4 border-red-500 p-4 rounded-xl flex-shrink-0 min-w-[200px]">
-              <div className="text-4xl font-display font-bold text-red-600 mb-1">{ignoredReports}</div>
+            <div className="bg-white border-b-4 border-forest/30 p-4 rounded-xl flex-shrink-0 min-w-[200px]">
+              <div className="text-4xl font-display font-bold text-forest mb-1">{ignoredReports}</div>
               <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Pending (0%)</div>
             </div>
             <div className="bg-white border-b-4 border-gold p-4 rounded-xl flex-shrink-0 min-w-[200px]">
@@ -59,8 +59,8 @@ export default function Accountability() {
         <section className="bg-white rounded-3xl p-6 md:p-8 border border-white shadow-md overflow-hidden">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h2 className="font-display font-bold text-3xl text-forest mb-2">Representative Performance Tracker</h2>
-              <p className="text-forest/70 font-medium">Tracking issue resolution across all wards objectively.</p>
+              <h2 className="font-display font-bold text-3xl text-forest mb-2">MLA Resolution Audit</h2>
+              <p className="text-forest/70 font-medium">Objective tracking of citizen problem resolution.</p>
             </div>
             <select className="bg-white border border-ash/80 text-forest font-bold text-sm outline-none px-4 py-2 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-olive/50 hover:border-olive transition-colors">
               <option>Sort by: Resolution Rate ↓</option>

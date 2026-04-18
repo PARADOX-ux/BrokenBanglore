@@ -365,7 +365,7 @@ export default function Map() {
                  <div className="text-[9px] font-bold uppercase text-forest/40">Reports</div>
               </div>
               <div>
-                 <div className="text-sm font-bold text-red-600">Open</div>
+                 <div className="text-sm font-bold text-forest">Open</div>
                  <div className="text-[9px] font-bold uppercase text-forest/40">Status</div>
               </div>
               <div className="ml-auto flex items-center gap-1.5 bg-forest/5 px-2 py-1 rounded-md">
@@ -383,13 +383,13 @@ export default function Map() {
 
       {/* The nammakasa-style Floating Accountability Card */}
       {selectedReport && (
-        <div className="absolute top-20 bottom-4 right-4 md:right-8 w-full max-w-[400px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300">
+        <div className="absolute top-20 bottom-4 right-4 md:right-8 w-full max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300">
           
           {/* Card Header */}
           <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></div>
-              <span className="uppercase text-[10px] font-bold tracking-wider text-red-600">
+              <div className="w-2.5 h-2.5 rounded-full bg-forest animate-pulse"></div>
+              <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
                 BBMP Ward #{selectedReport.ward}
               </span>
             </div>
@@ -419,23 +419,23 @@ export default function Map() {
 
               {/* Report count summary */}
               <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="bg-red-50 rounded-xl p-2.5 text-center border border-red-100">
-                  <div className="font-display font-bold text-2xl text-red-600">
+                <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
+                  <div className="font-display font-bold text-2xl text-forest">
                     {wardReportsLoading ? '…' : wardReports.length}
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-red-700/60">Total</div>
+                  <div className="text-[9px] font-bold uppercase text-forest/40">Total</div>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-2.5 text-center border border-amber-100">
-                  <div className="font-display font-bold text-2xl text-amber-600">
+                <div className="bg-gold/10 rounded-xl p-2.5 text-center border border-gold/20">
+                  <div className="font-display font-bold text-2xl text-forest">
                     {wardReportsLoading ? '…' : wardReports.filter(r => r.status === 'open').length}
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-amber-700/60">Open</div>
+                  <div className="text-[9px] font-bold uppercase text-forest/40">Open</div>
                 </div>
-                <div className="bg-green-50 rounded-xl p-2.5 text-center border border-green-100">
-                  <div className="font-display font-bold text-2xl text-green-600">
+                <div className="bg-bright/10 rounded-xl p-2.5 text-center border border-bright/20">
+                  <div className="font-display font-bold text-2xl text-bright">
                     {wardReportsLoading ? '…' : wardReports.filter(r => r.status === 'resolved').length}
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-green-700/60">Resolved</div>
+                  <div className="text-[9px] font-bold uppercase text-bright/60">Fixed</div>
                 </div>
               </div>
 

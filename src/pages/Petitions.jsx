@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { wardMLAData, getStats, incrementStat } from '../data/wardData';
 
 export default function Petitions() {
-  const [petitions] = useState([]);
+  const [petitions] = useState([
+    { id: 1, title: 'Restore Bellandur Lake Ecosystem', description: 'Massive pollution and frothing are destroying our health. We demand immediate dredging and STP inspection.', ward: 'Mahadevapura', signatures: 428, goal: 1000, author: 'Dr. Ramesh Kumar', authorArea: 'Bellandur' },
+    { id: 2, title: 'Safe Pedestrian Crossings for ORR', description: 'At least 5 accidents occur weekly. We demand skywalks at 4 major junctions on Outer Ring Road.', ward: 'Bommanahalli', signatures: 890, goal: 1000, author: 'Citizens Collective', authorArea: 'HSR Layout' },
+    { id: 3, title: 'Ban illegal Garbage Burning in East Zone', description: 'Night-time burning is causing respiratory issues for children. BBMP must enforce the ban.', ward: 'Mahadevapura', signatures: 156, goal: 500, author: 'Anita S.', authorArea: 'Whitefield' }
+  ]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', ward: '', goal: '' });
+  const [form, setForm] = useState({ title: '', description: '', author: '', ward: '', area: '', goal: '' });
   const [submitted, setSubmitted] = useState(false);
   const [stats, setStats] = useState(getStats());
 
@@ -75,9 +79,25 @@ export default function Petitions() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block font-bold text-[#1a3a2a] mb-1 text-sm">Your Area / Ward</label>
+                         <label className="block font-bold text-[#1a3a2a] mb-1 text-sm">Filer Name *</label>
+                         <input required value={form.author} onChange={e => setForm({...form, author: e.target.value})}
+                           placeholder="Your Name"
+                           className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a] font-medium"
+                         />
+                      </div>
+                      <div>
+                        <label className="block font-bold text-[#1a3a2a] mb-1 text-sm">Filer Area *</label>
+                        <input required value={form.area} onChange={e => setForm({...form, area: e.target.value})}
+                          placeholder="e.g. Indiranagar"
+                          className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a] font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block font-bold text-[#1a3a2a] mb-1 text-sm">Target Ward</label>
                         <input value={form.ward} onChange={e => setForm({...form, ward: e.target.value})}
-                          placeholder="e.g. Indiranagar, Ward 52"
+                          placeholder="e.g. Ward 52"
                           className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a] font-medium"
                         />
                       </div>
@@ -102,9 +122,36 @@ export default function Petitions() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {petitions.length > 0 ? (
             petitions.map(petition => {
-              const mla = wardMLAData.find(w => w.ward === petition.ward);
+              const progress = Math.min((petition.signatures / petition.goal) * 100, 100);
               return (
-                <div key={petition.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-ash/40 hover:border-forest hover:shadow-md transition-all flex flex-col">
+                <div key={petition.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-ash/40 hover:border-forest hover:shadow-lg transition-all flex flex-col p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="bg-strong/5 text-[#1a3a2a] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">{petition.ward}</span>
+                    <span className="text-forest text-[10px] font-bold uppercase tracking-widest">{petition.goal - petition.signatures} signatures left</span>
+                  </div>
+                  <h3 className="font-display font-bold text-xl text-[#1a3a2a] mb-2 leading-tight">{petition.title}</h3>
+                  <p className="text-sm text-[#1a3a2a]/60 line-clamp-3 mb-6 font-medium leading-relaxed">{petition.description}</p>
+                  
+                  {/* Filer Info */}
+                  <div className="bg-tea/20 rounded-xl p-3 mb-6 border border-forest/5">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-forest/40 mb-1">Petition Filer</div>
+                    <div className="text-sm font-bold text-forest">{petition.author} <span className="text-forest/40 font-medium ml-1">from {petition.authorArea}</span></div>
+                  </div>
+
+                  <div className="mt-auto space-y-4">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-2">
+                        <span className="text-forest">{petition.signatures} signatures</span>
+                        <span className="text-forest/40">Goal: {petition.goal}</span>
+                      </div>
+                      <div className="w-full bg-forest/5 h-2 rounded-full overflow-hidden">
+                        <div className="h-full bg-forest rounded-full transition-all duration-1000" style={{ width: `${progress}%` }}></div>
+                      </div>
+                    </div>
+                    <button className="w-full bg-forest text-gold py-3 rounded-xl font-bold hover:bg-[#1a3a2a] transition-colors shadow-sm">
+                      Sign this Petition →
+                    </button>
+                  </div>
                 </div>
               );
             })

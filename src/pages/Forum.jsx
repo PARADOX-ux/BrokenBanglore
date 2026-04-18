@@ -137,8 +137,10 @@ export default function Forum() {
                       <h3 className="font-bold text-lg text-[#1a3a2a] leading-tight mb-2">{post.title}</h3>
                       {post.body && <p className="text-sm text-[#1a3a2a]/70 font-medium leading-relaxed line-clamp-3">{post.body}</p>}
                       <div className="mt-3 flex items-center gap-1 text-xs font-bold text-[#1a3a2a]/50">
-                        <span className="w-6 h-6 rounded-full bg-forest/10 flex items-center justify-center text-forest font-black text-xs">{post.author[0]?.toUpperCase()}</span>
-                        {post.author}
+                        <span className="w-6 h-6 rounded-full bg-forest/10 flex items-center justify-center text-forest font-black text-xs">
+                          {(post.author || 'A')[0]?.toUpperCase()}
+                        </span>
+                        {post.author || 'Anonymous Citizen'}
                       </div>
                     </div>
                     <div className="flex flex-col items-center gap-1 shrink-0">
@@ -176,7 +178,7 @@ export default function Forum() {
                     </a>
                     {post.tab === 'Legal Help' && (
                       <a
-                        href="https://rti.india.gov.in/"
+                        href="https://rtionline.gov.in/"
                         target="_blank"
                         rel="noreferrer"
                         className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
@@ -230,7 +232,7 @@ export default function Forum() {
               </div>
             </div>
             <a
-              href="https://rti.india.gov.in/"
+              href="https://rtionline.gov.in/"
               target="_blank"
               rel="noreferrer"
               className="mt-4 w-full bg-gold text-[#1a3a2a] py-2.5 rounded-xl font-bold flex justify-center items-center gap-2 hover:brightness-110 transition-all block text-sm text-center"
