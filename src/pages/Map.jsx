@@ -280,23 +280,38 @@ export default function Map() {
               position={[report.lat, report.lng]}
               icon={L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div style="background-color: ${categories.find(c => c.id === report.category)?.color || '#2B9348'}; width: 12px; height: 12px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
+                html: `<div style="background-color: ${report.severity === 'high' ? '#f97316' : report.severity === 'emergency' ? '#ef4444' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
               })}
             >
               <Popup className="custom-popup">
                 <div className="p-1">
                   <div className="text-[10px] font-bold uppercase text-forest/50 mb-1">{report.category}</div>
                   <div className="font-bold text-xs mb-1">{report.title}</div>
+                  {report.photo && (
+                    <div className="w-full h-24 mb-2 rounded-lg overflow-hidden bg-ash/20 border border-ash/30">
+                      <img src={report.photo} alt="evidence" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                       {report.status === 'resolved' ? 'Fixed' : 'Open'}
                     </span>
+                  {(() => {
+                    const mla = wardMLAData.find(m => Number(m.ward) === Number(report.ward_no));
+                    return mla && (
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-ash/20">
+                        <img src={mla.photo} className="w-6 h-6 rounded-full object-cover" alt="mla" />
+                        <span className="text-[9px] font-bold text-forest">{mla.mla} (MLA)</span>
+                      </div>
+                    );
+                  })()}
+                  <div className="mt-2 text-center">
                     <button 
                       onClick={() => navigate(`/map?ward=${report.ward_no}`)}
-                      className="text-[9px] font-bold text-forest hover:underline"
-                    >View Ward →</button>
+                      className="text-[9px] font-bold text-forest hover:underline bg-forest/5 px-3 py-1 rounded-full w-full"
+                    >View Full Ward Audit →</button>
                   </div>
                 </div>
               </Popup>
@@ -381,7 +396,7 @@ export default function Map() {
       ) : (
         <div className="absolute bottom-6 left-6 z-[400] bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-forest/10 w-64 pointer-events-none">
            <div className="text-[10px] font-bold uppercase tracking-widest text-forest/40 mb-1">Explore Map</div>
-           <p className="text-xs font-medium text-forest/70">Hover over markers to view ward-level accountability data.</p>
+           <p className="text-xs font-medium text-forest/70">Tap markers to view ward-level accountability data and public photo evidence.</p>
         </div>
       )}
 

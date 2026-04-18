@@ -60,8 +60,10 @@ export default function Report() {
         const loc = { lat, lng };
         setFormData(f => ({ ...f, position: loc }));
         
-        // Try to get actual area name (free OSM service)
         try {
+          // Add a signal that GPS is working
+          setPickedLocation({ lat, lng, wardName: 'Detecting area...' });
+          
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
           const area = data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.city_district || 'Detected Area';
@@ -71,7 +73,13 @@ export default function Report() {
         } catch (e) {
           setPickedLocation({ lat, lng, wardName: 'GPS Location' });
         }
-      }, () => alert('Could not detect location. Try manually entering your area below.'));
+      }, (err) => {
+        let msg = 'Could not detect location.';
+        if (err.code === 1) msg = 'Location access denied. Please enable GPS and try again.';
+        alert(msg);
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    } else {
+      alert('Geolocation is not supported by your browser.');
     }
   };
 

@@ -22,7 +22,7 @@ export default function Accountability() {
       <div className="bg-strong/5 w-full px-4 md:px-8 pt-24 pb-12 border-b border-forest/10">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
-            <h1 className="font-display font-bold text-4xl md:text-6xl text-forest uppercase tracking-tighter">The Blockbuster <br className="md:hidden"/> Accountability Audit</h1>
+            <h1 className="font-display font-bold text-4xl md:text-6xl text-forest uppercase tracking-tighter">MLA Action Audit</h1>
             <span className="flex items-center gap-2 bg-bright/10 text-bright px-3 py-1 rounded-full text-xs font-bold border border-bright/20 shadow-sm mt-2 md:mt-4 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               Live Tracking
@@ -241,7 +241,7 @@ export default function Accountability() {
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">📰</span>
-              <h2 className="font-display font-bold text-3xl md:text-4xl text-forest">Weekly Hall of Shame</h2>
+              <h2 className="font-display font-bold text-3xl md:text-4xl text-forest">Priority Response Hub</h2>
             </div>
             <p className="text-forest/70 font-medium border-l-[3px] border-forest pl-4 py-1 ml-1 max-w-2xl">
               The oldest, most upvoted civic issues pending resolution. This data is fully public and transparent to drive government accountability.

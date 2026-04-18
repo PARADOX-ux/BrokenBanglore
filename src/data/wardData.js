@@ -180,7 +180,11 @@ export const authorityData = [
   },
 ];
 
-export const sampleReports = [];
+export const sampleReports = [
+  { id: 'rep-1', title: 'Open Manhole on Church Street', category: 'sewage', severity: 'emergency', lat: 12.9754, lng: 77.6010, ward_no: 161, status: 'open', upvotes: 12 },
+  { id: 'rep-2', title: 'Garbage pile near metro station', category: 'garbage', severity: 'high', lat: 12.9716, lng: 77.5946, ward_no: 161, status: 'open', upvotes: 8 },
+  { id: 'rep-3', title: 'Dim street lights in 4th block', category: 'electricity', severity: 'medium', lat: 12.9740, lng: 77.6050, ward_no: 161, status: 'open', upvotes: 3 }
+];
 export const samplePetitions = [];
 export const sampleForumPosts = [];
 
