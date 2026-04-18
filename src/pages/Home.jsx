@@ -193,47 +193,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Voice of Bengaluru - Quotes */}
-      <section className="w-full py-24 px-4 md:px-8 bg-[#fdfbf6]">
+      {/* THE DEMANDS - Simple & Powerful */}
+      <section className="w-full py-20 px-4 md:px-8 bg-forest text-white border-t-8 border-black">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="font-display font-black text-4xl md:text-6xl text-black uppercase tracking-tighter mb-12">
-            "Voices of Bengaluru"
+          <div className="bg-gold text-black px-6 py-3 font-display font-black text-3xl md:text-5xl leading-none w-fit mx-auto shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] uppercase tracking-tighter mb-12 rotate-1">
+            WHAT WE ALL WANT
           </div>
-          <div className="grid gap-12">
-            {quotes.map((q, i) => (
-              <div key={i} className="flex flex-col items-center gap-4 group">
-                <div className="text-2xl md:text-4xl font-display font-black text-forest italic leading-tight group-hover:scale-105 transition-transform">
-                   "{q.text}"
-                </div>
-                <div className="text-xs font-black uppercase tracking-[0.3em] text-black/40">
-                  — {q.author}
-                </div>
-              </div>
-            ))}
+          
+          <div className="grid gap-8 text-left">
+            <div className="bg-white/5 p-6 rounded-3xl border-2 border-dashed border-white/20 hover:bg-white/10 transition-colors">
+               <div className="text-3xl font-black uppercase tracking-tight text-gold mb-2">1. FIX THE ROADS</div>
+               <p className="text-sm md:text-lg font-bold opacity-80">Stop the potholes. Stop the dust. We want smooth roads for our kids and family.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-3xl border-2 border-dashed border-white/20 hover:bg-white/10 transition-colors">
+               <div className="text-3xl font-black uppercase tracking-tight text-white mb-2">2. CLEAN OUR CITY</div>
+               <p className="text-sm md:text-lg font-bold opacity-80">Pick up the garbage. Clean the drains. We want a green and fresh Bengaluru.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-3xl border-2 border-dashed border-white/20 hover:bg-white/10 transition-colors">
+               <div className="text-3xl font-black uppercase tracking-tight text-gold mb-2">3. LIGHT THE STREETS</div>
+               <p className="text-sm md:text-lg font-bold opacity-80">No more dark corners. We want safe streets for everyone to walk at night.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer Stats - Cream BG */}
-      <section className="w-full py-16 px-4 md:px-8 border-t-8 border-black bg-[#fdfbf6]">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-black">
-          <div className="text-center">
-            <div className="text-6xl font-display font-black mb-2 leading-none">0</div>
-            <div className="text-xs font-black uppercase tracking-[0.2em]">REPORTS</div>
+      {/* CALL THE GOVT - Simple Action */}
+      <section className="w-full py-16 px-4 md:px-8 bg-white border-y-8 border-black">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="text-4xl md:text-6xl font-display font-black text-black uppercase tracking-tighter mb-6">
+            TIME FOR ACTION
           </div>
-          <div className="text-center">
-            <div className="text-6xl font-display font-black text-forest mb-2 leading-none">0</div>
-            <div className="text-xs font-black uppercase tracking-[0.2em]">PETITIONS</div>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl font-display font-black mb-2 leading-none">0</div>
-            <div className="text-xs font-black uppercase tracking-[0.2em]">CITIZENS</div>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl font-display font-black text-forest mb-2 leading-none">0%</div>
-            <div className="text-xs font-black uppercase tracking-[0.2em]">SOLVED</div>
-          </div>
-        </div>
+          <p className="text-xl font-bold text-black/60 mb-10">Choose who to reach out to. They must listen to us.</p>
+          
 
         <div className="max-w-6xl mx-auto mt-20 pt-10 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start">
