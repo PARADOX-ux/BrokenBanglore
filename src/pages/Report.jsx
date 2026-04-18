@@ -557,13 +557,6 @@ export default function Report() {
             </div>
           );
         })()}
-
-              <Link to="/map" className="mt-6 font-bold text-forest hover:text-[#1a3a2a] border-b-2 border-transparent hover:border-forest pb-1 transition-colors self-center">
-                View on Live Map →
-              </Link>
-            </div>
-          );
-        })()}
       </div>
     </div>
   );
