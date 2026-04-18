@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getPetitions, submitPetition } from '../lib/communityDb';
 import { wardMLAData, getStats, incrementStat } from '../data/wardData';
 
 export default function Petitions() {
@@ -9,20 +10,33 @@ export default function Petitions() {
   const [stats, setStats] = useState(getStats());
 
   useEffect(() => {
+    getPetitions().then(setPetitions);
+    
     const handler = (e) => setStats(e.detail);
     window.addEventListener('bb-stats-update', handler);
     return () => window.removeEventListener('bb-stats-update', handler);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const { data, error } = await submitPetition({
+      title: form.title,
+      description: form.description,
+      author: form.author,
+      ward: form.ward,
+      area: form.area,
+      goal: Number(form.goal) || 100,
+      signatures: 0,
+    });
+    
+    if (data) setPetitions([data, ...petitions]);
     incrementStat('petitions');
     incrementStat('citizens');
     setSubmitted(true);
     setTimeout(() => {
       setShowForm(false);
       setSubmitted(false);
-      setForm({ title: '', description: '', ward: '', goal: '' });
+      setForm({ title: '', description: '', author: '', ward: '', area: '', goal: '' });
     }, 2500);
   };
 

@@ -35,19 +35,13 @@ export default function Navbar() {
         ))}
       </nav>
       
-      <div className="flex items-center gap-4">
-        <Link to="/signup" className="hidden sm:block bg-forest text-gold font-black px-6 py-2.5 rounded-xl border-2 border-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          Join Audit
-        </Link>
         
-        {/* Mobile Toggle */}
         <button 
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="lg:hidden p-2 text-black bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
         >
           {isMenuOpen ? '✕' : '☰'}
         </button>
-      </div>
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
@@ -63,13 +57,6 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Link 
-              to="/signup" 
-              onClick={() => setIsMenuOpen(false)}
-              className="mt-10 bg-forest text-gold font-black px-12 py-5 rounded-2xl border-4 border-black text-lg uppercase tracking-widest shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
-            >
-              Join Audit
-            </Link>
           </div>
         </div>
       )}

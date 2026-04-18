@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { categories, getWardByArea, incrementStat } from '../data/wardData';
+import { categories, getWardByArea } from '../data/wardData';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { submitReport } from '../lib/reportsDb';
 
 export default function Report() {
   const navigate = useNavigate();
@@ -448,10 +449,19 @@ export default function Report() {
                 Back
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   stopCamera();
-                  incrementStat('reports');
-                  incrementStat('citizens');
+                  const { data, refNo, error } = await submitReport({
+                    category: formData.category,
+                    title: formData.title,
+                    description: formData.description,
+                    severity: formData.severity,
+                    lat: formData.position?.lat,
+                    lng: formData.position?.lng,
+                    area_name: formData.area,
+                    ward_no: formData.wardData?.ward,
+                    photo: formData.photoPreview, // Using preview URL for now as placeholder for storage
+                  });
                   nextStep();
                 }}
                 className="bg-forest text-gold px-12 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:shadow-2xl transition-all disabled:opacity-20 border-4 border-black"

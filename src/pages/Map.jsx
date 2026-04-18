@@ -50,6 +50,7 @@ export default function Map() {
   const [wardReports, setWardReports] = useState([]);
   const [wardReportsLoading, setWardReportsLoading] = useState(false);
   const [hoveredData, setHoveredData] = useState(null);
+  const [hoveredReport, setHoveredReport] = useState(null);
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [allReports, setAllReports] = useState([]);
   const geoJsonRef = useRef(null);
@@ -151,8 +152,7 @@ export default function Map() {
       mla: mlaData
     });
 
-    // Automatically update the side card on hover as requested
-    setSelectedReport({
+    setHoveredReport({
       id: `ward-${wardNo}`,
       title: `${wardProps.KGISWardName || wardProps.name} Overview`,
       category: "geographical area",
@@ -163,10 +163,6 @@ export default function Map() {
       status: "pending",
       mlaDetails: mlaData
     });
-
-    if (selectedReport && selectedReport.id.startsWith('ward-')) {
-       // already handled by setSelectedReport above
-    }
   };
 
   const resetWard = (e) => {
@@ -174,17 +170,9 @@ export default function Map() {
     if (geoJsonRef.current) {
        geoJsonRef.current.resetStyle(layer);
     }
-    // Force reset to ensure it NEVER gets stuck, even if the ref logic fails
     layer.setStyle(wardStyle);
     setHoveredData(null);
-    
-    // Clear side card on hover-out as requested
-    // Only if it's an overview (hover-based) and not a full report selected
-    setSelectedReport(prev => {
-      if (prev && prev.id.startsWith('ward-')) return null;
-      return prev;
-    });
-    setWardReports([]);
+    setHoveredReport(null);
   };
 
   const handleWardClick = async (e) => {
@@ -407,38 +395,46 @@ export default function Map() {
       {/* Removed Bottom Left Audit Box as requested */}
 
       {/* The nammakasa-style Floating Accountability Card */}
-      {selectedReport && (
-        <div className="absolute top-20 bottom-4 right-4 md:right-8 left-4 md:left-auto max-w-none md:max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300">
+      {(selectedReport || hoveredReport) && (() => {
+        const activeReport = selectedReport || hoveredReport;
+        return (
+        <div 
+          className="absolute top-20 bottom-4 right-4 md:right-8 left-4 md:left-auto max-w-none md:max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
+          onMouseEnter={() => {
+            // Keep the hover report active if mouse is over the card
+            if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport);
+          }}
+        >
           
           {/* Card Header */}
           <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-forest animate-pulse"></div>
+              <div className={`w-2.5 h-2.5 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''}`}></div>
               <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
-                BBMP Ward #{selectedReport.ward}
+                {selectedReport ? 'Selected' : 'Peeking'} Ward #{activeReport.ward}
               </span>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => { setSelectedReport(null); setWardReports([]); }} className="text-forest/30 hover:text-forest">✕</button>
+              <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="text-forest/30 hover:text-forest">✕</button>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             <div className="p-5">
               {/* Ward name */}
-              <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-1 leading-tight">{selectedReport.title}</h2>
+              <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-1 leading-tight">{activeReport.title}</h2>
               
               {/* MLA + MP info */}
               <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
-                  <div className="font-bold text-sm leading-tight break-words">{selectedReport.mlaDetails?.mla || '—'}</div>
-                  <div className="text-white/50 text-[9px] uppercase font-black">{selectedReport.mlaDetails?.party}</div>
+                  <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
+                  <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party}</div>
                 </div>
                 <div>
                   <div className="text-white/40 uppercase tracking-widest text-[9px]">MP (Lok Sabha)</div>
-                  <div className="font-bold text-sm leading-tight break-words">{selectedReport.mlaDetails?.mp || '—'}</div>
-                  <div className="text-white/50 text-[9px] uppercase font-black">{selectedReport.mlaDetails?.mpConstituency}</div>
+                  <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mp || '—'}</div>
+                  <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
                 </div>
               </div>
 
@@ -446,19 +442,19 @@ export default function Map() {
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
                   <div className="font-display font-bold text-2xl text-forest">
-                    {wardReportsLoading ? '…' : wardReports.length}
+                    {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.length || 0)}
                   </div>
                   <div className="text-[9px] font-bold uppercase text-forest/40">Total</div>
                 </div>
                 <div className="bg-gold/10 rounded-xl p-2.5 text-center border border-gold/20">
                   <div className="font-display font-bold text-2xl text-forest">
-                    {wardReportsLoading ? '…' : wardReports.filter(r => r.status === 'open').length}
+                    {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'open').length || 0)}
                   </div>
                   <div className="text-[9px] font-bold uppercase text-forest/40">Open</div>
                 </div>
                 <div className="bg-bright/10 rounded-xl p-2.5 text-center border border-bright/20">
                   <div className="font-display font-bold text-2xl text-bright">
-                    {wardReportsLoading ? '…' : wardReports.filter(r => r.status === 'resolved').length}
+                    {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'resolved').length || 0)}
                   </div>
                   <div className="text-[9px] font-bold uppercase text-bright/60">Fixed</div>
                 </div>
@@ -504,7 +500,7 @@ export default function Map() {
                             {report.area_name && <p className="text-[9px] text-[#1a3a2a]/40 font-medium mt-0.5">📍 {report.area_name}</p>}
                           </div>
                           <button
-                            onClick={() => upvoteReport(report.id || report.ref_no).then(() => getReports({ ward_no: selectedReport.ward }).then(setWardReports))}
+                            onClick={() => upvoteReport(report.id || report.ref_no).then(() => getReports({ ward_no: activeReport.ward }).then(setWardReports))}
                             className="w-10 h-10 flex flex-col items-center justify-center rounded-xl bg-forest/5 hover:bg-forest hover:text-gold text-forest font-bold text-xs transition-all shrink-0"
                           >
                             <span>▲</span>
@@ -527,13 +523,13 @@ export default function Map() {
           {/* Action Footer */}
           <div className="p-4 border-t border-forest/10 bg-white flex flex-col gap-2 shrink-0">
             <a
-              href={`/report?ward=${selectedReport.ward}`}
+              href={`/report?ward=${activeReport.ward}`}
               className="w-full bg-forest hover:bg-[#1a3a2a] text-gold py-3 rounded-lg font-bold text-sm text-center shadow-lg transition-colors"
             >
               Report a Problem Here
             </a>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${selectedReport.ward} has ${wardReports.length} unresolved civic complaints. ${selectedReport.mlaDetails?.mla} (MLA) and ${selectedReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBanglore`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${activeReport.ward} has ${wardReports.length} unresolved civic complaints. ${activeReport.mlaDetails?.mla} (MLA) and ${activeReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBanglore`)}`}
               target="_blank"
               rel="noreferrer"
               className="w-full bg-black/5 hover:bg-black hover:text-white text-[#1a3a2a] py-2.5 rounded-lg font-bold text-sm text-center transition-colors border border-black/10"
@@ -545,7 +541,8 @@ export default function Map() {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

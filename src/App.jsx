@@ -1,5 +1,4 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -8,11 +7,9 @@ import Map from './pages/Map';
 import Accountability from './pages/Accountability';
 import Forum from './pages/Forum';
 import Petitions from './pages/Petitions';
-import Signup from './pages/Signup';
 
 function App() {
   return (
-    <AuthProvider>
     <div className="min-h-screen bg-cream font-body text-olive flex flex-col">
       <Navbar />
       <main className="flex-1 w-full max-w-[2560px] mx-auto flex flex-col relative pb-20 md:pb-0 pt-16 md:pt-20">
@@ -23,7 +20,6 @@ function App() {
           <Route path="/accountability" element={<Accountability />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/petitions" element={<Petitions />} />
-          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-ash/90 backdrop-blur-md border-t border-cream md:hidden flex justify-around items-center h-16 px-1 pb-safe overflow-x-auto hide-scrollbar">
@@ -35,7 +31,6 @@ function App() {
           <Link to="/accountability" className="flex items-center justify-center w-full h-full text-[12px] font-bold text-forest text-center leading-none px-1">Audit</Link>
       </nav>
     </div>
-    </AuthProvider>
   );
 }
 

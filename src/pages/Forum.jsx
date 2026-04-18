@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { getPosts, submitPost } from '../lib/communityDb';
 
 const FORUM_KEY = 'bb_forum_posts';
 const TABS = ['Trending', 'Discussions', 'Success Stories', 'Legal Help', 'Organizing'];
@@ -20,8 +22,9 @@ function timeAgo(ts) {
 }
 
 export default function Forum() {
-  const [activeTab, setActiveTab] = useState('Trending');
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('Discussions');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', body: '', author: '', ward: '', tab: 'Discussions' });
   const [submitted, setSubmitted] = useState(false);
@@ -78,27 +81,24 @@ export default function Forum() {
     } catch (e) {}
   }, []);
 
-  const savePosts = (p) => {
-    setPosts(p);
-    localStorage.setItem(FORUM_KEY, JSON.stringify(p));
-  };
+  useEffect(() => {
+    getPosts().then(data => {
+      setPosts(data);
+      setLoading(false);
+    });
+  }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newPost = {
-      id: Date.now(),
+    const { data, error } = await submitPost({
       title: form.title,
       body: form.body,
       author: form.author || 'Anonymous Citizen',
       ward: form.ward || 'Bengaluru',
       tab: form.tab,
-      upvotes: 0,
-      replies: [],
-      votedBy: [],
-      ts: Date.now(),
-    };
-    const updated = [newPost, ...posts];
-    savePosts(updated);
+    });
+    
+    if (data) setPosts([data, ...posts]);
     setSubmitted(true);
     setTimeout(() => {
       setShowForm(false);

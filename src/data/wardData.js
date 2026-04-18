@@ -50,8 +50,8 @@ export const constituencyMPMap = {
   // Yelahanka - part of Bangalore North
   'Yelahanka': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
 
-  // Rajarajeshwarinagar - Bangalore South
-  'Rajarajeshwarinagar': { mp: 'Tejasvi Surya', mpConstituency: 'Bangalore South', mpParty: 'BJP' },
+  // Rajarajeshwarinagar - Bangalore Rural
+  'Rajarajeshwarinagar': { mp: 'C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
 
   // Hoskote - Bangalore Rural
   'Hoskote': { mp: 'C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
@@ -63,7 +63,7 @@ export const getMPByConstituency = (constituency) => {
 };
 
 export const completeMLAList = [
-  { constNo: 177, constituency: 'Anekal', mla: 'V Shivanna', party: 'INC', partyColor: '#2563eb', photo: getAvatar('V Shivanna', '#2563eb'), ...getMPByConstituency('Anekal'), totalReports: 0, resolvedReports: 0 },
+  { constNo: 177, constituency: 'Anekal', mla: 'B Shivanna', party: 'INC', partyColor: '#2563eb', photo: getAvatar('B Shivanna', '#2563eb'), ...getMPByConstituency('Anekal'), totalReports: 0, resolvedReports: 0 },
   { constNo: 172, constituency: 'B.T.M. Layout', mla: 'Ramalinga Reddy', party: 'INC', partyColor: '#2563eb', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/R_Ramalinga_Reddy_BNC.jpg/330px-R_Ramalinga_Reddy_BNC.jpg', ...getMPByConstituency('B.T.M. Layout'), totalReports: 0, resolvedReports: 0 },
   { constNo: 176, constituency: 'Bangalore South', mla: 'M Krishnappa', party: 'BJP', partyColor: '#f97316', photo: getAvatar('M Krishnappa', '#f97316'), ...getMPByConstituency('Bangalore South'), totalReports: 0, resolvedReports: 0 },
   { constNo: 170, constituency: 'Basavanagudi', mla: 'Ravi Subramanya L A', party: 'BJP', partyColor: '#f97316', photo: getAvatar('Ravi Subramanya L A', '#f97316'), ...getMPByConstituency('Basavanagudi'), totalReports: 0, resolvedReports: 0 },
@@ -84,12 +84,12 @@ export const completeMLAList = [
   { constNo: 157, constituency: 'Malleshwaram', mla: 'Dr C N Ashwathnarayan', party: 'BJP', partyColor: '#f97316', photo: getAvatar('C N Ashwathnarayan', '#f97316'), ...getMPByConstituency('Malleshwaram'), totalReports: 0, resolvedReports: 0 },
   { constNo: 171, constituency: 'Padmanabhanagar', mla: 'R Ashoka', party: 'BJP', partyColor: '#f97316', photo: getAvatar('R Ashoka', '#f97316'), ...getMPByConstituency('Padmanabhanagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 159, constituency: 'Pulakeshinagar', mla: 'A. C. Srinivasa', party: 'INC', partyColor: '#2563eb', photo: getAvatar('A. C. Srinivasa', '#2563eb'), ...getMPByConstituency('Pulakeshinagar'), totalReports: 0, resolvedReports: 0 },
-  { constNo: 165, constituency: 'Rajaji Nagar', mla: 'S Suresh Kumar', party: 'INC', partyColor: '#2563eb', photo: getAvatar('S Suresh Kumar', '#2563eb'), ...getMPByConstituency('Rajaji Nagar'), totalReports: 0, resolvedReports: 0 },
+  { constNo: 165, constituency: 'Rajaji Nagar', mla: 'S Suresh Kumar', party: 'BJP', partyColor: '#f97316', photo: getAvatar('S Suresh Kumar', '#f97316'), ...getMPByConstituency('Rajaji Nagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 154, constituency: 'Rajarajeshwarinagar', mla: 'Munirathna', party: 'BJP', partyColor: '#f97316', photo: getAvatar('Munirathna', '#f97316'), ...getMPByConstituency('Rajarajeshwarinagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 160, constituency: 'Sarvagnanagar', mla: 'K J George', party: 'INC', partyColor: '#2563eb', photo: getAvatar('K J George', '#2563eb'), ...getMPByConstituency('Sarvagnanagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 163, constituency: 'Shanti Nagar', mla: 'N A Harris', party: 'INC', partyColor: '#2563eb', photo: getAvatar('N A Harris', '#2563eb'), ...getMPByConstituency('Shanti Nagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 162, constituency: 'Shivajinagar', mla: 'Rizwan Arshad', party: 'INC', partyColor: '#2563eb', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Rizwan_Arshad.png/330px-Rizwan_Arshad.png', ...getMPByConstituency('Shivajinagar'), totalReports: 0, resolvedReports: 0 },
-  { constNo: 167, constituency: 'Vijayanagara', mla: 'H R Gaviyappa', party: 'INC', partyColor: '#2563eb', photo: getAvatar('H R Gaviyappa', '#2563eb'), ...getMPByConstituency('Vijayanagara'), totalReports: 0, resolvedReports: 0 },
+  { constNo: 167, constituency: 'Vijayanagara', mla: 'M Krishnappa', party: 'INC', partyColor: '#2563eb', photo: getAvatar('M Krishnappa', '#2563eb'), ...getMPByConstituency('Vijayanagara'), totalReports: 0, resolvedReports: 0 },
   { constNo: 150, constituency: 'Yelahanka', mla: 'S R Vishwanath', party: 'BJP', partyColor: '#f97316', photo: getAvatar('S R Vishwanath', '#f97316'), ...getMPByConstituency('Yelahanka'), totalReports: 0, resolvedReports: 0 },
   { constNo: 153, constituency: 'Yeshvanthapura', mla: 'S T Somashekar', party: 'BJP', partyColor: '#f97316', photo: getAvatar('S T Somashekar', '#f97316'), ...getMPByConstituency('Yeshvanthapura'), totalReports: 0, resolvedReports: 0 },
 ];
@@ -112,7 +112,7 @@ export const wardMLAData = [
     totalReports: 0, resolvedReports: 0,
   },
   {
-    ward: 68, name: "Koramangala", constituency: "B.T.M. Layout",
+    ward: 149, name: "Koramangala", constituency: "B.T.M. Layout",
     mla: "Ramalinga Reddy", party: "INC", partyColor: "#2563eb",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
     phone: "080-22251236", twitter: "@ramalingareddy",
@@ -120,7 +120,7 @@ export const wardMLAData = [
     totalReports: 0, resolvedReports: 0,
   },
   {
-    ward: 99, name: "Whitefield", constituency: "Mahadevapura",
+    ward: 193, name: "Whitefield", constituency: "Mahadevapura",
     mla: "Manjula S.", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     phone: "080-22251237", twitter: "@ManjulaLimbavali",
@@ -136,7 +136,7 @@ export const wardMLAData = [
     totalReports: 0, resolvedReports: 0,
   },
   {
-    ward: 177, name: "Yeshwanthpur", constituency: "Yeshvanthapura",
+    ward: 37, name: "Yeshwanthpur", constituency: "Yeshvanthapura",
     mla: "S T Somashekar", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     phone: "080-22251239", twitter: "@STSomashekar_",
@@ -144,7 +144,7 @@ export const wardMLAData = [
     totalReports: 0, resolvedReports: 0,
   },
   {
-    ward: 83, name: "Bellandur", constituency: "Bommanahalli",
+    ward: 151, name: "Bellandur", constituency: "Bommanahalli",
     mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
     phone: "080-22251235", twitter: "@satishreddy_bjp",
@@ -152,7 +152,7 @@ export const wardMLAData = [
     totalReports: 0, resolvedReports: 0,
   },
   {
-    ward: 72, name: "Marathahalli", constituency: "Mahadevapura",
+    ward: 192, name: "Marathahalli", constituency: "Mahadevapura",
     mla: "Manjula S.", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     phone: "080-22251237", twitter: "@ManjulaLimbavali",
