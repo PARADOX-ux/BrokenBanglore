@@ -485,7 +485,7 @@ export default function Report() {
           const mlaEmail = `mla-${(wd?.constituency || 'office').toLowerCase().replace(/\s/g, '-')}@kla.kar.nic.in`;
 
           const emailSubject = `[URGENT: RESOLVE IN 7 DAYS] ${issue} — Ward ${ward}, ${area}`;
-          const emailBody = `Formal Citizen Notice: ${refNo}\n\nThis issue has been documented on BrokenBanglore. It is now part of the Public Action Audit.\n\nEscalation Warning:\n- Day 3: Public Twitter/Email Blast\n- Day 7: BBMP Commissioner Notice\n- Day 15: Formal RTI Filing\n\nResolve this now.`;
+          const emailBody = `Formal Citizen Notice: ${refNo}\n\nThis issue has been documented on BrokenBengaluru. It is now part of the Public Action Audit.\n\nEscalation Warning:\n- Day 3: Public Twitter/Email Blast\n- Day 7: BBMP Commissioner Notice\n- Day 15: Formal RTI Filing\n\nResolve this now.`;
 
           return (
             <div className="animate-fade-in flex flex-col py-2 text-left w-full h-full">
@@ -564,7 +564,7 @@ export default function Report() {
                 
                 {wd?.twitter && (
                   <a 
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`.${wd.twitter} @BBMPCOMM Reference ${refNo}: Reported a ${formData.category} issue in ${formData.area} (Ward ${wd.ward}). Please investigate and resolve. #BrokenBanglore #FixBengaluru`)}`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`.${wd.twitter} @BBMPCOMM Reference ${refNo}: Reported a ${formData.category} issue in ${formData.area} (Ward ${wd.ward}). Please investigate and resolve. #BrokenBengaluru #FixBengaluru`)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 bg-[#1DA1F2] text-white px-8 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest text-center hover:bg-blue-600 transition-colors flex items-center justify-center gap-3 shadow-xl"

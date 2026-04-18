@@ -35,7 +35,7 @@ export default function Home() {
     { text: "Bengaluru doesn't need more promises, it needs accountability.", author: "Public Audit 2024" },
     { text: "Your silence is their comfort. Your report is their deadline.", author: "Citizen Command" },
     { text: "If we don't fix it, our children will pay for it.", author: "Voice of Bengaluru" },
-    { text: "Pressure works. Public data works. BrokenBanglore works.", author: "Community Lead" }
+    { text: "Pressure works. Public data works. BrokenBengaluru works.", author: "Community Lead" }
   ];
 
   return (
@@ -133,25 +133,25 @@ export default function Home() {
               <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 h-[450px] overflow-y-auto pr-2 custom-scrollbar bg-black/5 p-3 md:p-4 rounded-[2rem] border-2 border-dashed border-black/10">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 h-[350px] md:h-[450px] overflow-y-auto overflow-x-hidden pr-1 md:pr-2 custom-scrollbar bg-black/5 p-2 md:p-4 rounded-2xl md:rounded-[2rem] border-2 border-dashed border-black/10">
               {completeMLAList.map((mla) => {
                 const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
                   <button
-                    key={mla.mla}
+                    key={mla.constNo}
                     onClick={() => setSelectedZoneMLA(mla)}
                     onMouseEnter={() => setSelectedZoneMLA(mla)}
-                    className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[160px] md:min-h-[200px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-x-0.5 -translate-y-0.5' : 'border-black/5 bg-white hover:border-black/20 hover:shadow-md'}`}
+                    className={`p-2 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-0 md:min-h-[200px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-x-0.5 -translate-y-0.5' : 'border-black/5 bg-white hover:border-black/20 hover:shadow-md'}`}
                   >
                     <div className="absolute top-0 right-0 w-12 h-12 bg-black opacity-[0.02] -mr-6 -mt-6 rounded-full"></div>
                     
-                    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden mb-2 border-2 transition-transform group-hover:scale-105 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
+                    <div className={`w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden mb-1 md:mb-2 border-2 transition-transform group-hover:scale-105 shrink-0 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
                       <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[8px] md:text-[9px] font-black text-black/30 uppercase tracking-[0.1em] mb-1 truncate">{mla.constituency}</div>
-                      <div className="font-body font-bold text-[10px] md:text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors break-words">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="text-[7px] md:text-[9px] font-black text-black/30 uppercase tracking-[0.1em] mb-0.5 md:mb-1 truncate">{mla.constituency}</div>
+                      <div className="font-body font-bold text-[9px] md:text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors line-clamp-2">
                           {mla.mla}
                       </div>
                     </div>
@@ -173,7 +173,7 @@ export default function Home() {
                   <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h4 className="font-display font-black text-3xl text-black mb-1 uppercase tracking-tight leading-none break-words">{selectedZoneMLA.mla}</h4>
+                  <h4 className="font-display font-black text-xl md:text-3xl text-black mb-1 uppercase tracking-tight leading-none break-words">{selectedZoneMLA.mla}</h4>
                   <div className="text-xs font-black text-black/50 uppercase tracking-widest mb-4 mt-2">{selectedZoneMLA.constituency} • {selectedZoneMLA.party}</div>
                   <div className="flex gap-8 justify-center md:justify-start">
                     {(() => {
@@ -253,7 +253,7 @@ export default function Home() {
       <section className="w-full py-12 px-4 md:px-8 bg-white">
         <div className="max-w-6xl mx-auto border-t border-black/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start">
-             <div className="font-display font-black text-2xl text-black uppercase tracking-tighter">BROKENBANGLORE</div>
+             <div className="font-display font-black text-2xl text-black uppercase tracking-tighter">BROKENBENGALURU</div>
              <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mt-1">Built for Bengaluru by Citizens • Established 2024</p>
           </div>
           <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-black/60">

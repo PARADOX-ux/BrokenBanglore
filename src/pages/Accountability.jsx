@@ -45,8 +45,7 @@ export default function Accountability() {
       <div className="bg-strong/5 w-full px-4 md:px-8 pt-24 pb-12 border-b border-forest/10">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
-            <h1 className="font-display font-bold text-4xl md:text-6xl text-forest uppercase tracking-tighter">Broken Bangalore Audit</h1>
-            <span className="flex items-center gap-2 bg-bright/10 text-bright px-3 py-1 rounded-full text-xs font-bold border border-bright/20 shadow-sm mt-2 md:mt-4 whitespace-nowrap">
+            <h1 className="font-display font-bold text-4xl md:text-6xl text-forest uppercase tracking-tighter">Broken Bengaluru Audit</h1>            <span className="flex items-center gap-2 bg-bright/10 text-bright px-3 py-1 rounded-full text-xs font-bold border border-bright/20 shadow-sm mt-2 md:mt-4 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               Live Tracking
             </span>
@@ -324,11 +323,11 @@ export default function Accountability() {
           : `[Citizen Pressure] Civic Issues Unresolved in ${mla.constituency} AC ${mla.constNo}`;
         const emailTo = isAuthority ? mla.email : `mla-${mla.constituency.toLowerCase().replace(/\s/g,'')}-karnataka@kla.kar.nic.in`;
         const emailBody = isAuthority
-          ? `Dear Commissioner,\n\nThis is a formal citizen escalation regarding unresolved civic issues in your jurisdiction.\n\nPlease review the public audit at https://brokenbanglore.in/accountability\n\nWe request an update within 7 working days.\n\nRegards,\nA Bengaluru Citizen`
-          : `Dear ${mla.mla} (MLA, ${mla.constituency}),\n\nAs a citizen of ${mla.constituency} constituency, I am formally requesting your attention to unresolved civic issues in our area.\n\nPublic Audit Report: https://brokenbanglore.in/accountability\n\nWe request acknowledgement and an action plan within 7 working days.\n\nRegards,\nA Bengaluru Citizen`;
+          ? `Dear Commissioner,\n\nThis is a formal citizen escalation regarding unresolved civic issues in your jurisdiction.\n\nPlease review the public audit at https://brokenbengaluru.in/accountability\n\nWe request an update within 7 working days.\n\nRegards,\nA Bengaluru Citizen`
+          : `Dear ${mla.mla} (MLA, ${mla.constituency}),\n\nAs a citizen of ${mla.constituency} constituency, I am formally requesting your attention to unresolved civic issues in our area.\n\nPublic Audit Report: https://brokenbengaluru.in/accountability\n\nWe request acknowledgement and an action plan within 7 working days.\n\nRegards,\nA Bengaluru Citizen`;
         const tweetText = isAuthority
-          ? `${mla.name} has ${mla.openTickets} unresolved civic complaints. Citizens of Bengaluru demand accountability. Review the public audit → https://brokenbanglore.in/accountability #BrokenBanglore #FixBengaluru`
-          : `${mla.mla} (MLA, ${mla.constituency}) has resolved 0 out of 0 civic complaints filed. The citizens of ${mla.constituency} deserve better. Public audit → https://brokenbanglore.in/accountability @NammaKarnataka #BrokenBanglore`;
+          ? `${mla.name} has ${mla.openTickets} unresolved civic complaints. Citizens of Bengaluru demand accountability. Review the public audit → https://brokenbengaluru.in/accountability #BrokenBengaluru #FixBengaluru`
+          : `${mla.mla} (MLA, ${mla.constituency}) has resolved 0 out of 0 civic complaints filed. The citizens of ${mla.constituency} deserve better. Public audit → https://brokenbengaluru.in/accountability @NammaKarnataka #BrokenBengaluru`;
 
         return (
           <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={() => setSelectedMLA(null)}>
@@ -449,7 +448,7 @@ export default function Accountability() {
 
                 {/* WhatsApp — direct message to BBMP control room */}
                 <a
-                  href={`https://wa.me/918022221188?text=${encodeURIComponent(`Hello, I am filing a formal civic complaint. ${isAuthority ? `Authority: ${mla.name}` : `MLA: ${mla.mla}, ${mla.constituency}`}. Issue: Unresolved complaints in our area. Reference: BrokenBanglore platform. Please acknowledge within 7 days.`)}`}
+                  href={`https://wa.me/918022221188?text=${encodeURIComponent(`Hello, I am filing a formal civic complaint. ${isAuthority ? `Authority: ${mla.name}` : `MLA: ${mla.mla}, ${mla.constituency}`}. Issue: Unresolved complaints in our area. Reference: BrokenBengaluru platform. Please acknowledge within 7 days.`)}`}
                   target="_blank"
                   rel="noreferrer"
                   onClick={e => e.stopPropagation()}

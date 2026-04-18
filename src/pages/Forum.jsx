@@ -205,7 +205,7 @@ export default function Forum() {
                   {/* Share row */}
                   <div className="mt-4 pt-3 border-t border-[#1a3a2a]/5 flex gap-3 flex-wrap">
                     <a
-                      href={`https://wa.me/?text=${encodeURIComponent(`"${post.title}" — A citizen in ${post.ward} is raising this on BrokenBanglore. Add your voice → brokenbanglore.in/forum`)}`}
+                      href={`https://wa.me/?text=${encodeURIComponent(`"${post.title}" — A citizen in ${post.ward} is raising this on BrokenBengaluru. Add your voice → brokenbengaluru.in/forum`)}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-xs font-bold text-[#25D366] hover:underline flex items-center gap-1"
@@ -213,7 +213,7 @@ export default function Forum() {
                       📲 Share on WhatsApp
                     </a>
                     <a
-                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${post.title}" — Bengaluru citizen raising this issue. ${post.ward ? `Ward: ${post.ward}.` : ''} → brokenbanglore.in/forum #BrokenBanglore #FixBengaluru`)}`}
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${post.title}" — Bengaluru citizen raising this issue. ${post.ward ? `Ward: ${post.ward}.` : ''} → brokenbengaluru.in/forum #BrokenBengaluru #FixBengaluru`)}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-xs font-bold text-[#1a1a1a] hover:underline flex items-center gap-1"

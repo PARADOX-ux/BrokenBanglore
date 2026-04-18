@@ -246,12 +246,12 @@ I am reporting a ${report.category} problem in ${report.area} (Ward ${wardData.w
 
 ${report.description}
 
-This report is live on BrokenBanglore. Please take immediate action.
+This report is live on BrokenBengaluru. Please take immediate action.
 
 📍 Location: ${report.area}, Ward ${wardData.ward}
 🔗 View report: https://brokenbanglore.in/map
 
-#BrokenBanglore #Fix${report.category.charAt(0).toUpperCase() + report.category.slice(1)}`;
+#BrokenBengaluru #Fix${report.category.charAt(0).toUpperCase() + report.category.slice(1)}`;
 
   return `https://wa.me/?text=${encodeURIComponent(msg)}`;
 }
@@ -261,7 +261,7 @@ export function generateShameTweet(mlaName, twitterHandle, constituency, resolve
 
 Check the full accountability report → brokenbanglore.in/accountability
 
-#BrokenBanglore #FixBengaluru #${constituency.replace(/\s/g, "")}`;
+#BrokenBengaluru #FixBengaluru #${constituency.replace(/\s/g, "")}`;
 
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}`;
 }

@@ -529,7 +529,7 @@ export default function Map() {
               Report a Problem Here
             </a>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${activeReport.ward} has ${wardReports.length} unresolved civic complaints. ${activeReport.mlaDetails?.mla} (MLA) and ${activeReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBanglore`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${activeReport.ward} has ${wardReports.length} unresolved civic complaints. ${activeReport.mlaDetails?.mla} (MLA) and ${activeReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBengaluru`)}`}
               target="_blank"
               rel="noreferrer"
               className="w-full bg-black/5 hover:bg-black hover:text-white text-[#1a3a2a] py-2.5 rounded-lg font-bold text-sm text-center transition-colors border border-black/10"
