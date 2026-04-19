@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON, Popup } from 'react-leaflet';
+import * as turf from '@turf/centroid';
 import L from 'leaflet';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { categories, sampleReports, wardMLAData, completeMLAList, getMPByConstituency } from '../data/wardData';
@@ -29,13 +30,26 @@ delete L.Icon.Default.prototype._getIconUrl;
 
 
 
-// Extracted globally so reference never changes, preventing React Leaflet redraws
-const wardStyle = {
-  fillColor: '#2B9348',
-  fillOpacity: 0.03,
-  weight: 1,
-  opacity: 0.2,
-  color: '#2B9348',
+// NammaKasa-style color scale: Red, Light Red, Creamish White
+const getWardColor = (count) => {
+  if (count >= 15) return '#7f1d1d'; // Crimson/Maroon
+  if (count >= 10) return '#b91c1c'; // Dark Red
+  if (count >= 5)  return '#ef4444'; // Red
+  if (count >= 1)  return '#fecaca'; // Light Red
+  return '#fdfbf6';                  // Creamish White (Default/Clean)
+};
+
+const wardStyle = (feature, reportCounts = {}) => {
+  const wardNo = feature.properties.KGISWardNo || feature.properties.ward || 1;
+  const count = reportCounts[wardNo] || 0;
+  
+  return {
+    fillColor: getWardColor(count),
+    fillOpacity: count > 0 ? 0.7 : 0.4,
+    weight: 1,
+    opacity: 0.3,
+    color: '#0a1f14',
+  };
 };
 
 export default function Map() {
@@ -53,6 +67,7 @@ export default function Map() {
   const [hoveredReport, setHoveredReport] = useState(null);
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [allReports, setAllReports] = useState([]);
+  const [reportCounts, setReportCounts] = useState({}); // Pre-calculated counts for coloring
   const geoJsonRef = useRef(null);
 
   // Confirm pick — save to localStorage and go back to report
@@ -116,9 +131,19 @@ export default function Map() {
       .then(data => setGeoJsonData(data))
       .catch(err => console.error("Could not load wards GeoJSON", err));
 
-    // Fetch all global reports to show markers
+    // Fetch all global reports to show markers and calculate counts
     getReports().then(data => {
-      setAllReports(data || []);
+      const reports = data || [];
+      setAllReports(reports);
+      
+      // Aggregate counts for ward coloring
+      const counts = {};
+      reports.forEach(r => {
+        if (r.ward_no) {
+          counts[r.ward_no] = (counts[r.ward_no] || 0) + 1;
+        }
+      });
+      setReportCounts(counts);
     });
   }, []);
 
@@ -152,17 +177,19 @@ export default function Map() {
       mla: mlaData
     });
 
+    const zone = wardProps.KGISWardName ? (wardProps.KGISWardName.split('(')[1]?.replace(')', '') || 'Central') : 'Central';
+
     setHoveredReport({
       id: `ward-${wardNo}`,
-      title: `${wardProps.KGISWardName || wardProps.name} Overview`,
+      title: `${wardProps.KGISWardName || wardProps.name} | Ward #${wardNo} | ${zone}`,
       category: "geographical area",
-      catColor: mlaData.partyColor || "#2B9348",
-      area: `BBMP Ward #${wardNo}`,
+      area: `Ward #${wardNo}`,
       ward: wardNo,
-      authority: "Bruhat Bengaluru Mahanagara Palike",
-      status: "pending",
       mlaDetails: mlaData
     });
+
+    // Dynamically load reports for comparison while hovering
+    getReports({ ward_no: wardNo }).then(setWardReports);
   };
 
   const resetWard = (e) => {
@@ -229,11 +256,11 @@ export default function Map() {
       <GeoJSON 
          ref={geoJsonRef}
          data={geoJsonData} 
-         style={wardStyle}
+         style={(feature) => wardStyle(feature, reportCounts)}
          onEachFeature={onEachWard}
       />
     );
-  }, [geoJsonData]);
+  }, [geoJsonData, reportCounts]);
 
   return (
     <div className="flex h-[calc(100vh-80px)] w-full relative">
@@ -290,52 +317,63 @@ export default function Map() {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
 
+
           {geoJsonLayer}
           
-          {/* Render real markers for all global reports */}
+          {/* NammaKasa Style: Ward-Level Count Bubbles */}
+          {geoJsonData && geoJsonData.features.map((feature, idx) => {
+            const wardNo = feature.properties.KGISWardNo || feature.properties.ward || 1;
+            const count = reportCounts[wardNo] || 0;
+            if (count === 0) return null;
+            
+            // Calculate center using turf
+            const c = turf.default(feature);
+            const pos = [c.geometry.coordinates[1], c.geometry.coordinates[0]];
+
+            return (
+              <Marker 
+                key={`bubble-${wardNo}-${idx}`}
+                position={pos}
+                icon={L.divIcon({
+                  className: 'count-bubble',
+                  html: `
+                    <div style="
+                      background-color: ${getWardColor(count)}; 
+                      width: ${32 + Math.min(count * 2, 30)}px; 
+                      height: ${32 + Math.min(count * 2, 30)}px; 
+                      border: 3px solid white; 
+                      border-radius: 50%; 
+                      display: flex; 
+                      align-items: center; 
+                      justify-content: center; 
+                      color: white; 
+                      font-weight: 900; 
+                      font-size: ${12 + (count > 9 ? 4 : 0)}px;
+                      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+                      cursor: pointer;
+                    ">
+                      ${count}
+                    </div>
+                  `,
+                  iconSize: [40, 40],
+                  iconAnchor: [20, 20]
+                })}
+              />
+            );
+          })}
+          
+          {/* Render real markers for all global reports: Subtle dots deep in the background */}
           {!isPickMode && allReports.map(report => (
             <Marker 
               key={report.id || report.ref_no} 
               position={[report.lat, report.lng]}
               icon={L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div style="background-color: ${report.severity === 'emergency' ? '#ef4444' : report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
-                iconSize: [14, 14],
-                iconAnchor: [7, 7]
+                className: 'custom-div-icon opacity-30',
+                html: `<div style="background-color: ${report.severity === 'emergency' ? '#ef4444' : report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 8px; height: 8px; border: 1.5px solid white; border-radius: 50%;"></div>`,
+                iconSize: [8, 8],
+                iconAnchor: [4, 4]
               })}
-            >
-              <Popup className="custom-popup">
-                <div className="p-1">
-                  <div className="text-[10px] font-bold uppercase text-forest/50 mb-1">{report.category}</div>
-                  <div className="font-bold text-xs mb-1">{report.title}</div>
-                  {report.photo && (
-                    <div className="w-full h-24 mb-2 rounded-lg overflow-hidden bg-ash/20 border border-ash/30">
-                      <img src={report.photo} alt="evidence" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                      {report.status === 'resolved' ? 'Fixed' : 'Open'}
-                    </span>
-                  </div>
-                  {(() => {
-                    const mla = wardMLAData.find(m => Number(m.ward) === Number(report.ward_no));
-                    return mla && (
-                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-ash/20">
-                        <img src={mla.photo} className="w-6 h-6 rounded-full object-cover" alt="mla" />
-                        <span className="text-[9px] font-bold text-forest">{mla.mla} (MLA)</span>
-                      </div>
-                    );
-                  })()}
-                  <div className="mt-2 text-center">
-                    <button 
-                      onClick={() => navigate(`/map?ward=${report.ward_no}`)}
-                      className="text-[9px] font-bold text-forest hover:underline bg-forest/5 px-3 py-1 rounded-full w-full"
-                    >View Full Ward Audit →</button>
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
+            />
           ))}
 
           {/* Pick mode: capture bare-map clicks + show dropped pin */}
@@ -399,7 +437,7 @@ export default function Map() {
         const activeReport = selectedReport || hoveredReport;
         return (
         <div 
-          className="absolute top-20 bottom-4 right-4 md:right-8 left-4 md:left-auto max-w-none md:max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
+          className="absolute bottom-10 left-4 md:left-8 w-[calc(100%-32px)] md:w-[320px] bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-[500] flex flex-col border-2 border-black overflow-hidden transform transition-all animate-in slide-in-from-bottom-8 duration-300"
           onMouseEnter={() => {
             // Keep the hover report active if mouse is over the card
             if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport);
@@ -419,10 +457,10 @@ export default function Map() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto max-h-[400px]">
             <div className="p-5">
-              {/* Ward name */}
-              <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-1 leading-tight">{activeReport.title}</h2>
+              {/* Ward name: NammaKasa Format */}
+              <h2 className="font-display font-black text-sm uppercase tracking-widest text-[#1a3a2a] mb-1 leading-tight">{activeReport.title}</h2>
               
               {/* MLA + MP info */}
               <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
