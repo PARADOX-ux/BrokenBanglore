@@ -351,19 +351,29 @@ export default function Map() {
             <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
             {geoJsonLayer}
             
-            {/* Render real markers for filtered reports */}
-            {!isPickMode && filteredReports.map(report => (
-              <Marker 
-                key={report.id || report.ref_no} 
-                position={[report.lat, report.lng]}
-                icon={L.divIcon({
-                  className: 'custom-div-icon',
-                  html: `<div style="background-color: ${report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
-                  iconSize: [14, 14],
-                  iconAnchor: [7, 7]
-                })}
-              />
-            ))}
+            {/* Render real markers for filtered reports - Verse Style */}
+            {!isPickMode && filteredReports.map(report => {
+              const color = report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24';
+              const isSevere = report.severity === 'critical' || report.severity === 'emergency' || report.severity === 'severe';
+              
+              return (
+                <Marker 
+                  key={report.id || report.ref_no} 
+                  position={[report.lat, report.lng]}
+                  icon={L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `
+                      <div class="relative flex items-center justify-center">
+                        ${isSevere ? `<div class="absolute w-8 h-8 rounded-full bg-[${color}] opacity-20 animate-ping"></div>` : ''}
+                        <div style="background-color: ${color}; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 15px ${color}88, inset 0 0 5px rgba(0,0,0,0.5);"></div>
+                      </div>
+                    `,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                  })}
+                />
+              );
+            })}
 
             {isPickMode && (
               <MapClickPicker onPick={(latlng) => {
@@ -460,25 +470,27 @@ export default function Map() {
         const activeReport = selectedReport || hoveredReport;
         return (
           <div 
-            className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[350px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
+            className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[380px] glass-card rounded-3xl shadow-[0_0_50px_rgba(43,147,72,0.2)] z-[500] flex flex-col border-4 border-black overflow-hidden transform transition-all animate-in zoom-in-95 slide-in-from-right-12 duration-300 ben-day glitch"
             onMouseEnter={() => { if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport); }}
           >
-            <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
-              <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''}`}></div>
-                <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
-                  {selectedReport ? 'Selected' : 'Peeking'} Ward #{activeReport.ward}
+            <div className="flex justify-between items-center p-4 border-b-4 border-black bg-white verse-scan shrink-0">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''} shadow-[0_0_10px_rgba(43,147,72,0.8)]`}></div>
+                <span className="uppercase text-[11px] font-black tracking-[0.2em] text-forest">
+                  {selectedReport ? 'LOCK-ON' : 'LOCAL-SCAN'} WARD #{activeReport.ward}
                 </span>
               </div>
-              <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="text-forest/30 hover:text-forest">✕</button>
+              <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="text-forest hover:scale-125 transition-transform">
+                <span className="text-xl">✕</span>
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-5 border-b border-forest/10">
+            <div className="flex-1 overflow-y-auto halftone-bg">
+              <div className="p-6 border-b-4 border-black">
               {/* Stacked Information Hierarchy */}
               <div className="flex flex-col gap-0.5 mb-4">
                 <span className="font-display font-medium text-[10px] uppercase tracking-[0.2em] text-black/40">Area Location</span>
-                <h2 className="font-display font-bold text-lg text-black leading-none tracking-tighter">
+                <h2 className="font-display font-black text-2xl uppercase tracking-tighter text-black leading-none verse-text">
                   {activeReport.title.split('|')[0].trim()}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
