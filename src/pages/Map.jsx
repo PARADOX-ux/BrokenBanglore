@@ -55,6 +55,9 @@ export default function Map() {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [allReports, setAllReports] = useState([]);
   const [reportCounts, setReportCounts] = useState({}); // Pre-calculated counts for coloring
+  const [viewMode, setViewMode] = useState('map');      // 'map' | 'list'
+  const [severityFilter, setSeverityFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const geoJsonRef = useRef(null);
 
   // Confirm pick — save to localStorage and go back to report
@@ -123,7 +126,14 @@ export default function Map() {
       const reports = data || [];
       setAllReports(reports);
       
-      // Aggregate counts for ward coloring
+      // Filtered reports based on active dropdowns
+  const filteredReports = useMemo(() => {
+    return allReports.filter(report => {
+      const severityMatch = severityFilter === 'all' || report.severity === severityFilter.toLowerCase();
+      const statusMatch = statusFilter === 'all' || report.status === statusFilter.toLowerCase();
+      return severityMatch && statusMatch;
+    });
+  }, [allReports, severityFilter, statusFilter]);
       const counts = {};
       reports.forEach(r => {
         if (r.ward_no) {
@@ -254,41 +264,59 @@ export default function Map() {
       
       {/* Namma Kasa Style Filter Header */}
       {!isPickMode && (
-        <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col gap-3">
-          {/* Top Row: Filters and Toggles */}
-          <div className="flex justify-between items-center w-full">
+        <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col gap-3 pointer-events-none">
+          {/* Top Row: Filters and Toggles (pointer-events-auto to keep them interactive) */}
+          <div className="flex justify-between items-center w-full pointer-events-auto">
             <div className="flex gap-2">
-              <select className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest">
-                <option>All Severity</option>
-                <option>Minor</option>
-                <option>Moderate</option>
-                <option>Severe</option>
-                <option>Critical</option>
+              <select 
+                value={severityFilter}
+                onChange={(e) => setSeverityFilter(e.target.value)}
+                className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest"
+              >
+                <option value="all">All Severity</option>
+                <option value="minor">Minor</option>
+                <option value="moderate">Moderate</option>
+                <option value="severe">Severe</option>
+                <option value="critical">Critical</option>
               </select>
-              <select className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest">
-                <option>All Status</option>
-                <option>Unresolved</option>
-                <option>Resolved</option>
+              <select 
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest"
+              >
+                <option value="all">All Status</option>
+                <option value="unresolved">Unresolved</option>
+                <option value="resolved">Resolved</option>
               </select>
             </div>
             
             <div className="flex bg-white border border-ash/30 rounded-lg overflow-hidden shadow-sm">
-              <button className="px-3 py-1.5 text-[10px] font-bold bg-forest text-gold border-r border-ash/30 uppercase">Map</button>
-              <button className="px-3 py-1.5 text-[10px] font-bold text-black hover:bg-ash/10 uppercase">List</button>
+              <button 
+                onClick={() => setViewMode('map')}
+                className={`px-3 py-1.5 text-[10px] font-bold border-r border-ash/30 uppercase ${viewMode === 'map' ? 'bg-forest text-gold' : 'text-black hover:bg-ash/10'}`}
+              >
+                Map
+              </button>
+              <button 
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 text-[10px] font-bold uppercase ${viewMode === 'list' ? 'bg-forest text-gold' : 'text-black hover:bg-ash/10'}`}
+              >
+                List
+              </button>
             </div>
           </div>
 
-          {/* Bottom Row: Key Stats - Dynamic and High-Visibility */}
+          {/* Bottom Row: Key Stats */}
           <div className="flex gap-6 px-1">
              <div className="flex items-center gap-2">
                 <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                  {allReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
+                   {filteredReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
                 </span>
                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active</span>
              </div>
              <div className="flex items-center gap-2">
                 <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                  {allReports.length}
+                   {filteredReports.length}
                 </span>
                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Reports</span>
              </div>
@@ -308,53 +336,88 @@ export default function Map() {
         </div>
       )}
 
-      {/* Main Map Layer */}
-      <div className="flex-1 w-full h-full z-10">
-        <MapContainer
-            center={[12.9716, 77.5946]}
-            zoom={10.2}
-            minZoom={9}
-            style={{ height: '100%', width: '100%' }}
-            zoomControl={false}
-          >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          />
+      {/* Main Content: Conditional Map or List */}
+      <div className="flex-1 w-full h-full z-10 bg-black">
+        {viewMode === 'map' ? (
+          <MapContainer
+              center={[12.9716, 77.5946]}
+              zoom={10.2}
+              minZoom={9}
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
+            >
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+            {geoJsonLayer}
+            
+            {/* Render real markers for filtered reports */}
+            {!isPickMode && filteredReports.map(report => (
+              <Marker 
+                key={report.id || report.ref_no} 
+                position={[report.lat, report.lng]}
+                icon={L.divIcon({
+                  className: 'custom-div-icon',
+                  html: `<div style="background-color: ${report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
+                  iconSize: [14, 14],
+                  iconAnchor: [7, 7]
+                })}
+              />
+            ))}
 
+            {isPickMode && (
+              <MapClickPicker onPick={(latlng) => {
+                setPickedPin(latlng);
+                setPickedWard(null);
+              }} />
+            )}
+            {isPickMode && pickedPin && <Marker position={[pickedPin.lat, pickedPin.lng]} />}
+          </MapContainer>
+        ) : (
+          <div className="w-full h-full p-8 pt-32 overflow-y-auto bg-[#fdfbf6]">
+             <div className="max-w-6xl mx-auto">
+                <div className="flex justify-between items-end mb-12 border-b-8 border-black pb-6">
+                   <div>
+                      <h1 className="font-display font-black text-6xl md:text-8xl uppercase tracking-tighter text-black leading-[0.8] mb-4">CITIZEN FEED</h1>
+                      <p className="text-xs md:text-sm font-bold text-black/50 uppercase tracking-[0.2em]">Live Audit Stream • {filteredReports.length} Reports Logged</p>
+                   </div>
+                </div>
 
-          {geoJsonLayer}
-          
-          {geoJsonLayer}
-          
-          {/* Render real markers for all global reports: Dots Colored by Severity */}
-          {!isPickMode && allReports.map(report => (
-            <Marker 
-              key={report.id || report.ref_no} 
-              position={[report.lat, report.lng]}
-              icon={L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div style="background-color: ${report.severity === 'emergency' ? '#ef4444' : report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
-                iconSize: [14, 14],
-                iconAnchor: [7, 7]
-              })}
-            />
-          ))}
-
-          {/* Pick mode: capture bare-map clicks + show dropped pin */}
-          {isPickMode && (
-            <MapClickPicker onPick={(latlng) => {
-              setPickedPin(latlng);
-              setPickedWard(null); // bare map click, no ward data
-            }} />
-          )}
-          {isPickMode && pickedPin && (
-            <Marker position={[pickedPin.lat, pickedPin.lng]} />
-          )}
-
-        </MapContainer>
+                {filteredReports.length === 0 ? (
+                   <div className="py-20 text-center border-4 border-dashed border-black/10 rounded-3xl">
+                      <div className="text-6xl mb-4">🔍</div>
+                      <p className="text-xl font-bold text-black/40 uppercase tracking-widest">No reports match your filters.</p>
+                   </div>
+                ) : (
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {filteredReports.map(report => (
+                        <div key={report.id || report.ref_no} className="bg-white border-[4px] border-black rounded-2xl p-6 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-2 hover:shadow-[15px_15px_0px_0px_rgba(255,182,0,1)] transition-all cursor-pointer group" onClick={() => { setViewMode('map'); navigate(`/map?ward=${report.ward_no}`); }}>
+                           <div className="flex justify-between items-start mb-6">
+                              <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border-2 border-black ${report.status === 'resolved' ? 'bg-green-400 text-black' : 'bg-red-500 text-white'}`}>
+                                 {report.status || 'open'}
+                              </span>
+                              <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">#{report.ref_no?.slice(-6) || 'AUDIT'}</span>
+                           </div>
+                           <h3 className="font-display font-black text-2xl text-black mb-4 leading-tight group-hover:underline underline-offset-4 decoration-4">{report.title}</h3>
+                           {report.area_name && <p className="text-[10px] font-bold text-black/60 uppercase tracking-widest mb-6 flex items-center gap-2 bg-ash/10 w-fit px-3 py-1 rounded-lg">📍 {report.area_name}</p>}
+                           <div className="mt-auto pt-6 border-t-2 border-black/5 flex items-center justify-between">
+                              <div className="flex flex-col">
+                                 <span className="text-[8px] font-black text-black/40 uppercase tracking-widest">Priority</span>
+                                 <span className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${report.severity === 'critical' ? 'bg-red-600 animate-pulse' : 'bg-gold'}`}></span>
+                                    {report.severity || 'moderate'}
+                                 </span>
+                              </div>
+                              <button className="bg-black text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-forest transition-colors">Observe Spot →</button>
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                )}
+             </div>
+          </div>
+        )}
       </div>
 
-      {/* In pick mode: Bottom confirm card; in normal mode: bottom nav buttons */}
+      {/* Overlays (Card, PickMode Banner, etc.) */}
       {isPickMode ? (
         <div className="absolute bottom-6 left-4 right-4 z-[400] bg-white rounded-2xl shadow-2xl p-4 border border-[#1a3a2a]/10">
           {pickedPin ? (
@@ -385,164 +448,88 @@ export default function Map() {
         </div>
       ) : (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] hidden md:flex items-center gap-3">
-         <a href="/" className="px-5 py-3 bg-white text-forest border border-forest/10 rounded-full font-bold shadow-lg flex items-center justify-center hover:bg-forest/5 transition-transform hover:scale-105">
-           Home
-         </a>
-         <a href="/report" className="px-6 py-3 bg-forest text-gold rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-black transition-transform hover:scale-105">
-           Scan QR to Report
-         </a>
-      </div>
+          <a href="/" className="px-5 py-3 bg-white text-forest border border-forest/10 rounded-full font-bold shadow-lg flex items-center justify-center hover:bg-forest/5 transition-transform hover:scale-105">Home</a>
+          <a href="/report" className="px-6 py-3 bg-forest text-gold rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-black transition-transform hover:scale-105">Scan QR to Report</a>
+        </div>
       )}
 
-      {/* Removed Bottom Left Audit Box as requested */}
-
-      {/* The nammakasa-style Floating Accountability Card */}
+      {/* Floating Accountability Card */}
       {(selectedReport || hoveredReport) && (() => {
         const activeReport = selectedReport || hoveredReport;
         return (
-        <div 
-          className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[350px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
-          onMouseEnter={() => {
-            // Keep the hover report active if mouse is over the card
-            if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport);
-          }}
-        >
-          
-          {/* Card Header */}
-          <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
-            <div className="flex items-center gap-2">
-              <div className={`w-2.5 h-2.5 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''}`}></div>
-              <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
-                {selectedReport ? 'Selected' : 'Peeking'} Ward #{activeReport.ward}
-              </span>
-            </div>
-            <div className="flex gap-2">
+          <div 
+            className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[350px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
+            onMouseEnter={() => { if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport); }}
+          >
+            <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
+              <div className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''}`}></div>
+                <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
+                  {selectedReport ? 'Selected' : 'Peeking'} Ward #{activeReport.ward}
+                </span>
+              </div>
               <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="text-forest/30 hover:text-forest">✕</button>
             </div>
-          </div>
 
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-5 border-b border-forest/10">
-              {/* Ward name: Compact & Clean per feedback */}
-              <h2 className="font-nav font-black text-sm uppercase tracking-tight text-black mb-1 leading-tight">{activeReport.title}</h2>
-              
-              {/* MLA + MP info */}
-              <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
-                <div>
-                  <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
-                  <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
-                  <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party}</div>
-                </div>
-                <div>
-                  <div className="text-white/40 uppercase tracking-widest text-[9px]">MP (Lok Sabha)</div>
-                  <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mp || '—'}</div>
-                  <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
-                </div>
-              </div>
-
-              {/* Report count summary */}
-              <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-forest/10">
-                <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
-                  <div className="font-display font-bold text-2xl text-forest">
-                    {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.length || 0)}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-5 border-b border-forest/10">
+                <h2 className="font-nav font-black text-sm uppercase tracking-tight text-black mb-1 leading-tight">{activeReport.title}</h2>
+                <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
+                  <div>
+                    <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
+                    <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
+                    <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party}</div>
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-forest/40">Total</div>
+                  <div>
+                    <div className="text-white/40 uppercase tracking-widest text-[9px]">MP (Lok Sabha)</div>
+                    <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mp || '—'}</div>
+                    <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
+                  </div>
                 </div>
-                <div className="bg-gold/10 rounded-xl p-2.5 text-center border border-gold/20">
-                  <div className="font-display font-bold text-2xl text-forest">
-                    {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'open').length || 0)}
+
+                <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-forest/10">
+                  <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
+                    <div className="font-display font-bold text-2xl text-forest">{activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.length || 0)}</div>
+                    <div className="text-[9px] font-bold uppercase text-forest/40">Total</div>
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-forest/40">Open</div>
+                  <div className="bg-gold/10 rounded-xl p-2.5 text-center border border-gold/20">
+                    <div className="font-display font-bold text-2xl text-forest">{activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'open').length || 0)}</div>
+                    <div className="text-[9px] font-bold uppercase text-forest/40">Open</div>
+                  </div>
+                  <div className="bg-bright/10 rounded-xl p-2.5 text-center border border-bright/20">
+                    <div className="font-display font-bold text-2xl text-bright">{activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'resolved').length || 0)}</div>
+                    <div className="text-[9px] font-bold uppercase text-bright/60">Fixed</div>
+                  </div>
                 </div>
-                <div className="bg-bright/10 rounded-xl p-2.5 text-center border border-bright/20">
-                  <div className="font-display font-bold text-2xl text-bright">
-                    {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'resolved').length || 0)}
-                  </div>
-                  <div className="text-[9px] font-bold uppercase text-bright/60">Fixed</div>
-                </div>
-              </div>
 
-              {/* Reports list */}
-              <div className="mb-4">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#1a3a2a]/50 mb-3">
-                  {wardReportsLoading ? 'Loading complaints…' : wardReports.length > 0 ? `${wardReports.length} Complaint${wardReports.length > 1 ? 's' : ''} in this ward` : 'No complaints filed yet'}
-                </h3>
-
-                {wardReportsLoading && (
-                  <div className="space-y-2">
-                    {[1,2].map(i => <div key={i} className="h-16 bg-ash/20 rounded-xl animate-pulse" />)}
-                  </div>
-                )}
-
-                {!wardReportsLoading && wardReports.length === 0 && (
-                  <div className="bg-forest/5 border-2 border-dashed border-forest/15 rounded-xl p-5 text-center">
-                    <div className="text-3xl mb-2">🎉</div>
-                    <p className="text-xs font-bold text-[#1a3a2a]/50">No complaints yet in this ward.</p>
-                    <p className="text-[10px] text-[#1a3a2a]/30 mt-1">Be the first to report an issue.</p>
-                  </div>
-                )}
-
-                {!wardReportsLoading && wardReports.length > 0 && (
-                  <div className="space-y-2">
-                    {wardReports.slice(0, 5).map(report => (
-                      <div key={report.id || report.ref_no} className="bg-white border border-[#1a3a2a]/10 rounded-xl p-3 hover:border-forest transition-colors">
-                        <div className="flex gap-2 items-start">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                              <span className="text-[9px] font-bold bg-forest/10 text-forest px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                                {report.category || 'General'}
-                              </span>
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                {report.status === 'resolved' ? '✓ Fixed' : '● Open'}
-                              </span>
+                <div className="mb-4">
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#1a3a2a]/50 mb-3">
+                    {wardReportsLoading ? 'Loading complaints…' : wardReports.length > 0 ? `${wardReports.length} Complaint${wardReports.length > 1 ? 's' : ''}` : 'No complaints filed yet'}
+                  </h3>
+                  {!wardReportsLoading && wardReports.length > 0 && (
+                    <div className="space-y-2">
+                      {wardReports.slice(0, 5).map(report => (
+                        <div key={report.id || report.ref_no} className="bg-white border border-[#1a3a2a]/10 rounded-xl p-3 hover:border-forest transition-colors">
+                          <div className="flex gap-2 items-start">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-xs text-[#1a3a2a] leading-tight line-clamp-2">{report.title}</p>
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{report.status === 'resolved' ? '✓ Fixed' : '● Open'}</span>
                             </div>
-                            <p className="font-bold text-xs text-[#1a3a2a] leading-tight line-clamp-2">
-                              {report.title}
-                            </p>
-                            {report.area_name && <p className="text-[9px] text-[#1a3a2a]/40 font-medium mt-0.5">📍 {report.area_name}</p>}
+                            <button onClick={() => upvoteReport(report.id || report.ref_no).then(() => getReports({ ward_no: activeReport.ward }).then(setWardReports))} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl bg-forest/5 hover:bg-forest hover:text-gold text-forest font-bold text-xs transition-all shrink-0"><span>▲</span><span>{report.upvotes || 0}</span></button>
                           </div>
-                          <button
-                            onClick={() => upvoteReport(report.id || report.ref_no).then(() => getReports({ ward_no: activeReport.ward }).then(setWardReports))}
-                            className="w-10 h-10 flex flex-col items-center justify-center rounded-xl bg-forest/5 hover:bg-forest hover:text-gold text-forest font-bold text-xs transition-all shrink-0"
-                          >
-                            <span>▲</span>
-                            <span>{report.upvotes || 0}</span>
-                          </button>
                         </div>
-                      </div>
-                    ))}
-                    {wardReports.length > 5 && (
-                      <p className="text-xs text-center text-[#1a3a2a]/40 font-bold py-1">
-                        +{wardReports.length - 5} more complaints in this ward
-                      </p>
-                    )}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Action Footer */}
-          <div className="p-4 border-t border-forest/10 bg-white flex flex-col gap-2 shrink-0">
-            <a
-              href={`/report?ward=${activeReport.ward}`}
-              className="w-full bg-forest hover:bg-[#1a3a2a] text-gold py-3 rounded-lg font-bold text-sm text-center shadow-lg transition-colors"
-            >
-              Report a Problem Here
-            </a>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${activeReport.ward} has ${wardReports.length} unresolved civic complaints. ${activeReport.mlaDetails?.mla} (MLA) and ${activeReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBengaluru`)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="w-full bg-black/5 hover:bg-black hover:text-white text-[#1a3a2a] py-2.5 rounded-lg font-bold text-sm text-center transition-colors border border-black/10"
-            >
-              Tweet MLA + MP about this Ward
-            </a>
-            <div className="text-center text-[9px] text-forest/40 font-bold flex items-center justify-center gap-1">
-              <span className="w-1.5 h-1.5 bg-bright rounded-full"></span> Citizen-verified data
+            <div className="p-4 border-t border-forest/10 bg-white flex flex-col gap-2 shrink-0">
+              <a href={`/report?ward=${activeReport.ward}`} className="w-full bg-forest hover:bg-[#1a3a2a] text-gold py-3 rounded-lg font-bold text-sm text-center shadow-lg transition-colors">Report a Problem Here</a>
+              <div className="text-center text-[9px] text-forest/40 font-bold flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 bg-bright rounded-full"></span> Citizen-verified data</div>
             </div>
           </div>
-        </div>
         );
       })()}
     </div>
