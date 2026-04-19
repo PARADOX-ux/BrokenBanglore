@@ -30,26 +30,13 @@ delete L.Icon.Default.prototype._getIconUrl;
 
 
 
-// NammaKasa-style color scale: Red, Light Red, Creamish White
-const getWardColor = (count) => {
-  if (count >= 15) return '#7f1d1d'; // Crimson/Maroon
-  if (count >= 10) return '#b91c1c'; // Dark Red
-  if (count >= 5)  return '#ef4444'; // Red
-  if (count >= 1)  return '#fecaca'; // Light Red
-  return '#fdfbf6';                  // Creamish White (Default/Clean)
-};
-
-const wardStyle = (feature, reportCounts = {}) => {
-  const wardNo = feature.properties.KGISWardNo || feature.properties.ward || 1;
-  const count = reportCounts[wardNo] || 0;
-  
-  return {
-    fillColor: getWardColor(count),
-    fillOpacity: count > 0 ? 0.7 : 0.4,
-    weight: 1,
-    opacity: 0.3,
-    color: '#0a1f14',
-  };
+// Reverted to original subtle green styling
+const wardStyle = {
+  fillColor: '#2B9348',
+  fillOpacity: 0.05,
+  weight: 1,
+  opacity: 0.2,
+  color: '#2B9348',
 };
 
 export default function Map() {
@@ -256,11 +243,11 @@ export default function Map() {
       <GeoJSON 
          ref={geoJsonRef}
          data={geoJsonData} 
-         style={(feature) => wardStyle(feature, reportCounts)}
+         style={wardStyle}
          onEachFeature={onEachWard}
       />
     );
-  }, [geoJsonData, reportCounts]);
+  }, [geoJsonData]);
 
   return (
     <div className="flex h-[calc(100vh-80px)] w-full relative">
@@ -320,58 +307,18 @@ export default function Map() {
 
           {geoJsonLayer}
           
-          {/* NammaKasa Style: Ward-Level Count Bubbles */}
-          {geoJsonData && geoJsonData.features.map((feature, idx) => {
-            const wardNo = feature.properties.KGISWardNo || feature.properties.ward || 1;
-            const count = reportCounts[wardNo] || 0;
-            if (count === 0) return null;
-            
-            // Calculate center using turf
-            const c = turf.default(feature);
-            const pos = [c.geometry.coordinates[1], c.geometry.coordinates[0]];
-
-            return (
-              <Marker 
-                key={`bubble-${wardNo}-${idx}`}
-                position={pos}
-                icon={L.divIcon({
-                  className: 'count-bubble',
-                  html: `
-                    <div style="
-                      background-color: ${getWardColor(count)}; 
-                      width: ${32 + Math.min(count * 2, 30)}px; 
-                      height: ${32 + Math.min(count * 2, 30)}px; 
-                      border: 3px solid white; 
-                      border-radius: 50%; 
-                      display: flex; 
-                      align-items: center; 
-                      justify-content: center; 
-                      color: white; 
-                      font-weight: 900; 
-                      font-size: ${12 + (count > 9 ? 4 : 0)}px;
-                      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-                      cursor: pointer;
-                    ">
-                      ${count}
-                    </div>
-                  `,
-                  iconSize: [40, 40],
-                  iconAnchor: [20, 20]
-                })}
-              />
-            );
-          })}
+          {geoJsonLayer}
           
-          {/* Render real markers for all global reports: Subtle dots deep in the background */}
+          {/* Render real markers for all global reports: Dots Colored by Severity */}
           {!isPickMode && allReports.map(report => (
             <Marker 
               key={report.id || report.ref_no} 
               position={[report.lat, report.lng]}
               icon={L.divIcon({
-                className: 'custom-div-icon opacity-30',
-                html: `<div style="background-color: ${report.severity === 'emergency' ? '#ef4444' : report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 8px; height: 8px; border: 1.5px solid white; border-radius: 50%;"></div>`,
-                iconSize: [8, 8],
-                iconAnchor: [4, 4]
+                className: 'custom-div-icon',
+                html: `<div style="background-color: ${report.severity === 'emergency' ? '#ef4444' : report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
               })}
             />
           ))}
@@ -437,7 +384,7 @@ export default function Map() {
         const activeReport = selectedReport || hoveredReport;
         return (
         <div 
-          className="absolute bottom-10 left-4 md:left-8 w-[calc(100%-32px)] md:w-[320px] bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-[500] flex flex-col border-2 border-black overflow-hidden transform transition-all animate-in slide-in-from-bottom-8 duration-300"
+          className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[350px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
           onMouseEnter={() => {
             // Keep the hover report active if mouse is over the card
             if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport);
@@ -457,10 +404,10 @@ export default function Map() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto max-h-[400px]">
+          <div className="flex-1 overflow-y-auto">
             <div className="p-5">
-              {/* Ward name: NammaKasa Format */}
-              <h2 className="font-display font-black text-sm uppercase tracking-widest text-[#1a3a2a] mb-1 leading-tight">{activeReport.title}</h2>
+              {/* Ward name: Improved Legibility */}
+              <h2 className="font-display font-black text-2xl text-black mb-1 leading-tight">{activeReport.title}</h2>
               
               {/* MLA + MP info */}
               <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
