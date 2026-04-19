@@ -406,8 +406,8 @@ export default function Map() {
 
           <div className="flex-1 overflow-y-auto">
             <div className="p-5">
-              {/* Ward name: Improved Legibility */}
-              <h2 className="font-display font-black text-2xl text-black mb-1 leading-tight">{activeReport.title}</h2>
+              {/* Ward name: Compact & Clean */}
+              <h2 className="font-nav font-black text-lg text-black mb-1 leading-tight tracking-tight uppercase">{activeReport.title}</h2>
               
               {/* MLA + MP info */}
               <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
