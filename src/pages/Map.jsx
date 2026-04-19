@@ -474,7 +474,21 @@ export default function Map() {
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-5 border-b border-forest/10">
-                <h2 className="font-nav font-black text-sm uppercase tracking-tight text-black mb-1 leading-tight">{activeReport.title}</h2>
+              {/* Stacked Information Hierarchy */}
+              <div className="flex flex-col gap-0.5 mb-4">
+                <span className="font-display font-medium text-[10px] uppercase tracking-[0.2em] text-black/40">Area Location</span>
+                <h2 className="font-display font-bold text-lg text-black leading-none tracking-tighter">
+                  {activeReport.title.split('|')[0].trim()}
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="font-nav font-black text-[10px] bg-forest text-gold px-2 py-0.5 rounded-md uppercase tracking-widest">
+                    {activeReport.title.split('|')[1]?.trim() || `Ward #${activeReport.ward}`}
+                  </span>
+                  <span className="font-nav font-bold text-[10px] text-black/30 uppercase tracking-[0.1em]">
+                    Region: {activeReport.title.split('|')[2]?.trim() || 'Central'}
+                  </span>
+                </div>
+              </div>
                 <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
                   <div>
                     <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
