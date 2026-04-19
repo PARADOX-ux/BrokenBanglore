@@ -16,7 +16,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] bg-cream border-b-2 border-black w-full h-16 md:h-20 flex items-center justify-between px-4 md:px-8">
-      <Link to="/" className="font-body font-black text-xl md:text-3xl flex items-center gap-1 text-black tracking-tight">
+      <Link to="/" className="font-nav font-black text-xl md:text-3xl flex items-center gap-1 text-black tracking-tight">
         Broken Bengaluru
       </Link>
       
@@ -52,7 +52,7 @@ export default function Navbar() {
                 key={link.path} 
                 to={link.path}
                 onClick={() => setIsMenuOpen(false)}
-                className="font-display font-black text-3xl uppercase tracking-tighter text-black hover:text-forest transition-colors"
+                className="font-nav font-black text-3xl uppercase tracking-tighter text-black hover:text-forest transition-colors"
               >
                 {link.name}
               </Link>
