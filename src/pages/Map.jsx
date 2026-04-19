@@ -165,8 +165,9 @@ export default function Map() {
     // Deterministic fallback system - if ward isn't explicitly defined, grab a stable MLA from the main list based on Modulo
     let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
     if (!mlaData) {
-      const fallbackIdx = Number(wardNo) % completeMLAList.length;
-      mlaData = completeMLAList[fallbackIdx] || completeMLAList[0];
+      const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
+      const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
+      mlaData = { ...fallbackMla, ...getMPByConstituency(fallbackMla.constituency) };
     }
     
     setHoveredData({ 
@@ -206,10 +207,10 @@ export default function Map() {
     
     let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
     if (!mlaData) {
-      const fallbackIdx = Number(wardNo) % completeMLAList.length;
-      const baseMla = completeMLAList[fallbackIdx] || completeMLAList[0];
-      const mpInfo = getMPByConstituency(baseMla.constituency);
-      mlaData = { ...baseMla, ...mpInfo };
+      // Improved fallback: Try to find any ward in same constituency or just a stable default for the zone
+      const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
+      const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
+      mlaData = { ...fallbackMla, ...getMPByConstituency(fallbackMla.constituency) };
     }
     
     setSelectedReport({
