@@ -31,11 +31,11 @@ delete L.Icon.Default.prototype._getIconUrl;
 
 // Extracted globally so reference never changes, preventing React Leaflet redraws
 const wardStyle = {
-  fillColor: '#2B9348',
-  fillOpacity: 0.03,
-  weight: 1,
-  opacity: 0.2,
-  color: '#2B9348',
+  fillColor: '#07170f',
+  fillOpacity: 0.05,
+  weight: 1.5,
+  opacity: 0.1,
+  color: '#07170f',
 };
 
 export default function Map() {
@@ -127,11 +127,11 @@ export default function Map() {
   const highlightWard = (e) => {
     const layer = e.target;
     layer.setStyle({
-      fillColor: '#55A630',
-      fillOpacity: 0.15,
-      weight: 2,
-      dashArray: '3, 6',
-      color: '#E9C46A',
+      fillColor: '#38b000',
+      fillOpacity: 0.2,
+      weight: 3,
+      dashArray: '',
+      color: '#f4d35e',
     });
     
     // Removed bringToFront to prevent event bubbling issues that cause 'stuck' highlights
@@ -240,38 +240,36 @@ export default function Map() {
       
       {/* Pick Mode Banner (replacing filter bar) */}
       {isPickMode ? (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[400] bg-red-600 text-white p-5 rounded-2xl shadow-2xl border-4 border-black flex gap-6 items-center w-[90%] max-w-lg">
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[400] glass-dark text-white p-6 rounded-3xl shadow-2xl border border-white/10 flex gap-6 items-center w-[95%] max-w-lg">
           <div className="text-3xl animate-bounce">📍</div>
           <div className="flex-1">
             <div className="font-display font-black text-xl uppercase tracking-tighter leading-none mb-1">Select the Problem Spot</div>
-            <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Tap exactly where the issue is. We log GPS automatically.</div>
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Tap exactly where the issue is.</div>
           </div>
-          <button onClick={() => setIsPickMode(false)} className="bg-black text-white px-3 py-1.5 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95 shrink-0">Cancel</button>
+          <button onClick={() => setIsPickMode(false)} className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shrink-0">Cancel</button>
         </div>
       ) : (
-        <div className="absolute top-4 left-4 right-4 z-[400] bg-white border-2 md:border-4 border-black rounded-lg md:rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2 md:p-3 flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center">
-          <div className="flex gap-2 items-center w-full md:w-auto">
+        <div className="absolute top-8 left-8 right-8 z-[400] glass rounded-3xl premium-shadow p-3 flex flex-col md:flex-row gap-4 items-center">
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="w-full md:w-auto bg-black text-white text-[9px] md:text-[11px] font-black outline-none cursor-pointer px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl uppercase tracking-widest border-2 border-black"
+              className="w-full md:w-auto bg-forest text-gold text-[11px] font-black outline-none cursor-pointer px-6 py-3 rounded-2xl uppercase tracking-[0.2em] shadow-lg"
             >
-              <option value="all">ALL AUDITS</option>
+              <option value="all">SITUATION REPORT: ALL</option>
               {categories.map(cat => (
                 <option key={cat.id} value={cat.id}>{cat.label.toUpperCase()}</option>
               ))}
             </select>
-          </div>
           
-          <div className="flex gap-4 md:gap-6 items-center flex-wrap pt-2 md:pt-0 md:pl-6 border-t-2 md:border-t-0 md:border-l-4 border-black/10 text-[9px] md:text-[10px] font-black text-black uppercase tracking-widest w-full md:w-auto">
-            <div className="flex items-center gap-2 bg-[#0a1f14] text-gold px-2 md:px-3 py-1 md:py-1.5 rounded-lg border-2 border-black">
-              <span className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-white animate-pulse"></span> 
-              <span>243 <span className="hidden md:inline">Wards</span> Mapped</span>
+          <div className="flex gap-8 items-center flex-wrap pt-2 md:pt-0 md:pl-8 border-t md:border-t-0 md:border-l border-forest/10 text-[10px] font-black text-forest uppercase tracking-[0.2em] w-full md:w-auto">
+            <div className="flex items-center gap-3 bg-forest text-gold px-4 py-2 rounded-xl shadow-lg shadow-forest/10">
+              <span className="w-2 h-2 rounded-full bg-bright animate-pulse"></span> 
+              <span>AUDITING 243 WARDS</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-red-600 inline-block w-2 md:w-2.5 h-2 md:h-2.5 rounded-full bg-red-600"></span>
+              <span className="text-bright inline-block w-2.5 h-2.5 rounded-full bg-bright"></span>
               <span className="opacity-40">FEED:</span>
-              <span>{allReports.filter(r => r.status === 'open').length} ACTIVE</span>
+              <span>{allReports.filter(r => r.status === 'open').length} ACTIVE NODES</span>
             </div>
           </div>
         </div>
@@ -354,31 +352,33 @@ export default function Map() {
 
       {/* In pick mode: Bottom confirm card; in normal mode: bottom nav buttons */}
       {isPickMode ? (
-        <div className="absolute bottom-6 left-4 right-4 z-[400] bg-white rounded-2xl shadow-2xl p-4 border border-[#1a3a2a]/10">
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[400] w-[90%] max-w-md">
           {pickedPin ? (
-            <div>
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 bg-forest/10 rounded-xl flex items-center justify-center text-xs font-bold text-forest shrink-0">LOC</div>
+            <div className="glass p-6 rounded-[2.5rem] premium-shadow border border-white flex flex-col gap-4 animate-in slide-in-from-bottom-8 duration-500">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-forest rounded-2xl flex items-center justify-center text-gold shadow-lg shrink-0">📍</div>
                 <div>
-                  <p className="font-bold text-[#1a3a2a] text-sm">
-                    {pickedWard?.name ? `Ward ${pickedWard.ward} — ${pickedWard.name}` : 'Location pinned'}
+                  <p className="font-display font-black text-forest text-lg uppercase tracking-tighter leading-tight">
+                    {pickedWard?.name ? `Ward ${pickedWard.ward}: ${pickedWard.name}` : 'Strategic Pinned Point'}
                   </p>
-                  <p className="text-xs text-[#1a3a2a]/50">
-                    {pickedWard?.mla ? `MLA: ${pickedWard.mla.mla}` : `${pickedPin.lat.toFixed(4)}, ${pickedPin.lng.toFixed(4)}`}
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-forest/40">
+                    {pickedWard?.mla ? `Jurisdiction: ${pickedWard.mla.mla}` : `${pickedPin.lat.toFixed(6)}, ${pickedPin.lng.toFixed(6)}`}
                   </p>
                 </div>
               </div>
               <button
                 onClick={confirmPick}
-                className="w-full bg-forest text-gold py-3 rounded-xl font-bold hover:bg-[#1a3a2a] transition-colors shadow-lg"
+                className="w-full bg-bright text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:scale-105 transition-transform shadow-2xl shadow-bright/20"
               >
-                Confirm This Location — Back to Report
+                Confirm Intelligence Point
               </button>
             </div>
           ) : (
-            <p className="text-center text-[#1a3a2a]/60 font-bold text-sm py-2">
-              👆 Tap anywhere on the map to drop your pin
-            </p>
+            <div className="glass p-6 rounded-full text-center premium-shadow border border-white">
+              <p className="text-forest/60 font-black uppercase tracking-[0.2em] text-[10px]">
+                Target the problem area on visual map
+              </p>
+            </div>
           )}
         </div>
       ) : (
@@ -399,7 +399,7 @@ export default function Map() {
         const activeReport = selectedReport || hoveredReport;
         return (
         <div 
-          className="absolute top-20 bottom-4 right-4 md:right-8 left-4 md:left-auto max-w-none md:max-w-[320px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
+          className="absolute top-24 bottom-8 right-8 left-8 md:left-auto max-w-none md:max-w-[400px] glass rounded-[2.5rem] premium-shadow z-[500] flex flex-col border border-white overflow-hidden transform transition-all animate-in slide-in-from-right-12 duration-500"
           onMouseEnter={() => {
             // Keep the hover report active if mouse is over the card
             if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport);
@@ -407,56 +407,55 @@ export default function Map() {
         >
           
           {/* Card Header */}
-          <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
-            <div className="flex items-center gap-2">
-              <div className={`w-2.5 h-2.5 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''}`}></div>
-              <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
-                {selectedReport ? 'Selected' : 'Peeking'} Ward #{activeReport.ward}
+          <div className="flex justify-between items-center px-8 py-4 border-b border-forest/5 bg-white/50 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full bg-bright shadow-[0_0_10px_rgba(56,176,0,1)] ${!selectedReport ? 'animate-pulse' : ''}`}></div>
+              <span className="uppercase text-[10px] font-black tracking-[0.2em] text-forest/40">
+                {selectedReport ? 'Intelligence Area' : 'Rapid Scan'} #{activeReport.ward}
               </span>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="text-forest/30 hover:text-forest">✕</button>
-            </div>
+            <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-forest/5 text-forest/20 hover:text-forest transition-colors text-xl">✕</button>
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="p-5">
+            <div className="p-8">
               {/* Ward name */}
-              <h2 className="font-display font-bold text-xl text-[#1a3a2a] mb-1 leading-tight">{activeReport.title}</h2>
+              <h2 className="font-display font-black text-3xl text-forest mb-2 leading-none uppercase tracking-tighter">{activeReport.title}</h2>
               
               {/* MLA + MP info */}
-              <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-forest rounded-3xl p-6 mb-8 grid grid-cols-2 gap-4 text-xs shadow-2xl shadow-forest/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 rounded-full -mr-12 -mt-12"></div>
                 <div>
-                  <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
-                  <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
-                  <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party}</div>
+                  <div className="text-white/30 uppercase tracking-[0.2em] text-[8px] mb-1 font-black">MLA (KLA)</div>
+                  <div className="font-display font-black text-gold text-base leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
+                  <div className="text-white/40 text-[9px] uppercase font-black tracking-widest mt-1">{activeReport.mlaDetails?.party}</div>
                 </div>
                 <div>
-                  <div className="text-white/40 uppercase tracking-widest text-[9px]">MP (Lok Sabha)</div>
-                  <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mp || '—'}</div>
-                  <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
+                  <div className="text-white/30 uppercase tracking-[0.2em] text-[8px] mb-1 font-black">MP (LS)</div>
+                  <div className="font-display font-black text-white text-base leading-tight break-words">{activeReport.mlaDetails?.mp || '—'}</div>
+                  <div className="text-white/40 text-[9px] uppercase font-black tracking-widest mt-1">{activeReport.mlaDetails?.mpConstituency}</div>
                 </div>
               </div>
 
               {/* Report count summary */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
-                  <div className="font-display font-bold text-2xl text-forest">
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                <div className="bg-ash/5 rounded-2xl p-4 text-center border border-ash/10">
+                  <div className="font-display font-black text-3xl text-forest leading-none">
                     {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.length || 0)}
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-forest/40">Total</div>
+                  <div className="text-[8px] font-black uppercase text-forest/30 tracking-widest mt-2">Nodes</div>
                 </div>
-                <div className="bg-gold/10 rounded-xl p-2.5 text-center border border-gold/20">
-                  <div className="font-display font-bold text-2xl text-forest">
+                <div className="bg-gold/5 rounded-2xl p-4 text-center border border-gold/20">
+                  <div className="font-display font-black text-3xl text-forest leading-none text-gold">
                     {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'open').length || 0)}
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-forest/40">Open</div>
+                  <div className="text-[8px] font-black uppercase text-gold tracking-widest mt-2">Alerts</div>
                 </div>
-                <div className="bg-bright/10 rounded-xl p-2.5 text-center border border-bright/20">
-                  <div className="font-display font-bold text-2xl text-bright">
+                <div className="bg-bright/5 rounded-2xl p-4 text-center border border-bright/20">
+                  <div className="font-display font-black text-3xl text-bright leading-none">
                     {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'resolved').length || 0)}
                   </div>
-                  <div className="text-[9px] font-bold uppercase text-bright/60">Fixed</div>
+                  <div className="text-[8px] font-black uppercase text-bright tracking-widest mt-2">Secured</div>
                 </div>
               </div>
 
@@ -521,23 +520,23 @@ export default function Map() {
           </div>
 
           {/* Action Footer */}
-          <div className="p-4 border-t border-forest/10 bg-white flex flex-col gap-2 shrink-0">
+          <div className="p-8 border-t border-forest/5 bg-white/50 flex flex-col gap-3 shrink-0">
             <a
               href={`/report?ward=${activeReport.ward}`}
-              className="w-full bg-forest hover:bg-[#1a3a2a] text-gold py-3 rounded-lg font-bold text-sm text-center shadow-lg transition-colors"
+              className="w-full bg-bright hover:bg-forest text-white py-5 rounded-2xl font-black text-xs text-center uppercase tracking-[0.3em] shadow-xl shadow-bright/20 transition-all hover:scale-[1.02]"
             >
-              Report a Problem Here
+              Initiate Ward Audit
             </a>
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Ward ${activeReport.ward} has ${wardReports.length} unresolved civic complaints. ${activeReport.mlaDetails?.mla} (MLA) and ${activeReport.mlaDetails?.mp} (MP) — please act. @NammaKarnataka @BBMPgov #BrokenBengaluru`)}`}
               target="_blank"
               rel="noreferrer"
-              className="w-full bg-black/5 hover:bg-black hover:text-white text-[#1a3a2a] py-2.5 rounded-lg font-bold text-sm text-center transition-colors border border-black/10"
+              className="w-full bg-forest/5 hover:bg-forest hover:text-gold text-forest py-4 rounded-2xl font-black text-[10px] text-center uppercase tracking-[0.2em] transition-all border border-forest/10"
             >
-              Tweet MLA + MP about this Ward
+              Broadcast Failure to MLA
             </a>
-            <div className="text-center text-[9px] text-forest/40 font-bold flex items-center justify-center gap-1">
-              <span className="w-1.5 h-1.5 bg-bright rounded-full"></span> Citizen-verified data
+            <div className="text-center text-[8px] text-forest/30 font-black flex items-center justify-center gap-2 uppercase tracking-[0.2em]">
+              <span className="w-1.5 h-1.5 bg-bright rounded-full animate-pulse"></span> Encrypted Civic Intelligence
             </div>
           </div>
         </div>
