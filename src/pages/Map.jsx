@@ -278,15 +278,19 @@ export default function Map() {
             </div>
           </div>
 
-          {/* Bottom Row: Key Stats */}
+          {/* Bottom Row: Key Stats - Dynamic and High-Visibility */}
           <div className="flex gap-6 px-1">
              <div className="flex items-center gap-2">
-                <span className="text-xl md:text-2xl font-black text-forest">1559</span>
-                <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-widest">Active</span>
+                <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
+                  {allReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
+                </span>
+                <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active</span>
              </div>
              <div className="flex items-center gap-2">
-                <span className="text-xl md:text-2xl font-black text-black">1578</span>
-                <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-widest">Reports</span>
+                <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
+                  {allReports.length}
+                </span>
+                <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Reports</span>
              </div>
           </div>
         </div>
