@@ -126,14 +126,6 @@ export default function Map() {
       const reports = data || [];
       setAllReports(reports);
       
-      // Filtered reports based on active dropdowns
-  const filteredReports = useMemo(() => {
-    return allReports.filter(report => {
-      const severityMatch = severityFilter === 'all' || report.severity === severityFilter.toLowerCase();
-      const statusMatch = statusFilter === 'all' || report.status === statusFilter.toLowerCase();
-      return severityMatch && statusMatch;
-    });
-  }, [allReports, severityFilter, statusFilter]);
       const counts = {};
       reports.forEach(r => {
         if (r.ward_no) {
@@ -143,6 +135,15 @@ export default function Map() {
       setReportCounts(counts);
     });
   }, []);
+
+  // Filtered reports based on active dropdowns
+  const filteredReports = useMemo(() => {
+    return allReports.filter(report => {
+      const severityMatch = severityFilter === 'all' || (report.severity && report.severity.toLowerCase() === severityFilter.toLowerCase());
+      const statusMatch = statusFilter === 'all' || (report.status && report.status.toLowerCase() === statusFilter.toLowerCase());
+      return severityMatch && statusMatch;
+    });
+  }, [allReports, severityFilter, statusFilter]);
 
   // NammaKasa Area Interaction Handlers
   // Fix map hover interaction
