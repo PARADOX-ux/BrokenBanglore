@@ -252,8 +252,48 @@ export default function Map() {
   return (
     <div className="flex h-[calc(100vh-80px)] w-full relative">
       
-      {/* Pick Mode Banner (replacing filter bar) */}
-      {isPickMode ? (
+      {/* Namma Kasa Style Filter Header */}
+      {!isPickMode && (
+        <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col gap-3">
+          {/* Top Row: Filters and Toggles */}
+          <div className="flex justify-between items-center w-full">
+            <div className="flex gap-2">
+              <select className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest">
+                <option>All Severity</option>
+                <option>Minor</option>
+                <option>Moderate</option>
+                <option>Severe</option>
+                <option>Critical</option>
+              </select>
+              <select className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest">
+                <option>All Status</option>
+                <option>Unresolved</option>
+                <option>Resolved</option>
+              </select>
+            </div>
+            
+            <div className="flex bg-white border border-ash/30 rounded-lg overflow-hidden shadow-sm">
+              <button className="px-3 py-1.5 text-[10px] font-bold bg-forest text-gold border-r border-ash/30 uppercase">Map</button>
+              <button className="px-3 py-1.5 text-[10px] font-bold text-black hover:bg-ash/10 uppercase">List</button>
+            </div>
+          </div>
+
+          {/* Bottom Row: Key Stats */}
+          <div className="flex gap-6 px-1">
+             <div className="flex items-center gap-2">
+                <span className="text-xl md:text-2xl font-black text-forest">1559</span>
+                <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-widest">Active</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <span className="text-xl md:text-2xl font-black text-black">1578</span>
+                <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-widest">Reports</span>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pick Mode Banner */}
+      {isPickMode && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[400] bg-red-600 text-white p-5 rounded-2xl shadow-2xl border-4 border-black flex gap-6 items-center w-[90%] max-w-lg">
           <div className="text-3xl animate-bounce">📍</div>
           <div className="flex-1">
@@ -261,33 +301,6 @@ export default function Map() {
             <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Tap exactly where the issue is. We log GPS automatically.</div>
           </div>
           <button onClick={() => setIsPickMode(false)} className="bg-black text-white px-3 py-1.5 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95 shrink-0">Cancel</button>
-        </div>
-      ) : (
-        <div className="absolute top-4 left-4 right-4 z-[400] bg-white border-2 md:border-4 border-black rounded-lg md:rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2 md:p-3 flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center">
-          <div className="flex gap-2 items-center w-full md:w-auto">
-            <select
-              value={activeCategory}
-              onChange={(e) => setActiveCategory(e.target.value)}
-              className="w-full md:w-auto bg-black text-white text-[9px] md:text-[11px] font-black outline-none cursor-pointer px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl uppercase tracking-widest border-2 border-black"
-            >
-              <option value="all">ALL AUDITS</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.label.toUpperCase()}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="flex gap-4 md:gap-6 items-center flex-wrap pt-2 md:pt-0 md:pl-6 border-t-2 md:border-t-0 md:border-l-4 border-black/10 text-[9px] md:text-[10px] font-black text-black uppercase tracking-widest w-full md:w-auto">
-            <div className="flex items-center gap-2 bg-[#0a1f14] text-gold px-2 md:px-3 py-1 md:py-1.5 rounded-lg border-2 border-black">
-              <span className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-white animate-pulse"></span> 
-              <span>243 <span className="hidden md:inline">Wards</span> Mapped</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-red-600 inline-block w-2 md:w-2.5 h-2 md:h-2.5 rounded-full bg-red-600"></span>
-              <span className="opacity-40">FEED:</span>
-              <span>{allReports.filter(r => r.status === 'open').length} ACTIVE</span>
-            </div>
-          </div>
         </div>
       )}
 
@@ -405,12 +418,12 @@ export default function Map() {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="p-5">
-              {/* Ward name: Compact & Clean */}
-              <h2 className="font-nav font-black text-lg text-black mb-1 leading-tight tracking-tight uppercase">{activeReport.title}</h2>
+            <div className="p-5 border-b border-forest/10">
+              {/* Ward name: Compact & Clean per feedback */}
+              <h2 className="font-nav font-black text-sm uppercase tracking-tight text-black mb-1 leading-tight">{activeReport.title}</h2>
               
               {/* MLA + MP info */}
-              <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
                 <div>
                   <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
                   <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
@@ -424,7 +437,7 @@ export default function Map() {
               </div>
 
               {/* Report count summary */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-forest/10">
                 <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
                   <div className="font-display font-bold text-2xl text-forest">
                     {activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.length || 0)}
