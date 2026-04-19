@@ -7,8 +7,7 @@
 
 const getAvatar = (name, pColor) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${pColor.replace('#', '')}&color=fff&size=512&font-size=0.35&bold=true`;
 
-// Constituency → Parliamentary Constituency mapping (2024 Lok Sabha)
-// Source: Election Commission of India
+// Constituency → Parliamentary Constituency mapping (2024 Lok Sabha Results)
 export const constituencyMPMap = {
   // Bangalore North (MP: Shobha Karandlaje, BJP)
   'Byatarayanapura': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
@@ -20,6 +19,7 @@ export const constituencyMPMap = {
   'Hebbal': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
   'Pulakeshinagar': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
   'Krishnarajapuram': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
+  'Yelahanka': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
 
   // Bangalore Central (MP: P. C. Mohan, BJP)
   'Sarvagnanagar': { mp: 'P. C. Mohan', mpConstituency: 'Bangalore Central', mpParty: 'BJP' },
@@ -43,18 +43,11 @@ export const constituencyMPMap = {
   'Bommanahalli': { mp: 'Tejasvi Surya', mpConstituency: 'Bangalore South', mpParty: 'BJP' },
   'BTM Layout': { mp: 'Tejasvi Surya', mpConstituency: 'Bangalore South', mpParty: 'BJP' },
 
-  // Bangalore Rural / South extended (MP: C. N. Manjunath, BJP)
-  'Bangalore South': { mp: 'C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
-  'Anekal': { mp: 'C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
-
-  // Yelahanka - part of Bangalore North
-  'Yelahanka': { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' },
-
-  // Rajarajeshwarinagar - Bangalore Rural
-  'Rajarajeshwarinagar': { mp: 'C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
-
-  // Hoskote - Bangalore Rural
-  'Hoskote': { mp: 'C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
+  // Bangalore Rural (MP: Dr. C. N. Manjunath, BJP)
+  'Bangalore South': { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
+  'Anekal': { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
+  'Rajarajeshwarinagar': { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
+  'Hoskote': { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
 };
 
 // Helper to get MP data by constituency name
@@ -70,18 +63,18 @@ export const completeMLAList = [
   { constNo: 175, constituency: 'Bommanahalli', mla: 'Satish Reddy M', party: 'BJP', partyColor: '#f97316', photo: getAvatar('Satish Reddy M', '#f97316'), ...getMPByConstituency('Bommanahalli'), totalReports: 0, resolvedReports: 0 },
   { constNo: 152, constituency: 'Byatarayanapura', mla: 'Krishna Byregowda', party: 'INC', partyColor: '#2563eb', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Krishna_Byre_Gowda_in_2018.jpg/330px-Krishna_Byre_Gowda_in_2018.jpg', ...getMPByConstituency('Byatarayanapura'), totalReports: 0, resolvedReports: 0 },
   { constNo: 161, constituency: 'C. V. Raman Nagar', mla: 'S Raghu', party: 'BJP', partyColor: '#f97316', photo: getAvatar('S Raghu', '#f97316'), ...getMPByConstituency('C. V. Raman Nagar'), totalReports: 0, resolvedReports: 0 },
-  { constNo: 168, constituency: 'Chamrajpet', mla: 'BZ Zameer Ahmed Khan', party: 'INC', partyColor: '#2563eb', photo: getAvatar('Zameer Ahmed Khan', '#2563eb'), ...getMPByConstituency('Chamrajpet'), totalReports: 0, resolvedReports: 0 },
+  { constNo: 168, constituency: 'Chamrajpet', mla: 'B. Z. Zameer Ahmed Khan', party: 'INC', partyColor: '#2563eb', photo: getAvatar('Zameer Ahmed Khan', '#2563eb'), ...getMPByConstituency('Chamrajpet'), totalReports: 0, resolvedReports: 0 },
   { constNo: 169, constituency: 'Chickpet', mla: 'Uday B Garudachar', party: 'BJP', partyColor: '#f97316', photo: getAvatar('Uday B Garudachar', '#f97316'), ...getMPByConstituency('Chickpet'), totalReports: 0, resolvedReports: 0 },
   { constNo: 155, constituency: 'Dasarahalli', mla: 'S Muniraju', party: 'BJP', partyColor: '#f97316', photo: getAvatar('S Muniraju', '#f97316'), ...getMPByConstituency('Dasarahalli'), totalReports: 0, resolvedReports: 0 },
   { constNo: 164, constituency: 'Gandhi Nagar', mla: 'Dinesh Gundu Rao', party: 'INC', partyColor: '#2563eb', photo: getAvatar('Dinesh Gundu Rao', '#2563eb'), ...getMPByConstituency('Gandhi Nagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 166, constituency: 'Govindraj Nagar', mla: 'Priya Krishna', party: 'INC', partyColor: '#2563eb', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/%E0%B2%AA%E0%B3%8D%E0%B2%B0%E0%B2%BF%E0%B2%AF_%E0%B2%95%E0%B3%83%E0%B2%B7%E0%B3%8D%E0%B2%A3%E0%B2%A8.jpg/330px-%E0%B2%AA%E0%B3%8D%E0%B2%B0%E0%B2%BF%E0%B2%AF_%E0%B2%95%E0%B3%83%E0%B2%B7%E0%B3%8D%E0%B2%A3%E0%B2%A8.jpg', ...getMPByConstituency('Govindraj Nagar'), totalReports: 0, resolvedReports: 0 },
-  { constNo: 158, constituency: 'Hebbal', mla: 'Suresha B S', party: 'INC', partyColor: '#2563eb', photo: getAvatar('Suresha B S', '#2563eb'), ...getMPByConstituency('Hebbal'), totalReports: 0, resolvedReports: 0 },
+  { constNo: 158, constituency: 'Hebbal', mla: 'Byrathi Suresh', party: 'INC', partyColor: '#2563eb', photo: getAvatar('Byrathi Suresh', '#2563eb'), ...getMPByConstituency('Hebbal'), totalReports: 0, resolvedReports: 0 },
   { constNo: 178, constituency: 'Hoskote', mla: 'Sharath Kumar Bachegowda', party: 'INC', partyColor: '#2563eb', photo: getAvatar('Sharath Kumar Bachegowda', '#2563eb'), ...getMPByConstituency('Hoskote'), totalReports: 0, resolvedReports: 0 },
   { constNo: 173, constituency: 'Jayanagar', mla: 'C K Ramamurthy', party: 'BJP', partyColor: '#f97316', photo: getAvatar('C K Ramamurthy', '#f97316'), ...getMPByConstituency('Jayanagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 151, constituency: 'Krishnarajapuram', mla: 'B A Basavaraja', party: 'BJP', partyColor: '#f97316', photo: getAvatar('B A Basavaraja', '#f97316'), ...getMPByConstituency('Krishnarajapuram'), totalReports: 0, resolvedReports: 0 },
   { constNo: 174, constituency: 'Mahadevapura', mla: 'Manjula S', party: 'BJP', partyColor: '#f97316', photo: getAvatar('Manjula S', '#f97316'), ...getMPByConstituency('Mahadevapura'), totalReports: 0, resolvedReports: 0 },
   { constNo: 156, constituency: 'Mahalakshmi Layout', mla: 'K Gopalaiah', party: 'BJP', partyColor: '#f97316', photo: getAvatar('K Gopalaiah', '#f97316'), ...getMPByConstituency('Mahalakshmi Layout'), totalReports: 0, resolvedReports: 0 },
-  { constNo: 157, constituency: 'Malleshwaram', mla: 'Dr C N Ashwathnarayan', party: 'BJP', partyColor: '#f97316', photo: getAvatar('C N Ashwathnarayan', '#f97316'), ...getMPByConstituency('Malleshwaram'), totalReports: 0, resolvedReports: 0 },
+  { constNo: 157, constituency: 'Malleshwaram', mla: 'Dr C N Ashwathnarayan', party: 'BJP', partyColor: '#f97316', photo: getAvatar('Dr C N Ashwathnarayan', '#f97316'), ...getMPByConstituency('Malleshwaram'), totalReports: 0, resolvedReports: 0 },
   { constNo: 171, constituency: 'Padmanabhanagar', mla: 'R Ashoka', party: 'BJP', partyColor: '#f97316', photo: getAvatar('R Ashoka', '#f97316'), ...getMPByConstituency('Padmanabhanagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 159, constituency: 'Pulakeshinagar', mla: 'A. C. Srinivasa', party: 'INC', partyColor: '#2563eb', photo: getAvatar('A. C. Srinivasa', '#2563eb'), ...getMPByConstituency('Pulakeshinagar'), totalReports: 0, resolvedReports: 0 },
   { constNo: 165, constituency: 'Rajaji Nagar', mla: 'S Suresh Kumar', party: 'BJP', partyColor: '#f97316', photo: getAvatar('S Suresh Kumar', '#f97316'), ...getMPByConstituency('Rajaji Nagar'), totalReports: 0, resolvedReports: 0 },
@@ -121,7 +114,7 @@ export const wardMLAData = [
   },
   {
     ward: 52, name: "Indiranagar", constituency: "C V Raman Nagar",
-    mla: "S. Raghu", party: "BJP", partyColor: "#f97316",
+    mla: "S Raghu", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
   },
@@ -139,13 +132,13 @@ export const wardMLAData = [
   },
   {
     ward: 193, name: "Whitefield", constituency: "Mahadevapura",
-    mla: "Manjula S.", party: "BJP", partyColor: "#f97316",
+    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
   },
   {
     ward: 165, name: "Hebbal", constituency: "Hebbal",
-    mla: "Suresha B S", party: "INC", partyColor: "#2563eb",
+    mla: "Byrathi Suresh", party: "INC", partyColor: "#2563eb",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP North Zone", totalReports: 0, resolvedReports: 0,
   },
@@ -168,16 +161,22 @@ export const wardMLAData = [
     authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
   },
   {
-    ward: 151, name: "Bellandur", constituency: "Bommanahalli",
-    mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
-    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
-    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
+    ward: 151, name: "Bellandur", constituency: "Mahadevapura",
+    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
+    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
+    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
+  },
+  {
+    ward: 149, name: "Varthur", constituency: "Mahadevapura",
+    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
+    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
+    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
   },
   {
     ward: 192, name: "Marathahalli", constituency: "Mahadevapura",
-    mla: "Manjula S.", party: "BJP", partyColor: "#f97316",
+    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
+    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
   },
 ];
 
