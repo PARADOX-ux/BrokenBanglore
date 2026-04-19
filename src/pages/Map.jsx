@@ -292,8 +292,8 @@ export default function Map() {
 
           {geoJsonLayer}
           
-          {/* Render real markers for all global reports with safe coordinate checks */}
-          {!isPickMode && allReports.filter(r => r.lat && r.lng).map(report => (
+          {/* Render real markers for all global reports */}
+          {!isPickMode && allReports.map(report => (
             <Marker 
               key={report.id || report.ref_no} 
               position={[report.lat, report.lng]}
