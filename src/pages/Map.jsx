@@ -116,10 +116,32 @@ export default function Map() {
       .then(data => setGeoJsonData(data))
       .catch(err => console.error("Could not load wards GeoJSON", err));
 
-    // Fetch all global reports to show markers
-    getReports().then(data => {
+    // Initial Fetch
+    const fetchGlobalReports = async () => {
+      const data = await getReports();
       setAllReports(data || []);
-    });
+    };
+    fetchGlobalReports();
+
+    // Real-time listener for "instant" appearance of dots when users report
+    const importSupabase = async () => {
+      const { supabase, isSupabaseConfigured } = await import('../lib/supabase');
+      if (isSupabaseConfigured()) {
+        const channel = supabase
+          .channel('schema-db-changes')
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'reports' },
+            (payload) => {
+              setAllReports((prev) => [payload.new, ...prev]);
+            }
+          )
+          .subscribe();
+        return () => supabase.removeChannel(channel);
+      }
+    };
+    
+    importSupabase();
   }, []);
 
   // NammaKasa Area Interaction Handlers
@@ -287,52 +309,15 @@ export default function Map() {
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
           >
-          {/* Base Layer: High-Detail Voyager */}
+          {/* Unified High-Detail Layer with Area Names (Yelahanka, Whitefield, etc.) */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
 
           {geoJsonLayer}
           
-          {/* Ward Labels: Explicitly rendering names from GeoJSON to ensure "every place" is visible */}
-          {geoJsonData && geoJsonData.features.map((feature, idx) => {
-            const props = feature.properties;
-            const name = props.KGISWardName || props.name;
-            const wardNo = props.KGISWardNo || props.ward;
-            
-            // Simple center calculation (average of coordinates)
-            // For a better center, turf.centroid would be used, but this is fast for rendering
-            let coords = feature.geometry.coordinates[0];
-            if (feature.geometry.type === 'MultiPolygon') coords = coords[0];
-            
-            // Extract a representative point (center of the first ring)
-            if (!coords || !coords.length) return null;
-            const lat = coords.reduce((acc, c) => acc + c[1], 0) / coords.length;
-            const lng = coords.reduce((acc, c) => acc + c[0], 0) / coords.length;
-
-            return (
-              <Marker
-                key={`label-${wardNo}-${idx}`}
-                position={[lat, lng]}
-                interactive={false}
-                icon={L.divIcon({
-                  className: 'ward-label',
-                  html: `<span style="color: #0a1f14; font-weight: 800; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.7); padding: 2px 4px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); white-space: nowrap;">${name}</span>`,
-                  iconSize: [0, 0],
-                })}
-              />
-            );
-          })}
-
-          {/* Place Labels Layer: Detailed street and area names from CartoDB */}
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            pane="shadowPane" 
-          />
-          
-          {/* Render real markers for all global reports */}
+          {/* Render real markers for all global reports: Colored Dots by Severity */}
           {!isPickMode && allReports.map(report => (
             <Marker 
               key={report.id || report.ref_no} 
