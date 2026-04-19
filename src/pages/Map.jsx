@@ -287,19 +287,49 @@ export default function Map() {
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
           >
-          {/* Base Layer: Dark Matter No Labels */}
+          {/* Base Layer: High-Detail Voyager */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
 
           {geoJsonLayer}
           
-          {/* Labels Layer on TOP of GeoJSON: Ensuring areas like Yelahanka/Whitefield are always visible */}
+          {/* Ward Labels: Explicitly rendering names from GeoJSON to ensure "every place" is visible */}
+          {geoJsonData && geoJsonData.features.map((feature, idx) => {
+            const props = feature.properties;
+            const name = props.KGISWardName || props.name;
+            const wardNo = props.KGISWardNo || props.ward;
+            
+            // Simple center calculation (average of coordinates)
+            // For a better center, turf.centroid would be used, but this is fast for rendering
+            let coords = feature.geometry.coordinates[0];
+            if (feature.geometry.type === 'MultiPolygon') coords = coords[0];
+            
+            // Extract a representative point (center of the first ring)
+            if (!coords || !coords.length) return null;
+            const lat = coords.reduce((acc, c) => acc + c[1], 0) / coords.length;
+            const lng = coords.reduce((acc, c) => acc + c[0], 0) / coords.length;
+
+            return (
+              <Marker
+                key={`label-${wardNo}-${idx}`}
+                position={[lat, lng]}
+                interactive={false}
+                icon={L.divIcon({
+                  className: 'ward-label',
+                  html: `<span style="color: #0a1f14; font-weight: 800; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.7); padding: 2px 4px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); white-space: nowrap;">${name}</span>`,
+                  iconSize: [0, 0],
+                })}
+              />
+            );
+          })}
+
+          {/* Place Labels Layer: Detailed street and area names from CartoDB */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            pane="shadowPane" // Using shadowPane or similar to ensure it stays on top of SVG layers
+            pane="shadowPane" 
           />
           
           {/* Render real markers for all global reports */}
