@@ -281,26 +281,16 @@ export default function Map() {
       <div className="flex-1 w-full h-full z-10">
         <MapContainer
             center={[12.9716, 77.5946]}
-            zoom={11.0}
+            zoom={10.2}
             minZoom={9}
-            maxZoom={18}
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
           >
-          {/* Base Layer: Dark Matter No Labels */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
 
           {geoJsonLayer}
-          
-          {/* Labels Layer on TOP of GeoJSON: Ensuring areas like Yelahanka/Whitefield are always visible */}
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            pane="shadowPane" // Using shadowPane or similar to ensure it stays on top of SVG layers
-          />
           
           {/* Render real markers for all global reports */}
           {!isPickMode && allReports.map(report => (
