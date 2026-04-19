@@ -39,47 +39,51 @@ export default function Home() {
   ];
 
   return (
-    <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-[#fdfbf6] text-black halftone-bg action-lines">
+    <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-[#fdfbf6] text-black">
       {/* Hero Section */}
-      <section className="w-full bg-[#fdfbf6] px-4 md:px-8 py-20 md:py-32 flex flex-col items-center justify-center text-center relative overflow-hidden verse-scan border-b-8 border-black">
+      <section className="w-full bg-[#fdfbf6] px-4 md:px-8 py-20 md:py-32 flex flex-col items-center justify-center text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-[0.04] pointer-events-none"
              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }}>
         </div>
 
-        <div className="relative z-10 mb-6 inline-flex items-center gap-2 bg-red-100 text-red-900 border border-red-200 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-tight ben-day">
-          <span className="animate-pulse">●</span> Your photo. Your ward. Their problem to fix.
+        <div className="relative z-10 mb-6 inline-flex items-center gap-2 bg-red-100 text-red-900 border border-red-200 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-tight">
+          Your photo. Your ward. Their problem to fix.
         </div>
 
-        <h1 className="font-display font-black text-5xl md:text-7xl lg:text-9xl text-black mb-8 tracking-tighter relative z-10 max-w-6xl leading-[0.85] verse-text hover-glitch cursor-default">
-          BENGALURU IS <br className="hidden md:block"/> BROKEN.
+        <h1 className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
+          Bengaluru is broken. <br className="hidden md:block"/>
+          <span className="text-forest relative inline-block">
+            We're fixing it.
+            <span className="absolute -bottom-4 left-0 w-full h-1 md:h-1.5 bg-gold -z-10"></span>
+          </span>
         </h1>
 
-        <p className="text-xl md:text-3xl text-black font-bold max-w-2xl mb-12 relative z-10 uppercase tracking-tighter leading-tight italic">
-          We're fixing it. <br className="hidden md:block" /> One report at a time.
+        <p className="text-lg md:text-2xl text-black font-bold max-w-2xl mb-12 relative z-10">
+          Report problems. Sign petitions. Reach your MLA. <br className="hidden md:block" /> Make the government move.
         </p>
 
-        <div className="flex flex-col md:flex-row gap-6 relative z-10 w-full md:w-auto px-6">
-          <Link to="/report" className="bg-forest text-gold px-12 py-6 rounded-2xl font-black text-xl hover:bg-black transition-all shadow-[12px_12px_0px_0px_rgba(43,147,72,0.3)] hover:-translate-y-1 text-center uppercase tracking-tighter">
-            Report Now →
+        <div className="flex flex-col md:flex-row gap-4 relative z-10 w-full md:w-auto px-6">
+          <Link to="/report" className="bg-forest text-gold px-10 py-5 rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl hover:-translate-y-1 text-center uppercase tracking-tight">
+            Report a Problem →
           </Link>
-          <Link to="/map" className="bg-white text-black border-4 border-black px-12 py-6 rounded-2xl font-black text-xl hover:bg-black hover:text-white transition-all text-center uppercase tracking-tighter shadow-[12px_12px_0px_0px_rgba(0,0,0,0.1)]">
-            Explore Map
+          <Link to="/map" className="bg-white text-black border-4 border-black px-10 py-5 rounded-2xl font-black text-lg hover:bg-black hover:text-white transition-all text-center uppercase tracking-tight">
+            Explore the Map
           </Link>
         </div>
       </section>
 
       {/* Audit Hub - Structured Grid */}
-      <section className="w-full pt-12 md:pt-24 pb-24 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-8 border-black ben-day">
+      <section className="w-full pt-12 md:pt-20 pb-20 px-4 md:px-8 bg-black/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-black">
           
           {/* Left Panel: High Energy Citizen Voice */}
-          <div className="md:w-[350px] bg-forest p-6 md:p-12 flex flex-col justify-between border-b-8 md:border-b-0 md:border-r-8 border-black shrink-0 relative overflow-hidden halftone-green">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 pointer-events-none"></div>
+          <div className="md:w-[320px] bg-forest p-6 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
             
             <div className="animate-in slide-in-from-left duration-500">
-              <div className="flex flex-col gap-4 mb-12">
-                <span className="bg-gold text-black px-6 py-3 font-display font-black text-6xl leading-none w-fit shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-3 uppercase tracking-tighter verse-text">WE SEE</span>
-                <span className="bg-white text-forest px-6 py-3 font-display font-black text-7xl leading-none w-fit shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] -rotate-6 uppercase tracking-tighter">YOU.</span>
+              <div className="flex flex-col gap-2 mb-10">
+                <span className="bg-gold text-black px-4 py-2 font-display font-black text-5xl leading-none w-fit shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-2 uppercase tracking-tighter">WE SEE</span>
+                <span className="bg-white text-forest px-4 py-2 font-display font-black text-5xl leading-none w-fit shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -rotate-3 uppercase tracking-tighter">YOU.</span>
               </div>
               
               <div className="space-y-6">
