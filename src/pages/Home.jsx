@@ -50,7 +50,7 @@ export default function Home() {
           Your photo. Your ward. Their problem to fix.
         </div>
 
-        <h1 className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
+        <h1 className="font-display font-medium text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
           Bengaluru is broken. <br className="hidden md:block"/>
           <span className="text-forest relative inline-block">
             We're fixing it.
