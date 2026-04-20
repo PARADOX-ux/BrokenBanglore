@@ -366,8 +366,8 @@ export default function Report() {
                     ward_no: formData.wardData?.ward
                   });
                   if (error) { 
-                    alert("Submission failed. Admin: please check 'reports' table columns & bucket.");
-                    console.error("DB Error:", error);
+                    alert(`Submission failed: ${error.message || 'Unknown Error'}. Please screenshot this for the Admin.`);
+                    console.error("Detailed DB Error:", error);
                   } else { nextStep(); }
                 }}
                 className="bg-black text-gold px-12 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-forest transition-all border-4 border-black shadow-xl"
