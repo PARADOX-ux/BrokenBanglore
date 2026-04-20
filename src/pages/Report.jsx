@@ -410,19 +410,27 @@ export default function Report() {
               )}
 
               <div className="bg-white border-4 border-black rounded-[2.5rem] p-8 mb-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
-                <h3 className="font-display font-black text-2xl text-black uppercase tracking-tight mb-8">⏱️ ACCOUNTABILITY TIMELINE</h3>
+                <h3 className="font-display font-black text-2xl text-black uppercase tracking-tight mb-8">⏱️ 7-DAY AGGRESSIVE TIMELINE</h3>
                 <div className="space-y-6 relative ml-4 border-l-2 border-black/10 pl-6">
                   <div>
                     <p className="font-black text-sm uppercase tracking-tight text-forest">DAY 0: EVIDENCE LOGGED</p>
                     <p className="text-[10px] text-black/50 font-bold uppercase">Official notice mirrored to Ward Office.</p>
                   </div>
                   <div>
-                    <p className="font-black text-sm uppercase tracking-tight">DAY 3: SOCIAL PRESSURE</p>
-                    <p className="text-[10px] text-black/40 font-bold uppercase">Public Twitter blast to local MLA.</p>
+                    <p className="font-black text-sm uppercase tracking-tight">DAY 2: SOCIAL PRESSURE</p>
+                    <p className="text-[10px] text-black/40 font-bold uppercase">Public Twitter blast to local MLA office.</p>
                   </div>
                   <div>
-                    <p className="font-black text-sm uppercase tracking-tight text-red-600">DAY 15: RTI FILING</p>
-                    <p className="text-[10px] text-red-800/40 font-bold uppercase">CITIZEN Audit of service delays.</p>
+                    <p className="font-black text-sm uppercase tracking-tight">DAY 4: DIRECT ESCALATION</p>
+                    <p className="text-[10px] text-black/40 font-bold uppercase">Email bomb to BBMP Zone Commissioner.</p>
+                  </div>
+                  <div>
+                    <p className="font-black text-sm uppercase tracking-tight">DAY 6: MP INTERVENTION</p>
+                    <p className="text-[10px] text-black/40 font-bold uppercase">Report shared with Parliamentary office.</p>
+                  </div>
+                  <div>
+                    <p className="font-black text-sm uppercase tracking-tight text-red-600">DAY 7: RTI FILING (LEGAL MAX)</p>
+                    <p className="text-[10px] text-red-800/40 font-bold uppercase">Constitutional demand for immediate repair.</p>
                   </div>
                 </div>
               </div>

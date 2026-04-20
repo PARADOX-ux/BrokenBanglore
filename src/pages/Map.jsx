@@ -116,46 +116,37 @@ export default function Map() {
 
   const handleReportClick = (report) => {
     // Attempt metadata recovery if database fields are missing
-    let recoveredMla = null;
-    let recoveredWardName = null;
-    let recoveredWardNo = report.ward_no;
-
-    // 1. Try spatial recovery if ward_no is missing and we have GeoJSON
-    if (!recoveredWardNo && report.lat && report.lng && geoJsonData) {
-      try {
-        const pt = [Number(report.lng), Number(report.lat)];
-        const match = geoJsonData.features.find(feature => {
-          // Precise polygon math is complex without a modern Turf, 
-          // let's use a simpler bounding box + name lookup for now 
-          // OR iterate through available data
-          return false; // Fallback to fuzzy
-        });
-      } catch (e) {}
+    let recoveredWard = null;
+    
+    // 1. Precise lookup by Ward Number
+    if (report.ward_no) {
+      recoveredWard = wardMLAData.find(w => Number(w.ward) === Number(report.ward_no));
     }
 
-    if (recoveredWardNo) {
-      recoveredMla = wardMLAData.find(w => Number(w.ward) === Number(recoveredWardNo));
-    }
-
-    if (!recoveredMla && report.area_name) {
-      // Fuzzy lookup by area name or description
-      recoveredMla = wardMLAData.find(w => 
+    // 2. Fuzzy lookup by Area Name (if no ward match)
+    if (!recoveredWard && report.area_name) {
+      recoveredWard = wardMLAData.find(w => 
         w.name.toLowerCase().includes(report.area_name.toLowerCase()) || 
-        (report.area_name.toLowerCase().includes(w.name.toLowerCase()))
+        report.area_name.toLowerCase().includes(w.name.toLowerCase()) ||
+        w.constituency.toLowerCase().includes(report.area_name.toLowerCase())
       );
     }
 
-    // if still null, check if any area in the description matches a ward name
-    if (!recoveredMla && report.description) {
-      recoveredMla = wardMLAData.find(w => report.description.toLowerCase().includes(w.name.toLowerCase()));
+    // 3. Last resort: Lookup by description mentions
+    if (!recoveredWard && report.description) {
+      recoveredWard = wardMLAData.find(w => report.description.toLowerCase().includes(w.name.toLowerCase()));
     }
 
+    // 4. Parliamentary Mapping (The Core Fix)
+    const constituency = report.mla_constituency || recoveredWard?.constituency || report.area_name || 'Bengaluru';
+    const mpData = getMPByConstituency(constituency);
+
     const mlaDetails = {
-      mla: report.mla_name || recoveredMla?.mla || 'Assigned to Zone',
-      party: report.mla_party || recoveredMla?.party || 'BBMP',
-      mp: report.mp_name || recoveredMla?.mp || getMPByZone(report.area_name || '').mp,
-      mpConstituency: report.mp_constituency || recoveredMla?.mpConstituency || getMPByZone(report.area_name || '').mpConstituency,
-      authority: report.authority || recoveredMla?.authority || 'BBMP'
+      mla: report.mla_name || recoveredWard?.mla || 'In Audit Zone',
+      party: report.mla_party || recoveredWard?.party || 'BBMP',
+      mp: report.mp_name || recoveredWard?.mp || mpData.mp,
+      mpConstituency: report.mp_constituency || recoveredWard?.mpConstituency || mpData.mpConstituency,
+      authority: report.authority || recoveredWard?.authority || 'BBMP'
     };
 
     setSelectedReport({
@@ -163,8 +154,8 @@ export default function Map() {
       id: report.id || report.ref_no,
       title: report.title,
       category: report.category,
-      area: report.area_name || recoveredMla?.name || 'Bangalore Audit',
-      ward: report.ward_no || recoveredMla?.ward || 'GPS',
+      area: report.area_name || recoveredWard?.name || 'Bangalore Civic Audit',
+      ward: report.ward_no || recoveredWard?.ward || 'GPS',
       status: report.status,
       description: report.description,
       photo_url: report.photo_url,

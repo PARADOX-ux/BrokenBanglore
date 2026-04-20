@@ -1,10 +1,5 @@
-/**
- * reportsDb.js — All report CRUD operations.
- * Uses Supabase when configured, falls back to localStorage.
- * This is the single source of truth for all report data across the app.
- */
 import { supabase, isSupabaseConfigured } from './supabase';
-import { incrementStat } from '../data/wardData';
+import { incrementStat, wardMLAData, getMPByConstituency } from '../data/wardData';
 
 const LS_KEY = 'bb_reports';
 
@@ -83,6 +78,28 @@ export async function submitReport(reportData) {
     created_at: new Date().toISOString(),
     photo_url: finalPhotoUrl || reportData.photoPreview || null
   };
+
+  // ─── DATA HEALING: Ensure MLA/MP are present before save ─────────────────
+  if (!record.mla_name && record.ward_no) {
+    const ward = wardMLAData.find(w => Number(w.ward) === Number(record.ward_no));
+    if (ward) {
+      record.mla_name = ward.mla;
+      record.mla_party = ward.party;
+      record.mp_name = ward.mp;
+      record.mp_constituency = ward.mpConstituency;
+      record.ward_name = ward.name;
+    }
+  }
+  // ─── FINAL MP CHECK: Based on parliamentary constituency logic ───────────
+  if (!record.mp_name && record.mla_name) {
+    // Try to find the mla's constituency
+    const mlaEntry = wardMLAData.find(w => w.mla === record.mla_name);
+    if (mlaEntry) {
+      const mpData = getMPByConstituency(mlaEntry.constituency);
+      record.mp_name = mpData.mp;
+      record.mp_constituency = mpData.mpConstituency;
+    }
+  }
 
   if (isSupabaseConfigured()) {
     const { data, error } = await supabase.from('reports').insert([record]).select();
