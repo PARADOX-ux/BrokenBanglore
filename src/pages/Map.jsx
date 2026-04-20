@@ -115,23 +115,38 @@ export default function Map() {
   };
 
   const handleReportClick = (report) => {
+    // Attempt metadata recovery if database fields are missing
+    let recoveredMla = null;
+    if (report.ward_no) {
+      recoveredMla = wardMLAData.find(w => Number(w.ward) === Number(report.ward_no));
+    }
+    if (!recoveredMla && report.area_name) {
+      // Fuzzy lookup by area
+      recoveredMla = wardMLAData.find(w => 
+        w.name.toLowerCase().includes(report.area_name.toLowerCase()) || 
+        (report.area_name.toLowerCase().includes(w.name.toLowerCase()))
+      );
+    }
+
+    const mlaDetails = {
+      mla: report.mla_name || recoveredMla?.mla || 'Pending Assignment',
+      party: report.mla_party || recoveredMla?.party || 'BBMP',
+      mp: report.mp_name || recoveredMla?.mp || 'Pending Assignment',
+      mpConstituency: report.mp_constituency || recoveredMla?.mpConstituency || 'Bengaluru',
+      authority: report.authority || recoveredMla?.authority || 'BBMP'
+    };
+
     setSelectedReport({
       ...report,
       id: report.id || report.ref_no,
       title: report.title,
       category: report.category,
-      area: report.area_name,
-      ward: report.ward_no,
+      area: report.area_name || recoveredMla?.name || 'Assigned by GPS',
+      ward: report.ward_no || recoveredMla?.ward,
       status: report.status,
       description: report.description,
       photo_url: report.photo_url,
-      mlaDetails: {
-        mla: report.mla_name,
-        party: report.mla_party,
-        mp: report.mp_name,
-        mpConstituency: report.mp_constituency,
-        authority: report.authority
-      }
+      mlaDetails: mlaDetails
     });
     setWardReports([]);
   };
@@ -508,20 +523,30 @@ export default function Map() {
                 <h2 className="font-display font-bold text-lg text-black leading-none tracking-tighter">
                   {activeReport.title.split('|')[0].trim()}
                 </h2>
-                 <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
                   <span className="font-nav font-black text-[10px] bg-forest text-gold px-2 py-0.5 rounded-md uppercase tracking-widest">
-                    {activeReport.ward ? `Ward #${activeReport.ward}` : 'Area Center'}
+                    {activeReport.ward ? `Ward #${activeReport.ward}` : 'GPS Assigned Location'}
                   </span>
                   <span className="font-nav font-bold text-[10px] text-black/30 uppercase tracking-[0.1em]">
-                    Type: {activeReport.category || 'General'}
+                    Type: {activeReport.category || 'General Audit'}
                   </span>
                 </div>
               </div>
 
                 {/* Evidence Photo */}
-                {(selectedReport && activeReport.photo_url) && (
-                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-black shadow-lg aspect-video bg-black/5">
-                    <img src={activeReport.photo_url} alt="Evidence" className="w-full h-full object-cover" />
+                {activeReport.photo_url ? (
+                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-black shadow-lg aspect-auto min-h-[150px] bg-black/5">
+                    <img 
+                      src={activeReport.photo_url} 
+                      alt="Evidence" 
+                      className="w-full h-full object-contain bg-black" 
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  </div>
+                ) : (
+                  <div className="mb-6 rounded-2xl border-4 border-dashed border-forest/10 p-8 flex flex-col items-center justify-center text-center opacity-40">
+                    <span className="text-3xl mb-2">📷</span>
+                    <p className="text-[10px] font-bold uppercase tracking-widest">No photo evidence attached</p>
                   </div>
                 )}
 
