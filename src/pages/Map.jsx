@@ -14,6 +14,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Bengaluru Strict Bounds
+const BENGALURU_CENTER = [12.9716, 77.5946];
+const BENGALURU_BOUNDS = [
+  [12.7300, 77.3500], // South West
+  [13.2000, 77.8500]  // North East
+];
+
 // Captures bare-map clicks (not on ward polygons) for pick mode
 function MapClickPicker({ onPick }) {
   useMapEvents({
@@ -105,7 +112,10 @@ export default function Map() {
       ward: wardNo,
       authority: 'Bruhat Bengaluru Mahanagara Palike',
       status: 'pending',
-      mlaDetails: mlaData,
+      mlaDetails: {
+        ...mlaData,
+        mla: mlaData.mla || mlaData.name || 'BBMP Ward Officer'
+      },
     });
     setWardReports([]);
     setWardReportsLoading(true);
@@ -390,13 +400,16 @@ export default function Map() {
       {/* Main Content: Conditional Map or List */}
       <div className="flex-1 w-full h-full z-10 bg-black">
         {viewMode === 'map' ? (
-          <MapContainer
-              center={[12.9716, 77.5946]}
-              zoom={10.2}
-              minZoom={9}
-              style={{ height: '100%', width: '100%' }}
-              zoomControl={false}
-            >
+          <MapContainer 
+            center={BENGALURU_CENTER} 
+            zoom={11} 
+            minZoom={10}
+            maxBounds={BENGALURU_BOUNDS}
+            maxBoundsViscosity={1.0}
+            style={{ height: '100%', width: '100%', background: '#F8F9FA' }}
+            className="z-0"
+            zoomControl={false}
+          >
             <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
             {geoJsonLayer}
             
@@ -575,15 +588,25 @@ export default function Map() {
                     className="text-left hover:bg-white/10 p-1 rounded transition-colors group"
                   >
                     <div className="text-white/40 uppercase tracking-widest text-[9px] group-hover:text-gold transition-colors">MLA (State) →</div>
-                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">{activeReport.mlaDetails?.mla || '—'}</div>
-                    <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party}</div>
+                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">
+                      {activeReport.mlaDetails?.mla && activeReport.mlaDetails.mla !== 'In Audit Zone' 
+                        ? activeReport.mlaDetails.mla 
+                        : (wardMLAData.find(w => Number(w.ward) === Number(activeReport.ward))?.mla || 'BBMP Authority')
+                      }
+                    </div>
+                    <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party || 'KLA'}</div>
                   </button>
                   <button 
                     onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mp)}`)}
                     className="text-left hover:bg-white/10 p-1 rounded transition-colors group"
                   >
                     <div className="text-white/40 uppercase tracking-widest text-[9px] group-hover:text-gold transition-colors">MP (Lok Sabha) →</div>
-                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">{activeReport.mlaDetails?.mp || '—'}</div>
+                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">
+                      {activeReport.mlaDetails?.mp && activeReport.mlaDetails.mp !== 'Bengaluru'
+                        ? activeReport.mlaDetails.mp 
+                        : (getMPByConstituency(activeReport.mlaDetails?.constituency || activeReport.area || '').mp)
+                      }
+                    </div>
                     <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
                   </button>
                 </div>
