@@ -221,7 +221,7 @@ export const sampleForumPosts = [];
 export const categories = [
   { id: "roads", label: "Roads & Potholes", emoji: "🚧", color: "#2B9348" },
   { id: "water", label: "Water Supply", emoji: "💧", color: "#55A630" },
-  { id: "garbage", label: "Garbage & Waste", emoji: "🗑️", color: "#80B918" },
+  { id: "garbage", label: "NAMMA KASA (Garbage)", emoji: "🗑️", color: "#2B9348" },
   { id: "power", label: "Power Cuts", emoji: "⚡", color: "#E9C46A" },
   { id: "environment", label: "Lakes & Environment", emoji: "🌊", color: "#2B9348" },
   { id: "traffic", label: "Traffic & Roads", emoji: "🚦", color: "#55A630" },

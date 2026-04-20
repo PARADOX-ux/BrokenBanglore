@@ -358,9 +358,9 @@ export default function Map() {
                 position={[report.lat, report.lng]}
                 icon={L.divIcon({
                   className: 'custom-div-icon',
-                  html: `<div style="background-color: ${report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4);"></div>`,
-                  iconSize: [14, 14],
-                  iconAnchor: [7, 7]
+                  html: `<div style="background-color: ${report.category === 'garbage' ? '#2B9348' : report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: ${report.category === 'garbage' ? '18px' : '14px'}; height: ${report.category === 'garbage' ? '18px' : '14px'}; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 8px;">${report.category === 'garbage' ? '♻️' : ''}</div>`,
+                  iconSize: [20, 20],
+                  iconAnchor: [10, 10]
                 })}
               />
             ))}
@@ -397,6 +397,11 @@ export default function Map() {
                                  {report.status || 'open'}
                               </span>
                               <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">#{report.ref_no?.slice(-6) || 'AUDIT'}</span>
+                           </div>
+                           <div className="flex items-center gap-2 mb-2">
+                              {report.category === 'garbage' && (
+                                <span className="bg-forest text-gold text-[8px] font-black px-2 py-0.5 rounded-sm uppercase tracking-tighter">Namma Kasa</span>
+                              )}
                            </div>
                            <h3 className="font-display font-black text-2xl text-black mb-4 leading-tight group-hover:underline underline-offset-4 decoration-4">{report.title}</h3>
                            {report.area_name && <p className="text-[10px] font-bold text-black/60 uppercase tracking-widest mb-6 flex items-center gap-2 bg-ash/10 w-fit px-3 py-1 rounded-lg">📍 {report.area_name}</p>}

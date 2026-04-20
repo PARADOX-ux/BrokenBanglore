@@ -53,15 +53,31 @@ export async function submitReport(reportData) {
     }
   }
 
+  const wd = reportData.wardData;
+  const severityMap = {
+    'lower': 'low',
+    'medium': 'medium',
+    'severe': 'high',
+    'emergency': 'emergency',
+    'low': 'low',
+    'high': 'high'
+  };
+
   const record = { 
-    category: reportData.category,
+    category: reportData.category || 'general',
     title: reportData.title,
     description: reportData.description,
-    severity: reportData.severity,
+    severity: severityMap[reportData.severity?.toLowerCase()] || 'medium',
     lat: reportData.lat,
     lng: reportData.lng,
-    area_name: reportData.area_name || reportData.area,
-    ward_no: reportData.ward_no,
+    area_name: reportData.area_name || reportData.area || reportData.wardData?.name,
+    ward_no: reportData.ward_no || reportData.wardData?.ward,
+    ward_name: reportData.wardData?.name,
+    mla_name: reportData.wardData?.mla,
+    mla_party: reportData.wardData?.party,
+    mp_name: reportData.wardData?.mp,
+    mp_constituency: reportData.wardData?.mp_const,
+    authority: reportData.wardData?.authority || 'BBMP',
     status: 'open',
     ref_no: refNo,
     created_at: new Date().toISOString(),
@@ -72,6 +88,8 @@ export async function submitReport(reportData) {
     const { data, error } = await supabase.from('reports').insert([record]).select();
     if (error) {
       console.error('Supabase Insert Error Detail:', error);
+      // Fallback to localStorage so user doesn't lose data
+      lsSave(record);
       return { data: null, refNo, error };
     }
     
