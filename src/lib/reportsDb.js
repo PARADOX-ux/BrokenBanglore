@@ -54,25 +54,32 @@ export async function submitReport(reportData) {
   }
 
   const record = { 
-    ...reportData, 
-    ref_no: refNo, 
-    status: 'open', 
+    category: reportData.category,
+    title: reportData.title,
+    description: reportData.description,
+    severity: reportData.severity,
+    lat: reportData.lat,
+    lng: reportData.lng,
+    area_name: reportData.area_name || reportData.area,
+    ward_no: reportData.ward_no,
+    status: 'open',
+    ref_no: refNo,
     created_at: new Date().toISOString(),
-    photo_url: finalPhotoUrl || reportData.photoPreview || null // Prefer uploaded URL
+    photo_url: finalPhotoUrl || reportData.photoPreview || null
   };
-  
-  // Clean up non-database fields before inserting
-  delete record.photoPreview;
-  delete record.photo; // Remove the File object
 
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase.from('reports').insert([record]).select().single();
-    if (!error) {
-      incrementStat('reports');
-      incrementStat('citizens');
-      await sendComplaintEmail(data);
+    const { data, error } = await supabase.from('reports').insert([record]).select();
+    if (error) {
+      console.error('Supabase Insert Error Detail:', error);
+      return { data: null, refNo, error };
     }
-    return { data, refNo, error };
+    
+    incrementStat('reports');
+    incrementStat('citizens');
+    if (data && data[0]) await sendComplaintEmail(data[0]);
+    
+    return { data: data ? data[0] : null, refNo, error: null };
   }
 
   // localStorage fallback
