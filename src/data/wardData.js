@@ -50,9 +50,25 @@ export const constituencyMPMap = {
   'Hoskote': { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' },
 };
 
+// Helper to get MP data by zone (as fallback)
+export const getMPByZone = (zoneName) => {
+  const zone = zoneName?.toLowerCase() || '';
+  if (zone.includes('south') || zone.includes('bommanahalli') || zone.includes('rr nagar')) {
+    return { mp: 'Tejasvi Surya', mpConstituency: 'Bangalore South', mpParty: 'BJP' };
+  }
+  if (zone.includes('yelahanka') || zone.includes('north') || zone.includes('hebbal')) {
+    return { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' };
+  }
+  if (zone.includes('rural') || zone.includes('anekal')) {
+    return { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' };
+  }
+  // Default to Central for East/West/Mahadevapura/Central
+  return { mp: 'P. C. Mohan', mpConstituency: 'Bangalore Central', mpParty: 'BJP' };
+};
+
 // Helper to get MP data by constituency name
 export const getMPByConstituency = (constituency) => {
-  return constituencyMPMap[constituency] || { mp: 'P. C. Mohan', mpConstituency: 'Bangalore Central', mpParty: 'BJP' };
+  return constituencyMPMap[constituency] || getMPByZone(constituency);
 };
 
 export const completeMLAList = [
@@ -193,6 +209,41 @@ export const wardMLAData = [
     authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
     lat: 12.9592, lng: 77.7011
   },
+  {
+    ward: 151, name: "HSR Layout", constituency: "Bommanahalli",
+    mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
+    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
+    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9128, lng: 77.6387
+  },
+  {
+    ward: 174, name: "Mahadevapura", constituency: "Mahadevapura",
+    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
+    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
+    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9920, lng: 77.7020
+  },
+  {
+    ward: 18, name: "Malleshwaram", constituency: "Malleshwaram",
+    mla: "Dr C N Ashwathnarayan", party: "BJP", partyColor: "#f97316",
+    mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
+    authority: "BBMP West Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9980, lng: 77.5710
+  },
+  {
+    ward: 110, name: "Sampangiram Nagar", constituency: "Shivajinagar",
+    mla: "Rizwan Arshad", party: "INC", partyColor: "#2563eb",
+    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
+    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9700, lng: 77.5900
+  },
+  {
+    ward: 160, name: "Indiranagar", constituency: "C V Raman Nagar",
+    mla: "S Raghu", party: "BJP", partyColor: "#f97316",
+    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
+    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9719, lng: 77.6412
+  }
 ];
 
 // Authority data
@@ -228,13 +279,25 @@ export const categories = [
 ];
 
 export function getWardData(wardNo) {
-  return wardMLAData.find((w) => w.ward === wardNo) || null;
+  return wardMLAData.find((w) => w.ward === Number(wardNo)) || null;
 }
 
 export function getWardByArea(areaName) {
-  return wardMLAData.find(
-    (w) => w.name.toLowerCase() === areaName.toLowerCase()
-  ) || null;
+  if (!areaName) return null;
+  const lowerArea = areaName.toLowerCase();
+  
+  // 1. Direct Ward Name match
+  let found = wardMLAData.find((w) => w.name.toLowerCase() === lowerArea);
+  if (found) return found;
+
+  // 2. Assembly Constituency match (return any ward from that constituency)
+  found = wardMLAData.find((w) => w.constituency.toLowerCase() === lowerArea);
+  if (found) return found;
+
+  // 3. Sub-string match
+  found = wardMLAData.find((w) => w.name.toLowerCase().includes(lowerArea) || w.constituency.toLowerCase().includes(lowerArea));
+  
+  return found || null;
 }
 
 export function getResponseRateColor(total, resolved) {

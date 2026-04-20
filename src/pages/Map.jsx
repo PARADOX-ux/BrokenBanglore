@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON, Popup } from 'r
 import * as turf from '@turf/centroid';
 import L from 'leaflet';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { categories, sampleReports, wardMLAData, completeMLAList, getMPByConstituency } from '../data/wardData';
+import { categories, sampleReports, wardMLAData, completeMLAList, getMPByConstituency, getMPByZone } from '../data/wardData';
 import { getReports, upvoteReport } from '../lib/reportsDb';
 
 // Fix Leaflet icon
@@ -114,6 +114,28 @@ export default function Map() {
     setWardReportsLoading(false);
   };
 
+  const handleReportClick = (report) => {
+    setSelectedReport({
+      ...report,
+      id: report.id || report.ref_no,
+      title: report.title,
+      category: report.category,
+      area: report.area_name,
+      ward: report.ward_no,
+      status: report.status,
+      description: report.description,
+      photo_url: report.photo_url,
+      mlaDetails: {
+        mla: report.mla_name,
+        party: report.mla_party,
+        mp: report.mp_name,
+        mpConstituency: report.mp_constituency,
+        authority: report.authority
+      }
+    });
+    setWardReports([]);
+  };
+
 
   useEffect(() => {
     fetch('/data/bangalore-wards.geojson?v=datameet_243')
@@ -167,7 +189,7 @@ export default function Map() {
     if (!mlaData) {
       const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
       const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
-      mlaData = { ...fallbackMla, ...getMPByConstituency(fallbackMla.constituency) };
+      mlaData = { ...fallbackMla, ...getMPByZone(zone) };
     }
     
     setHoveredData({ 
@@ -207,10 +229,9 @@ export default function Map() {
     
     let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
     if (!mlaData) {
-      // Improved fallback: Try to find any ward in same constituency or just a stable default for the zone
       const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
       const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
-      mlaData = { ...fallbackMla, ...getMPByConstituency(fallbackMla.constituency) };
+      mlaData = { ...fallbackMla, ...getMPByZone(zone) };
     }
     
     setSelectedReport({
@@ -356,6 +377,7 @@ export default function Map() {
               <Marker 
                 key={report.id || report.ref_no} 
                 position={[report.lat, report.lng]}
+                eventHandlers={{ click: () => handleReportClick(report) }}
                 icon={L.divIcon({
                   className: 'custom-div-icon',
                   html: `<div style="background-color: ${report.category === 'garbage' ? '#2B9348' : report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: ${report.category === 'garbage' ? '18px' : '14px'}; height: ${report.category === 'garbage' ? '18px' : '14px'}; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 8px;">${report.category === 'garbage' ? '♻️' : ''}</div>`,
@@ -486,15 +508,29 @@ export default function Map() {
                 <h2 className="font-display font-bold text-lg text-black leading-none tracking-tighter">
                   {activeReport.title.split('|')[0].trim()}
                 </h2>
-                <div className="flex items-center gap-2 mt-1">
+                 <div className="flex items-center gap-2 mt-1">
                   <span className="font-nav font-black text-[10px] bg-forest text-gold px-2 py-0.5 rounded-md uppercase tracking-widest">
-                    {activeReport.title.split('|')[1]?.trim() || `Ward #${activeReport.ward}`}
+                    {activeReport.ward ? `Ward #${activeReport.ward}` : 'Area Center'}
                   </span>
                   <span className="font-nav font-bold text-[10px] text-black/30 uppercase tracking-[0.1em]">
-                    Region: {activeReport.title.split('|')[2]?.trim() || 'Central'}
+                    Type: {activeReport.category || 'General'}
                   </span>
                 </div>
               </div>
+
+                {/* Evidence Photo */}
+                {(selectedReport && activeReport.photo_url) && (
+                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-black shadow-lg aspect-video bg-black/5">
+                    <img src={activeReport.photo_url} alt="Evidence" className="w-full h-full object-cover" />
+                  </div>
+                )}
+
+                {/* Full Description for selected reports */}
+                {selectedReport && activeReport.description && (
+                  <div className="mb-6 bg-cream/30 p-4 rounded-xl border border-forest/10 italic text-sm text-black/70">
+                    "{activeReport.description}"
+                  </div>
+                )}
                 <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
                   <div>
                     <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
