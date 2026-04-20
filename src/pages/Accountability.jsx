@@ -1,18 +1,37 @@
 import { useState, useEffect } from 'react';
 import { completeMLAList, authorityData, sampleReports, getResponseRateColor, getResponseRateLabel } from '../data/wardData';
 import { getReports } from '../lib/reportsDb';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Accountability() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMLA, setSelectedMLA] = useState(null);
+  const [searchParams] = useSearchParams();
+  const highlightSearch = searchParams.get('search');
 
   useEffect(() => {
     getReports().then(data => {
-      setReports(data);
+      setReports(data || []);
       setLoading(false);
     });
   }, []);
+
+  // Handle cross-navigation from map
+  useEffect(() => {
+    if (highlightSearch && !loading) {
+      const match = completeMLAList.find(m => 
+        m.mla?.toLowerCase().includes(highlightSearch.toLowerCase()) || 
+        m.mp?.toLowerCase().includes(highlightSearch.toLowerCase())
+      );
+      if (match) {
+        // We set selectedMLA to trigger the modal automatically
+        setSelectedMLA(match);
+        // Scroll to the MLA list area
+        document.getElementById('audit-table')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [highlightSearch, loading]);
 
   const totalReports = reports.length;
   const resolvedReports = reports.filter(r => r.status === 'resolved').length;
@@ -91,7 +110,7 @@ export default function Accountability() {
             </select>
           </div>
 
-          <div className="w-full overflow-x-auto pb-4">
+          <div id="audit-table" className="w-full overflow-x-auto pb-4">
             {/* Desktop Table Header */}
             <div className="hidden md:grid grid-cols-12 gap-4 bg-tea p-4 rounded-xl mb-4 text-sm font-bold uppercase tracking-wider text-forest/80">
               <div className="col-span-1 border-r border-ash/40">Photo</div>
@@ -370,11 +389,15 @@ export default function Accountability() {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-red-700/60">Reports</div>
                 </div>
                 <div className="bg-green-50 rounded-xl p-3 text-center border border-green-100">
-                  <div className="font-display font-bold text-2xl text-green-600">{mla.resolvedReports || mla.openTickets && (0) || 0}</div>
+                  <div className="font-display font-bold text-2xl text-green-600">
+                    {reports.filter(r => (Number(r.ward_no) === Number(mla.ward)) && r.status === 'resolved').length}
+                  </div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-green-700/60">Resolved</div>
                 </div>
                 <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
-                  <div className="font-display font-bold text-2xl text-amber-600">0%</div>
+                  <div className="font-display font-bold text-2xl text-amber-600">
+                    {mla.totalReports > 0 ? Math.round((reports.filter(r=>(Number(r.ward_no)===Number(mla.ward)) && r.status === 'resolved').length / mla.totalReports) * 100) : 0}%
+                  </div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700/60">Rate</div>
                 </div>
               </div>

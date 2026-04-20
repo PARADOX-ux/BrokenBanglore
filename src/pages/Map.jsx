@@ -579,16 +579,22 @@ export default function Map() {
                   </div>
                 )}
                 <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
-                  <div>
-                    <div className="text-white/40 uppercase tracking-widest text-[9px]">MLA (State)</div>
-                    <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mla || '—'}</div>
+                  <button 
+                    onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mla)}`)}
+                    className="text-left hover:bg-white/10 p-1 rounded transition-colors group"
+                  >
+                    <div className="text-white/40 uppercase tracking-widest text-[9px] group-hover:text-gold transition-colors">MLA (State) →</div>
+                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">{activeReport.mlaDetails?.mla || '—'}</div>
                     <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party}</div>
-                  </div>
-                  <div>
-                    <div className="text-white/40 uppercase tracking-widest text-[9px]">MP (Lok Sabha)</div>
-                    <div className="font-bold text-sm leading-tight break-words">{activeReport.mlaDetails?.mp || '—'}</div>
+                  </button>
+                  <button 
+                    onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mp)}`)}
+                    className="text-left hover:bg-white/10 p-1 rounded transition-colors group"
+                  >
+                    <div className="text-white/40 uppercase tracking-widest text-[9px] group-hover:text-gold transition-colors">MP (Lok Sabha) →</div>
+                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">{activeReport.mlaDetails?.mp || '—'}</div>
                     <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-forest/10">

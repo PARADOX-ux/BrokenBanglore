@@ -19,11 +19,12 @@ export default function Report() {
     severity: 'medium',
     position: null,
     area: '',
-    address: '',
     wardData: null,
     photo: null,
     photoPreview: null,
   });
+  const [submittedReport, setSubmittedReport] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // On mount: if we came back from Map pick mode, read the saved location
   useEffect(() => {
@@ -220,7 +221,7 @@ export default function Report() {
                 <div className="relative h-full">
                   <img src={formData.photoPreview} alt="Evidence" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-all gap-4">
-                    <button onClick={() => { setFormData({...f, photo: null, photoPreview: null}); startCamera(); }} className="bg-gold text-forest px-8 py-3 rounded-2xl font-black uppercase text-sm tracking-widest shadow-xl">Retake Live</button>
+                    <button onClick={() => { setFormData({...formData, photo: null, photoPreview: null}); startCamera(); }} className="bg-gold text-forest px-8 py-3 rounded-2xl font-black uppercase text-sm tracking-widest shadow-xl">Retake Live</button>
                     <label className="bg-white text-forest px-8 py-3 rounded-2xl font-black uppercase text-sm tracking-widest shadow-xl cursor-pointer">
                       Change File
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => {
@@ -358,6 +359,7 @@ export default function Report() {
               <button onClick={prevStep} className="font-black text-olive/40 hover:text-black uppercase text-xs tracking-widest">Back</button>
               <button
                 onClick={async () => {
+                  setLoading(true);
                   const finalPos = formData.position || (formData.wardData?.lat ? { lat: formData.wardData.lat, lng: formData.wardData.lng } : null);
                   const { data, error } = await submitReport({
                     ...formData,
@@ -365,15 +367,14 @@ export default function Report() {
                     lng: finalPos?.lng,
                     ward_no: formData.wardData?.ward
                   });
+                  setLoading(false);
+                  if (data) setSubmittedReport(data);
                   if (error) { 
                     alert(`Supabase Setup Incomplete: ${error.message}. Your report has been SAVED LOCALLY and will show on your map. Admin: Run the schema.sql in Supabase to enable cloud sync.`);
-                    nextStep(); // Allow user to see the success screen
-                  } else { 
-                    nextStep(); 
                   }
+                  nextStep();
                 }}
                 className="bg-black text-gold px-12 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-forest transition-all border-4 border-black shadow-xl"
-                disabled={!formData.title}
               >
                 File Public Audit 🚀
               </button>
@@ -393,6 +394,20 @@ export default function Report() {
                   Ready for Escalation
                 </div>
               </div>
+
+              {/* SUCCESS PHOTO PREVIEW */}
+              {(submittedReport?.photo_url || formData.photoPreview) && (
+                <div className="mb-8 rounded-[2.5rem] overflow-hidden border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-black/5 aspect-auto max-h-[300px]">
+                  <img 
+                    src={submittedReport?.photo_url || formData.photoPreview} 
+                    alt="Submitted Evidence" 
+                    className="w-full h-full object-contain bg-black" 
+                  />
+                  <div className="bg-forest text-gold py-3 px-6 font-black text-[10px] uppercase tracking-widest text-center border-t-4 border-black">
+                    Audit Photo Verified & Logged
+                  </div>
+                </div>
+              )}
 
               <div className="bg-white border-4 border-black rounded-[2.5rem] p-8 mb-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
                 <h3 className="font-display font-black text-2xl text-black uppercase tracking-tight mb-8">⏱️ ACCOUNTABILITY TIMELINE</h3>
