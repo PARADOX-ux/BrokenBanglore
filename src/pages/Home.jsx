@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { completeMLAList, getStats } from '../data/wardData';
-import CountUp from '../components/Animations/CountUp';
-import DecryptedText from '../components/Animations/DecryptedText';
-import SpotlightCard from '../components/Animations/SpotlightCard';
 
 export default function Home() {
   const [selectedZoneMLA, setSelectedZoneMLA] = useState(null);
@@ -53,39 +50,17 @@ export default function Home() {
           Your photo. Your ward. Their problem to fix.
         </div>
 
-        <h1 className="font-display font-black text-5xl md:text-8xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.85] uppercase">
-          <DecryptedText 
-            text="BENGALURU IS BROKEN." 
-            animateOn="view" 
-            revealDirection="start"
-            speed={40}
-            className="text-black"
-            encryptedClassName="text-forest/20"
-          />
+        <h1 className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
+          Bengaluru is broken. <br className="hidden md:block"/>
+          <span className="text-forest relative inline-block">
+            We're fixing it.
+            <span className="absolute -bottom-4 left-0 w-full h-1 md:h-1.5 bg-gold -z-10"></span>
+          </span>
         </h1>
 
-        <div className="flex flex-col md:flex-row gap-12 items-center justify-center mb-12 relative z-10">
-          <div className="flex flex-col items-center">
-            <span className="text-4xl md:text-6xl font-display font-black text-forest">
-              <CountUp to={stats.reports || 1578} separator="," duration={1.5} />
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/40">Reports Filed</span>
-          </div>
-          <div className="w-px h-12 bg-black/10 hidden md:block"></div>
-          <div className="flex flex-col items-center">
-            <span className="text-4xl md:text-6xl font-display font-black text-forest">
-              <CountUp to={stats.citizens || 2450} separator="," duration={1.5} />
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/40">Active Citizens</span>
-          </div>
-          <div className="w-px h-12 bg-black/10 hidden md:block"></div>
-          <div className="flex flex-col items-center">
-            <span className="text-4xl md:text-6xl font-display font-black text-forest">
-              <CountUp to={stats.resolved || 842} separator="," duration={1.5} />
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/40">Solved Issues</span>
-          </div>
-        </div>
+        <p className="text-lg md:text-2xl text-black font-bold max-w-2xl mb-12 relative z-10">
+          Report problems. Sign petitions. Reach your MLA. <br className="hidden md:block" /> Make the government move.
+        </p>
 
         <div className="flex flex-col md:flex-row gap-4 relative z-10 w-full md:w-auto px-6">
           <Link to="/report" className="bg-forest text-gold px-10 py-5 rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl hover:-translate-y-1 text-center uppercase tracking-tight">
@@ -162,37 +137,32 @@ export default function Home() {
               {completeMLAList.map((mla) => {
                 const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
-                  <SpotlightCard
+                  <button
                     key={mla.constNo}
-                    className="p-0 border-0 bg-transparent group"
-                    spotlightColor="rgba(43, 147, 72, 0.1)"
+                    onClick={() => setSelectedZoneMLA(mla)}
+                    onMouseEnter={() => setSelectedZoneMLA(mla)}
+                    className={`p-2 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-0 md:min-h-[200px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-x-0.5 -translate-y-0.5' : 'border-black/5 bg-white hover:border-black/20 hover:shadow-md'}`}
                   >
-                    <button
-                      onClick={() => setSelectedZoneMLA(mla)}
-                      onMouseEnter={() => setSelectedZoneMLA(mla)}
-                      className={`w-full h-full p-2 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-0 md:min-h-[200px] relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-x-0.5 -translate-y-0.5' : 'border-black/5 bg-white hover:border-black/20 hover:shadow-md'}`}
-                    >
-                      <div className="absolute top-0 right-0 w-12 h-12 bg-black opacity-[0.02] -mr-6 -mt-6 rounded-full"></div>
-                      
-                      <div className={`w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden mb-1 md:mb-2 border-2 transition-transform group-hover:scale-105 shrink-0 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
-                        <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                    <div className="absolute top-0 right-0 w-12 h-12 bg-black opacity-[0.02] -mr-6 -mt-6 rounded-full"></div>
+                    
+                    <div className={`w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden mb-1 md:mb-2 border-2 transition-transform group-hover:scale-105 shrink-0 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
+                      <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                    </div>
+
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="text-[7px] md:text-[9px] font-black text-black/30 uppercase tracking-[0.1em] mb-0.5 md:mb-1 truncate">{mla.constituency}</div>
+                      <div className="font-body font-bold text-[9px] md:text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors line-clamp-2">
+                          {mla.mla}
                       </div>
-  
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="text-[7px] md:text-[9px] font-black text-black/30 uppercase tracking-[0.1em] mb-0.5 md:mb-1 truncate">{mla.constituency}</div>
-                        <div className="font-body font-bold text-[9px] md:text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors line-clamp-2">
-                            {mla.mla}
-                        </div>
-                      </div>
-  
-                      <div className="flex justify-between items-center mt-3">
-                         <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border border-black/10 ${mla.party === 'BJP' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
-                           {mla.party}
-                         </span>
-                         {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse"></div>}
-                      </div>
-                    </button>
-                  </SpotlightCard>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-3">
+                       <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border border-black/10 ${mla.party === 'BJP' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                         {mla.party}
+                       </span>
+                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse"></div>}
+                    </div>
+                  </button>
                 );
               })}
             </div>
