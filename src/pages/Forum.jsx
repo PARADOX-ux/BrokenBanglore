@@ -34,7 +34,7 @@ export default function Forum() {
       id: 1,
       title: "Broken streetlights in Indiranagar 2nd stage since 2 weeks",
       body: "Walked home last night in pitch dark. Multiple elderly people live on this lane. Complained on Sahaya app but no update.",
-      author: "Rahul S.",
+      author: "Anonymous",
       ward: "80 - Indiranagar",
       tab: 'Discussions',
       upvotes: 42,
@@ -46,7 +46,7 @@ export default function Forum() {
       id: 2,
       title: "How to file an RTI for ward fund allocation?",
       body: "I want to know where the 2 crore allocated for road repairs went. Has anyone done this before in Ward 150?",
-      author: "Priya V.",
+      author: "Anonymous",
       ward: "150 - Bellandur",
       tab: 'Legal Help',
       upvotes: 89,
@@ -58,7 +58,7 @@ export default function Forum() {
       id: 3,
       title: "STP water overflow near HSR layout park",
       body: "Health hazard for kids playing in the park. Need to mobilize and tweet to BWSSB chief.",
-      author: "Suresh M.",
+      author: "Anonymous",
       ward: "174 - HSR Layout",
       tab: 'Organizing',
       upvotes: 24,
@@ -180,11 +180,9 @@ export default function Forum() {
                       </div>
                       <h3 className="font-black text-xl text-black leading-tight mb-2 uppercase tracking-tight">{post.title}</h3>
                       {post.body && <p className="text-sm text-black/80 font-bold leading-relaxed line-clamp-3 mb-4">{post.body}</p>}
-                      <div className="mt-3 flex items-center gap-1 text-xs font-black text-black">
-                        <span className="w-6 h-6 rounded-full bg-forest text-gold flex items-center justify-center font-black text-xs">
-                          {(post.author || 'A')[0]?.toUpperCase()}
-                        </span>
-                        {post.author || 'Anonymous Citizen'}
+                      <div className="mt-3 flex items-center gap-1 text-xs font-black text-black/40">
+                        <span className="w-6 h-6 rounded-full bg-forest/10 text-forest flex items-center justify-center font-black text-[10px]">A</span>
+                        Anonymous Citizen
                       </div>
                     </div>
                     <div className="flex flex-col items-center gap-1 shrink-0">
@@ -297,27 +295,26 @@ export default function Forum() {
             </ul>
           </div>
 
-          {/* Top Contributors */}
+          {/* Active Wards */}
           <div className="bg-white rounded-2xl p-6 border border-[#1a3a2a]/10 shadow-sm">
-            <h3 className="font-display font-bold text-lg text-[#1a3a2a] mb-4">Top Contributors</h3>
-            {topContributors.length > 0 ? (
+            <h3 className="font-display font-bold text-lg text-[#1a3a2a] mb-4">📢 Active Wards</h3>
+            {posts.length > 0 ? (
               <div className="space-y-3">
-                {topContributors.map(([name, count], i) => (
-                  <div key={name} className="flex items-center gap-3">
+                {Object.entries(posts.reduce((acc, p) => {
+                  acc[p.ward] = (acc[p.ward] || 0) + 1;
+                  return acc;
+                }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ward, count], i) => (
+                  <div key={ward} className="flex items-center gap-3">
                     <span className="font-bold text-[#1a3a2a]/40 text-sm w-5">#{i + 1}</span>
-                    <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center font-black text-forest text-sm">
-                      {name[0]?.toUpperCase()}
-                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-[#1a3a2a] text-sm truncate">{name}</div>
-                      <div className="text-xs text-[#1a3a2a]/40 font-medium">{count} post{count > 1 ? 's' : ''}</div>
+                      <div className="font-bold text-[#1a3a2a] text-sm truncate">{ward}</div>
+                      <div className="text-xs text-[#1a3a2a]/40 font-medium">{count} active discussion{count > 1 ? 's' : ''}</div>
                     </div>
-                    {i === 0 && <span title="Top contributor">🏆</span>}
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs font-bold text-[#1a3a2a]/30 italic text-center py-4">Be the first top contributor!</p>
+              <p className="text-xs font-bold text-[#1a3a2a]/30 italic text-center py-4">No data yet.</p>
             )}
           </div>
         </div>
@@ -375,12 +372,11 @@ export default function Forum() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-[#1a3a2a]/50 mb-1">Your Name</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-[#1a3a2a]/50 mb-1">Identity</label>
                       <input
-                        value={form.author}
-                        onChange={e => setForm({...form, author: e.target.value})}
-                        placeholder="Anonymous OK"
-                        className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a] font-medium"
+                        disabled
+                        value="Anonymous Citizen"
+                        className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a]/40 font-black uppercase text-[10px] tracking-widest bg-black/5"
                       />
                     </div>
                     <div>

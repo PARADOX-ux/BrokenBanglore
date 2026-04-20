@@ -89,10 +89,9 @@ export default function Petitions() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                         <label className="block font-bold text-[#1a3a2a] mb-1 text-sm">Filer Name *</label>
-                         <input required value={form.author} onChange={e => setForm({...form, author: e.target.value})}
-                           placeholder="Your Name"
-                           className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a] font-medium"
+                         <label className="block font-bold text-[#1a3a2a] mb-1 text-sm">Identity</label>
+                         <input disabled value="Anonymous Citizen"
+                           className="w-full border border-[#1a3a2a]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-forest/30 text-[#1a3a2a]/40 font-black uppercase text-[10px] tracking-widest bg-black/5"
                          />
                       </div>
                       <div>
@@ -144,8 +143,8 @@ export default function Petitions() {
                   
                   {/* Filer Info */}
                   <div className="bg-tea/20 rounded-xl p-3 mb-6 border border-forest/5">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-forest/40 mb-1">Petition Filer</div>
-                    <div className="text-sm font-bold text-forest">{petition.author} <span className="text-forest/40 font-medium ml-1">from {petition.authorArea}</span></div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-forest/40 mb-1">Petition Origin</div>
+                    <div className="text-sm font-bold text-forest">Anonymous Citizen <span className="text-forest/40 font-medium ml-1">from {petition.area || petition.ward}</span></div>
                   </div>
 
                   <div className="mt-auto space-y-4">
