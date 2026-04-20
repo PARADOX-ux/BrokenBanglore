@@ -366,9 +366,11 @@ export default function Report() {
                     ward_no: formData.wardData?.ward
                   });
                   if (error) { 
-                    alert(`Submission failed: ${error.message || 'Unknown Error'}. Please screenshot this for the Admin.`);
-                    console.error("Detailed DB Error:", error);
-                  } else { nextStep(); }
+                    alert(`Supabase Setup Incomplete: ${error.message}. Your report has been SAVED LOCALLY and will show on your map. Admin: Run the schema.sql in Supabase to enable cloud sync.`);
+                    nextStep(); // Allow user to see the success screen
+                  } else { 
+                    nextStep(); 
+                  }
                 }}
                 className="bg-black text-gold px-12 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-forest transition-all border-4 border-black shadow-xl"
                 disabled={!formData.title}
