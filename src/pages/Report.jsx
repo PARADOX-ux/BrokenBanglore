@@ -102,7 +102,8 @@ export default function Report() {
   const handleAreaChange = (e) => {
     const area = e.target.value;
     const ward = getWardByArea(area);
-    setFormData({ ...formData, area, wardData: ward });
+    const newPos = (ward && ward.lat) ? { lat: ward.lat, lng: ward.lng } : formData.position;
+    setFormData({ ...formData, area, wardData: ward, position: newPos });
   };
 
   const handleCategorySelect = (categoryId) => {
@@ -451,19 +452,33 @@ export default function Report() {
               <button
                 onClick={async () => {
                   stopCamera();
+                  const finalPos = formData.position || (formData.wardData?.lat ? { lat: formData.wardData.lat, lng: formData.wardData.lng } : null);
+                  
+                  if (!finalPos) {
+                    alert("Please select a location on the map or type a valid area name so we can place your report.");
+                    setStep(3);
+                    return;
+                  }
+
                   const { data, refNo, error } = await submitReport({
                     category: formData.category,
                     title: formData.title,
                     description: formData.description,
                     severity: formData.severity,
-                    lat: formData.position?.lat,
-                    lng: formData.position?.lng,
+                    lat: finalPos.lat,
+                    lng: finalPos.lng,
                     area_name: formData.area,
                     ward_no: formData.wardData?.ward,
-                    photo: formData.photo, // Pass the File object for upload
-                    photoPreview: formData.photoPreview, // Pass the preview URL for immediate display
+                    photo: formData.photo,
+                    photoPreview: formData.photoPreview,
                   });
-                  nextStep();
+
+                  if (error) {
+                    alert("Submission failed. Please check your internet or try again.");
+                    console.error(error);
+                  } else {
+                    nextStep();
+                  }
                 }}
                 className="bg-forest text-gold px-12 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:shadow-2xl transition-all disabled:opacity-20 border-4 border-black"
                 disabled={!formData.photo}

@@ -93,90 +93,105 @@ export const wardMLAData = [
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
+    lat: 13.1250, lng: 77.5950
   },
   {
     ward: 4, name: "Yelahanka Satellite Town", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
+    lat: 13.0980, lng: 77.5866
   },
   {
     ward: 5, name: "Chokkanahalli", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
+    lat: 13.1020, lng: 77.6250
   },
   {
     ward: 7, name: "Byatarayanapura", constituency: "Byatarayanapura",
     mla: "Krishna Byregowda", party: "INC", partyColor: "#2563eb",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
+    lat: 13.0640, lng: 77.5950
   },
   {
     ward: 52, name: "Indiranagar", constituency: "C V Raman Nagar",
     mla: "S Raghu", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9719, lng: 77.6412
   },
   {
     ward: 150, name: "HSR Layout", constituency: "Bommanahalli",
     mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
     authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9128, lng: 77.6387
   },
   {
     ward: 149, name: "Koramangala", constituency: "B.T.M. Layout",
     mla: "Ramalinga Reddy", party: "INC", partyColor: "#2563eb",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
     authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9352, lng: 77.6245
   },
   {
     ward: 193, name: "Whitefield", constituency: "Mahadevapura",
     mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9698, lng: 77.7499
   },
   {
     ward: 165, name: "Hebbal", constituency: "Hebbal",
     mla: "Byrathi Suresh", party: "INC", partyColor: "#2563eb",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP North Zone", totalReports: 0, resolvedReports: 0,
+    lat: 13.0358, lng: 77.5970
   },
   {
     ward: 37, name: "Yeshwanthpur", constituency: "Yeshvanthapura",
     mla: "S T Somashekar", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP West Zone", totalReports: 0, resolvedReports: 0,
+    lat: 13.0285, lng: 77.5401
   },
   {
     ward: 153, name: "Jayanagar", constituency: "Jayanagar",
     mla: "C K Ramamurthy", party: "BJP", partyColor: "#f97316",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
     authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9300, lng: 77.5800
   },
   {
     ward: 172, name: "BTM Layout", constituency: "B.T.M. Layout",
     mla: "Ramalinga Reddy", party: "INC", partyColor: "#2563eb",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
     authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9160, lng: 77.6050
   },
   {
     ward: 151, name: "Bellandur", constituency: "Mahadevapura",
     mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9304, lng: 77.6784
   },
   {
     ward: 149, name: "Varthur", constituency: "Mahadevapura",
     mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9389, lng: 77.7497
   },
   {
     ward: 192, name: "Marathahalli", constituency: "Mahadevapura",
     mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
     authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
+    lat: 12.9592, lng: 77.7011
   },
 ];
 

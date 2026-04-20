@@ -312,13 +312,13 @@ export default function Map() {
           <div className="flex gap-6 px-1">
              <div className="flex items-center gap-2">
                 <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                   {filteredReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
+                   {allReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
                 </span>
                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active</span>
              </div>
              <div className="flex items-center gap-2">
                 <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                   {filteredReports.length}
+                   {allReports.length}
                 </span>
                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Reports</span>
              </div>

@@ -8,11 +8,19 @@ export default function Home() {
   const [stats, setStats] = useState({ reports: 0, petitions: 0, citizens: 0, resolved: 0 });
 
   useEffect(() => {
-    setStats(getStats());
-    
-    // Fetch real reports for MLA stats
+    // Fetch real reports for accurate live counters
     import('../lib/reportsDb').then(m => {
-      m.getReports().then(setReports);
+      m.getReports().then(fetchedReports => {
+        setReports(fetchedReports);
+        
+        // Calculate dynamic stats from all reports
+        const baseStats = getStats();
+        setStats({
+          reports: fetchedReports.length || baseStats.reports,
+          citizens: Math.max(fetchedReports.length + 10, baseStats.citizens), // Estimate active citizens
+          resolved: fetchedReports.filter(r => r.status === 'resolved').length || baseStats.resolved
+        });
+      });
     });
 
     const handler = (e) => setStats(e.detail);
