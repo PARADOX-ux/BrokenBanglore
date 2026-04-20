@@ -17,8 +17,8 @@ L.Icon.Default.mergeOptions({
 // Bengaluru Strict Bounds
 const BENGALURU_CENTER = [12.9716, 77.5946];
 const BENGALURU_BOUNDS = [
-  [12.7300, 77.3500], // South West
-  [13.2000, 77.8500]  // North East
+  [12.8000, 77.4000], // South West - Tighter
+  [13.1500, 77.8000]  // North East - Tighter
 ];
 
 // Captures bare-map clicks (not on ward polygons) for pick mode
@@ -367,20 +367,26 @@ export default function Map() {
             </div>
           </div>
 
-          {/* Bottom Row: Key Stats */}
-          <div className="flex gap-6 px-1">
-             <div className="flex items-center gap-2">
-                <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                   {allReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
-                </span>
-                <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active</span>
-             </div>
-             <div className="flex items-center gap-2">
-                <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                   {allReports.length}
-                </span>
-                <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Reports</span>
-             </div>
+          {/* Bottom Row: Key Stats & Scope */}
+          <div className="flex justify-between items-center px-1">
+            <div className="flex gap-6">
+               <div className="flex items-center gap-2">
+                  <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
+                     {allReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
+                  </span>
+                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
+                     {allReports.length}
+                  </span>
+                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Reports</span>
+               </div>
+            </div>
+            <div className="bg-gold text-black font-black text-[9px] px-3 py-1 rounded-sm uppercase tracking-tighter animate-pulse flex items-center gap-2 shadow-lg">
+               <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+               Bengaluru Only Map
+            </div>
           </div>
         </div>
       )}
@@ -402,10 +408,11 @@ export default function Map() {
         {viewMode === 'map' ? (
           <MapContainer 
             center={BENGALURU_CENTER} 
-            zoom={11} 
-            minZoom={10}
+            zoom={12} 
+            minZoom={11}
             maxBounds={BENGALURU_BOUNDS}
             maxBoundsViscosity={1.0}
+            attributionControl={false}
             style={{ height: '100%', width: '100%', background: '#F8F9FA' }}
             className="z-0"
             zoomControl={false}
@@ -441,7 +448,13 @@ export default function Map() {
              <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-end mb-12 border-b-8 border-black pb-6">
                    <div>
-                      <h1 className="font-display font-black text-6xl md:text-8xl uppercase tracking-tighter text-black leading-[0.8] mb-4">CITIZEN FEED</h1>
+                      <h1 className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
+                        Bengaluru is Broken. <br className="hidden md:block"/>
+                        <span className="text-forest relative inline-block">
+                          You are the Fix.
+                          <span className="absolute -bottom-4 left-0 w-full h-1 md:h-1.5 bg-gold -z-10"></span>
+                        </span>
+                      </h1>
                       <p className="text-xs md:text-sm font-bold text-black/50 uppercase tracking-[0.2em]">Live Audit Stream • {filteredReports.length} Reports Logged</p>
                    </div>
                 </div>
@@ -549,10 +562,15 @@ export default function Map() {
                 <h2 className="font-display font-bold text-lg text-black leading-none tracking-tighter">
                   {activeReport.title}
                 </h2>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex flex-wrap items-center gap-2 mt-1">
                   <span className="font-nav font-black text-[10px] bg-forest text-gold px-2 py-0.5 rounded-md uppercase tracking-widest">
                     {activeReport.ward ? `Ward #${activeReport.ward}` : 'GPS Assigned Location'}
                   </span>
+                  {activeReport.mlaDetails?.constituency && (
+                    <span className="font-nav font-bold text-[10px] bg-black text-white px-2 py-0.5 rounded-md uppercase tracking-widest">
+                      AC: {activeReport.mlaDetails.constituency}
+                    </span>
+                  )}
                   <span className="font-nav font-bold text-[10px] text-black/30 uppercase tracking-[0.1em]">
                     Type: {activeReport.category || 'General Audit'}
                   </span>
