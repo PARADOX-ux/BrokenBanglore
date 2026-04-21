@@ -267,16 +267,19 @@ export default function Map() {
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
 
-      // Ward Borders (Ultra subtle)
+      // Ward Borders (Distinct Forest Green)
       map.current.addLayer({
         id: 'ward-borders',
         type: 'line',
         source: 'bbmp-wards',
-        layout: {},
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
         paint: {
           'line-color': '#2B9348',
-          'line-width': 0.5,
-          'line-opacity': 0.05 // Much more subtle
+          'line-width': 1.2,
+          'line-opacity': 0.3 // Increased visibility
         }
       });
 
@@ -606,24 +609,27 @@ export default function Map() {
       {/* Floating Ward Info (Small & Reorganized) */}
       {!selectedReport && hoveredReport && (() => {
         const activeReport = hoveredReport;
+        
+        // Match the user's specific request: Sub-area -> Ward # -> Zone -> Main Area (Assembly)
         const subArea = activeReport.mlaDetails?.area || activeReport.title.replace(' Overview', '');
+        const wardNo = activeReport.ward;
         const zone = activeReport.mlaDetails?.zone || 'Bengaluru';
-        const assembly = activeReport.mlaDetails?.constituency || 'East Bangalore';
+        const mainArea = activeReport.mlaDetails?.constituency || 'General Area';
 
         return (
           <div className="absolute bottom-10 left-4 md:left-8 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-            <div className="bg-white/95 backdrop-blur-sm p-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] border border-black/5 w-48 flex flex-col">
-               <h2 className="font-display font-black text-sm text-black leading-tight mb-0.5 uppercase tracking-tighter">
+            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-[0_15px_50px_rgba(0,0,0,0.2)] border border-[#2B9348]/20 w-52 flex flex-col">
+               <div className="text-[14px] font-black text-black leading-none mb-1 tracking-tighter">
                   {subArea}
-               </h2>
-               <div className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none mb-0.5">
-                 Ward #{activeReport.ward}
                </div>
-               <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mb-2">
+               <div className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none mb-0.5">
+                 Ward #{wardNo}
+               </div>
+               <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mb-3">
                  {zone}
                </div>
-               <div className="text-[10px] font-black text-forest uppercase tracking-tight leading-none border-t border-black/5 pt-2">
-                 {assembly}
+               <div className="text-[10px] font-black text-forest uppercase tracking-widest leading-none border-t border-forest/10 pt-2.5">
+                 {mainArea}
                </div>
             </div>
           </div>
