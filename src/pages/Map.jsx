@@ -154,10 +154,19 @@ export default function Map() {
   };
 
   const handleWardAction = async (wardProps, type = 'click') => {
-    const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
+    const wardNo = wardProps.KGISWardNo || wardProps.ward || wardProps.ward_no || 1;
+    const rawWardName = wardProps.KGISWardName || wardProps.ward_name || wardProps.name || 'Unknown Area';
+    
     let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
+    
+    // Deeper lookup for mlaData if simple find fails
     if (!mlaData) {
-      const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
+      const areaMatch = rawWardName.split('(')[0].trim().toLowerCase();
+      mlaData = wardMLAData.find(m => m.name.toLowerCase().includes(areaMatch));
+    }
+
+    if (!mlaData) {
+      const zone = rawWardName.split('(')[1]?.replace(')', '') || 'Central';
       const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
       mlaData = { ...fallbackMla, ...getMPByZone(zone) };
     }
@@ -165,7 +174,7 @@ export default function Map() {
     if (type === 'hover') {
       setHoveredReport({
         id: `ward-${wardNo}`,
-        wardName: wardProps.KGISWardName || wardProps.name,
+        wardName: rawWardName,
         ward: wardNo,
         mlaDetails: mlaData
       });
@@ -174,7 +183,7 @@ export default function Map() {
     } else {
       setSelectedReport({
         id: `ward-${wardNo}`,
-        title: `${wardProps.KGISWardName || wardProps.name} Overview`,
+        title: `${rawWardName} Overview`,
         category: "geographical area",
         catColor: mlaData.partyColor || "#2B9348",
         area: `BBMP Ward #${wardNo}`,
@@ -239,14 +248,14 @@ export default function Map() {
         data: '/data/bangalore-wards.geojson?v=datameet_243'
       });
 
-      // 3D Ward Extrusion (Foundation - Flattened for transparency)
+      // Ward Fill Layer (The clickable/hoverable HIT TARGET)
       map.current.addLayer({
         id: 'ward-fills',
-        type: 'fill', // Switched to flat fill for base
+        type: 'fill', 
         source: 'bbmp-wards',
         paint: {
-          'fill-color': '#2B9348',
-          'fill-opacity': 0.02 
+          'fill-color': '#4ADE80',
+          'fill-opacity': 0.05 // Increased opacity for better HIT DETECTION
         }
       });
 
@@ -307,26 +316,26 @@ export default function Map() {
         }
       });
 
-      // Global Hover and Mouse Move Interaction
-      map.current.on('mousemove', (e) => {
-        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
-        
-        if (features.length > 0) {
+      // Direct Layer Interaction (Most Reliable)
+      map.current.on('mousemove', 'ward-fills', (e) => {
+        if (e.features.length > 0) {
           map.current.getCanvas().style.cursor = 'pointer';
-          const feature = features[0];
-          const wardNo = feature.properties.KGISWardNo;
+          const feature = e.features[0];
+          const wardNo = feature.properties.KGISWardNo || feature.properties.ward_no;
           
           // Update Highlights
           map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
           map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
           
           handleWardAction(feature.properties, 'hover');
-        } else {
-          map.current.getCanvas().style.cursor = '';
-          map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
-          map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
-          setHoveredReport(null);
         }
+      });
+
+      map.current.on('mouseleave', 'ward-fills', () => {
+        map.current.getCanvas().style.cursor = '';
+        map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
+        map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
+        setHoveredReport(null);
       });
 
       // Click interaction
