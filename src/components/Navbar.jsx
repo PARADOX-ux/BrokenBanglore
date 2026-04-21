@@ -16,8 +16,12 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] bg-cream border-b-2 border-black w-full h-16 md:h-20 flex items-center justify-between px-4 md:px-8">
-      <Link to="/" className="font-nav font-black text-xl md:text-3xl flex items-center gap-1 text-black tracking-tight">
-        Broken Bengaluru
+      <Link to="/" className="font-nav font-black text-xl md:text-3xl flex flex-col items-start gap-0 text-black tracking-tighter leading-none group">
+        <span>Broken Bengaluru</span>
+        <span className="text-[7px] font-black tracking-[0.2em] text-red-600 flex items-center gap-1 mt-1">
+           <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+           ANONYMOUS AUDIT ENABLED
+        </span>
       </Link>
       
       {/* Desktop Nav */}

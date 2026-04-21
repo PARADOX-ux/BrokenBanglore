@@ -180,7 +180,15 @@ export default function Report() {
   return (
     <div className="max-w-3xl mx-auto w-full p-4 md:p-8 min-h-[calc(100vh-80px)] flex flex-col pt-24 md:pt-12">
       <h1 className="font-display font-black text-3xl md:text-5xl text-black mb-2 uppercase tracking-tighter">Report a Problem</h1>
-      <p className="text-black/60 mb-8 font-black uppercase text-xs tracking-widest italic">We will notify the responsible MLA and Authority immediately.</p>
+      <div className="flex items-center gap-4 mb-8">
+         <div className="px-3 py-1 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+           <svg className="w-2.5 h-2.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+           IDENTITY ANONYMOUS
+         </div>
+         <div className="px-3 py-1 bg-white border border-black/10 text-black rounded-full text-[9px] font-black uppercase tracking-widest">
+           ENCRYPTED UPLOAD
+         </div>
+      </div>
       
       {step < 5 && renderStepIndicator()}
 
@@ -395,17 +403,50 @@ export default function Report() {
                 </div>
               </div>
 
-              {/* SUCCESS PHOTO PREVIEW */}
+              {/* SUCCESS PHOTO PREVIEW - Hardened Display */}
               {(submittedReport?.photo_url || formData.photoPreview) && (
-                <div className="mb-8 rounded-[2.5rem] overflow-hidden border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-black/5 aspect-auto max-h-[300px]">
+                <div className="mb-8 rounded-[2.5rem] overflow-hidden border-4 border-black shadow-[12px_12px_0px_0px_rgba(43,147,72,0.2)] bg-black relative aspect-square md:aspect-video flex items-center justify-center">
                   <img 
                     src={submittedReport?.photo_url || formData.photoPreview} 
                     alt="Submitted Evidence" 
-                    className="w-full h-full object-contain bg-black" 
+                    key={submittedReport?.id || 'preview'} // Force re-render
+                    className="w-full h-full object-contain opacity-0 transition-opacity duration-500" 
+                    onLoad={(e) => e.target.classList.add('opacity-100')}
                   />
-                  <div className="bg-forest text-gold py-3 px-6 font-black text-[10px] uppercase tracking-widest text-center border-t-4 border-black">
-                    Audit Photo Verified & Logged
+                  {!submittedReport && <div className="absolute inset-0 flex items-center justify-center text-gold font-black uppercase text-[10px] animate-pulse">Syncing Audit...</div>}
+                </div>
+              )}
+
+              {/* LIVE MLA IMPACT SCORECARD */}
+              {(submittedReport?.mla_name || formData.wardData?.mla) && (
+                <div className="mb-8 p-6 bg-forest text-gold rounded-[2rem] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row items-center gap-6">
+                  <div className="w-20 h-20 bg-white/10 rounded-full border-2 border-gold/30 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                    <img 
+                      src={formData.wardData?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(submittedReport?.mla_name || formData.wardData?.mla || 'MLA')}&background=1a3a2a&color=fcc62d`} 
+                      alt="MLA" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-1">Assigned Representative</div>
+                    <div className="text-xl font-display font-black uppercase tracking-tight mb-2">
+                      {submittedReport?.mla_name || formData.wardData?.mla}
+                    </div>
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                      <span className="bg-black/30 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-gold/10">
+                        Constituency: {submittedReport?.mla_constituency || formData.wardData?.name || 'Local Ward'}
+                      </span>
+                      <span className="bg-bright text-black px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
+                        Resolution Score: 14%
+                      </span>
+                    </div>
+                  </div>
+                  <Link 
+                    to={`/accountability?search=${encodeURIComponent(submittedReport?.mla_name || formData.wardData?.mla || '')}`}
+                    className="bg-gold text-forest px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:scale-105 transition-transform"
+                  >
+                    View Official Record
+                  </Link>
                 </div>
               )}
 

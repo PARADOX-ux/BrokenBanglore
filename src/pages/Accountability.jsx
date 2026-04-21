@@ -82,21 +82,31 @@ export default function Accountability() {
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 w-full overflow-x-auto pb-4 hide-scrollbar">
-            <div className="bg-white border-b-4 border-forest p-4 rounded-xl flex-shrink-0 min-w-[200px]">
-              <div className="text-4xl font-display font-bold text-forest mb-1">{totalReports}</div>
-              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Total Reports</div>
+            <div className="bg-white border-b-4 border-forest p-4 rounded-xl flex-shrink-0 min-w-[200px] shadow-sm">
+              <div className="text-4xl font-display font-black text-forest mb-1">{totalReports}</div>
+              <div className="font-black text-[10px] tracking-widest uppercase text-forest/40">Audits Logged</div>
             </div>
-            <div className="bg-white border-b-4 border-bright p-4 rounded-xl flex-shrink-0 min-w-[200px]">
-              <div className="text-4xl font-display font-bold text-bright mb-1">{resolvedReports}</div>
-              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Resolved ({resolutionRate}%)</div>
+            <div className="bg-white border-b-4 border-bright p-4 rounded-xl flex-shrink-0 min-w-[200px] shadow-sm">
+              <div className="text-4xl font-display font-black text-bright mb-1">{resolvedReports}</div>
+              <div className="font-black text-[10px] tracking-widest uppercase text-forest/40">Resolved ({resolutionRate}%)</div>
             </div>
-            <div className="bg-white border-b-4 border-forest/30 p-4 rounded-xl flex-shrink-0 min-w-[200px]">
-              <div className="text-4xl font-display font-bold text-forest mb-1">{ignoredReports}</div>
-              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">Pending Audit</div>
+            <div className="bg-white border-b-4 border-red-600 p-4 rounded-xl flex-shrink-0 min-w-[200px] shadow-sm">
+              <div className="text-4xl font-display font-black text-red-600 mb-1">{ignoredReports}</div>
+              <div className="font-black text-[10px] tracking-widest uppercase text-forest/40">Critical Pending</div>
             </div>
-            <div className="bg-white border-b-4 border-gold p-4 rounded-xl flex-shrink-0 min-w-[200px]">
-              <div className="text-4xl font-display font-bold text-gold mb-1">0</div>
-              <div className="font-bold text-sm tracking-wider uppercase text-forest/60">To Media</div>
+          </div>
+
+          {/* User's Request: MLA List triggered / Resolved % leaderboard */}
+          <div className="mt-8 bg-black/5 rounded-2xl p-4 flex items-center gap-4 border border-black/5">
+            <span className="bg-black text-gold px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Live Leaderboard</span>
+            <div className="flex-1 overflow-hidden whitespace-nowrap">
+              <div className="inline-block animate-marquee hover:pause-marquee">
+                {sortedMLAs.slice(0, 5).map((mla, i) => (
+                  <span key={mla.mla} className="mr-8 font-black text-[10px] uppercase text-forest/60">
+                    <span className="text-black">#{i+1} {mla.mla}</span>: {mla.totalReports > 0 ? Math.round((mla.resolvedReports/mla.totalReports)*100) : 0}% Fix Rate
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -138,7 +148,11 @@ export default function Accountability() {
                 const percentage = mla.totalReports > 0 ? (mla.resolvedReports/mla.totalReports)*100 : 0;
                 
                 return (
-                  <div key={mla.constNo} className="group relative bg-white md:bg-transparent rounded-2xl md:rounded-none p-5 md:p-0 border border-ash/40 md:border-b md:border-x-0 md:border-t-0 md:border-ash/30 md:pb-4 hover:bg-white/50 transition-colors">
+                  <div key={mla.mla} className="group relative bg-white md:bg-transparent rounded-2xl md:rounded-none p-5 md:p-0 border border-ash/40 md:border-b md:border-x-0 md:border-t-0 md:border-ash/30 md:pb-4 hover:bg-white/50 transition-colors">
+                    <div className="bg-forest text-gold py-1.5 px-3 rounded-full text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1.5 self-start mb-2">
+                       <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse"></span>
+                       Regional Rep Accountability: {Math.round(percentage)}% Fixed
+                    </div>
                     
                     {/* Desktop rendering structure */}
                     <div className="hidden md:grid grid-cols-12 gap-4 items-center px-4">

@@ -480,8 +480,17 @@ export default function Map() {
                                 <span className="bg-forest text-gold text-[8px] font-black px-2 py-0.5 rounded-sm uppercase tracking-tighter">Namma Kasa</span>
                               )}
                            </div>
-                           <h3 className="font-display font-black text-2xl text-black mb-4 leading-tight group-hover:underline underline-offset-4 decoration-4">{report.title}</h3>
-                           {report.area_name && <p className="text-[10px] font-bold text-black/60 uppercase tracking-widest mb-6 flex items-center gap-2 bg-ash/10 w-fit px-3 py-1 rounded-lg">📍 {report.area_name}</p>}
+                           <h3 className="font-display font-black text-2xl text-black mb-1 leading-tight group-hover:underline underline-offset-4 decoration-4">{report.title}</h3>
+                           
+                           {/* Location & Representative Context */}
+                           <div className="flex flex-col gap-1 mb-6">
+                              <div className="text-[10px] font-black text-black/60 uppercase tracking-widest flex items-center gap-2 bg-ash/10 w-fit px-3 py-1 rounded-lg">📍 {report.area_name || 'GPS SPOT'}</div>
+                              <div className="flex gap-2">
+                                <span className="text-[8px] font-black uppercase text-forest/60 tracking-wider">MLA: {report.mla_name || 'BBMP Authority'}</span>
+                                <span className="text-[8px] font-black uppercase text-black/20 tracking-wider">•</span>
+                                <span className="text-[8px] font-black uppercase text-black/40 tracking-wider">MP: {report.mp_name || 'Bengaluru'}</span>
+                              </div>
+                           </div>
                            <div className="mt-auto pt-6 border-t-2 border-black/5 flex items-center justify-between">
                               <div className="flex flex-col">
                                  <span className="text-[8px] font-black text-black/40 uppercase tracking-widest">Priority</span>
@@ -602,33 +611,54 @@ export default function Map() {
                     "{activeReport.description}"
                   </div>
                 )}
-                <div className="bg-[#1a3a2a] text-white rounded-xl p-3 mb-4 grid grid-cols-2 gap-2 text-xs border-b border-forest/10">
-                  <button 
-                    onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mla)}`)}
-                    className="text-left hover:bg-white/10 p-1 rounded transition-colors group"
-                  >
-                    <div className="text-white/40 uppercase tracking-widest text-[9px] group-hover:text-gold transition-colors">MLA (State) →</div>
-                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">
+                <div className="bg-[#1a3a2a] text-white rounded-[2rem] p-6 mb-6 flex flex-col gap-5 border border-forest shadow-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-100 transition-opacity">
+                     <span className="text-4xl">⚖️</span>
+                  </div>
+                  
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-display font-black text-[9px] uppercase tracking-[0.3em] text-white/40 mb-1">Local Accountability Metrics</span>
+                    <h4 className="font-display font-black text-xl uppercase tracking-tighter text-gold leading-none">
                       {activeReport.mlaDetails?.mla && activeReport.mlaDetails.mla !== 'In Audit Zone' 
                         ? activeReport.mlaDetails.mla 
                         : (wardMLAData.find(w => Number(w.ward) === Number(activeReport.ward))?.mla || 'BBMP Authority')
                       }
+                    </h4>
+                    <span className="text-[10px] uppercase font-black text-white/50 tracking-widest">{activeReport.mlaDetails?.constituency || activeReport.area} (AC)</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                       <span className="font-nav font-black text-[9px] uppercase tracking-widest text-white/60">Resolution Score</span>
+                       <span className="font-display font-black text-bright text-lg">14%</span>
                     </div>
-                    <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.party || 'KLA'}</div>
-                  </button>
-                  <button 
-                    onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mp)}`)}
-                    className="text-left hover:bg-white/10 p-1 rounded transition-colors group"
-                  >
-                    <div className="text-white/40 uppercase tracking-widest text-[9px] group-hover:text-gold transition-colors">MP (Lok Sabha) →</div>
-                    <div className="font-bold text-sm leading-tight break-words text-white group-hover:text-gold">
-                      {activeReport.mlaDetails?.mp && activeReport.mlaDetails.mp !== 'Bengaluru'
-                        ? activeReport.mlaDetails.mp 
-                        : (getMPByConstituency(activeReport.mlaDetails?.constituency || activeReport.area || '').mp)
-                      }
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                       <div className="h-full bg-bright rounded-full w-[14%] shadow-[0_0_10px_rgba(43,247,172,0.3)]"></div>
                     </div>
-                    <div className="text-white/50 text-[9px] uppercase font-black">{activeReport.mlaDetails?.mpConstituency}</div>
-                  </button>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-[8px] font-black uppercase text-white/30 tracking-widest mb-0.5">MP Oversight</div>
+                        <div className="text-xs font-bold text-white break-words">
+                          {activeReport.mlaDetails?.mp && activeReport.mlaDetails.mp !== 'Bengaluru'
+                            ? activeReport.mlaDetails.mp 
+                            : (getMPByConstituency(activeReport.mlaDetails?.constituency || activeReport.area || '').mp)
+                          }
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[8px] font-black uppercase text-white/30 tracking-widest mb-0.5">Constituency</div>
+                        <div className="text-xs font-bold text-white">{activeReport.mlaDetails?.mpConstituency || 'Bengaluru'}</div>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mla)}`)}
+                      className="w-full bg-gold text-forest py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all mt-2"
+                    >
+                      Audit Official Record →
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-forest/10">
