@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { categories, getWardByArea } from '../data/wardData';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { submitReport } from '../lib/reportsDb';
+import { getWardFromLatLng } from '../utils/geoUtils';
 
 export default function Report() {
   const navigate = useNavigate();
@@ -58,11 +59,11 @@ export default function Report() {
   const nextStep = () => setStep((s) => Math.min(s + 1, 5));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
-  // Auto-detect GPS location with Reverse Geocoding
+  // Auto-detect GPS location with Precise Ward Mapping
   const detectLocation = async () => {
     if (navigator.geolocation) {
       setFormData(f => ({ ...f, area: 'Detecting...', wardData: null }));
-      setPickedLocation({ lat: 0, lng: 0, wardName: 'Detecting location...' });
+      setPickedLocation({ lat: 0, lng: 0, wardName: 'Detecting position...' });
 
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
@@ -70,32 +71,48 @@ export default function Report() {
         setFormData(f => ({ ...f, position: loc }));
         
         try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-          const data = await res.json();
+          // 1. Precise Ward Lookup using GeoJSON polygons
+          const ward = await getWardFromLatLng(lat, lng);
           
-          if (data && data.address) {
-            const area = data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.city_district || data.address.subdistrict || 'Detected Area';
-            const ward = getWardByArea(area);
-            
-            setFormData(f => ({ ...f, area: area, wardData: ward }));
-            setPickedLocation({ lat, lng, wardName: area });
+          if (ward) {
+            setFormData(f => ({ 
+              ...f, 
+              area: ward.name, 
+              wardData: {
+                ward: ward.ward,
+                name: ward.name,
+                mla: ward.mla,
+                party: ward.party,
+                partyColor: ward.partyColor,
+                authority: ward.authority
+              } 
+            }));
+            setPickedLocation({ lat, lng, wardName: ward.name });
           } else {
-            setPickedLocation({ lat, lng, wardName: 'GPS Location' });
+            // 2. Fallback to reverse geocoding if outside ward boundaries
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+            const data = await res.json();
+            if (data && data.address) {
+              const area = data.address.suburb || data.address.neighbourhood || data.address.city_district || 'Detected Area';
+              setFormData(f => ({ ...f, area: area }));
+              setPickedLocation({ lat, lng, wardName: area });
+            } else {
+              setPickedLocation({ lat, lng, wardName: 'GPS Location' });
+            }
           }
         } catch (e) {
-          console.error("Reverse geocoding failed", e);
+          console.error("Location detection failed", e);
           setPickedLocation({ lat, lng, wardName: 'GPS Location' });
         }
       }, (err) => {
         let msg = 'Could not detect location.';
-        if (err.code === 1) msg = 'Location access denied. Please enable GPS and try again.';
-        if (err.code === 3) msg = 'GPS timeout. Try picking on the map instead.';
+        if (err.code === 1) msg = 'Location access denied. Please enable GPS.';
         alert(msg);
         setPickedLocation(null);
         setFormData(f => ({ ...f, area: '' }));
-      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      }, { enableHighAccuracy: true, timeout: 15000 });
     } else {
-      alert('Geolocation is not supported by your browser.');
+      alert('Geolocation not supported.');
     }
   };
 

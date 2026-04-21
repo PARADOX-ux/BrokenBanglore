@@ -1,71 +1,38 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON, Popup } from 'react-leaflet';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import * as turf from '@turf/centroid';
-import L from 'leaflet';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { categories, sampleReports, wardMLAData, completeMLAList, getMPByConstituency, getMPByZone } from '../data/wardData';
+import { categories, wardMLAData, completeMLAList, getMPByConstituency, getMPByZone } from '../data/wardData';
 import { getReports, upvoteReport } from '../lib/reportsDb';
 
-// Fix Leaflet icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
 // Bengaluru Strict Bounds
-const BENGALURU_CENTER = [12.9716, 77.5946];
+// NOTE: MapLibre uses [lng, lat]
+const BENGALURU_CENTER = [77.5946, 12.9716];
 const BENGALURU_BOUNDS = [
-  [12.8000, 77.4000], // South West - Tighter
-  [13.1500, 77.8000]  // North East - Tighter
+  [77.4000, 12.8000], // South West
+  [77.8000, 13.1500]  // North East
 ];
-
-// Captures bare-map clicks (not on ward polygons) for pick mode
-function MapClickPicker({ onPick }) {
-  useMapEvents({
-    click(e) { onPick(e.latlng); }
-  });
-  return null;
-}
-
-// Fix Leaflet icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-// Purged custom icons to remove dots/pins logic completely
-// Dots and Pins logic removed for pure Ward Area interaction.
-
-
-
-
-// Reverted to original subtle green styling
-const wardStyle = {
-  fillColor: '#2B9348',
-  fillOpacity: 0.05,
-  weight: 1,
-  opacity: 0.2,
-  color: '#2B9348',
-};
 
 export default function Map() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isPickMode = searchParams.get('pickMode') === 'true';
 
-  const [activeCategory, setActiveCategory] = useState('all');
   const [selectedReport, setSelectedReport] = useState(null);
-  const [pickedPin, setPickedPin] = useState(null);        // lat/lng picked in pick mode
+  const [pickedPin, setPickedPin] = useState(null);        // {lat, lng}
   const [pickedWard, setPickedWard] = useState(null);      // ward data from click
   const [wardReports, setWardReports] = useState([]);
   const [wardReportsLoading, setWardReportsLoading] = useState(false);
-  const [hoveredData, setHoveredData] = useState(null);
   const [hoveredReport, setHoveredReport] = useState(null);
-  const [geoJsonData, setGeoJsonData] = useState(null);
   const [allReports, setAllReports] = useState([]);
-  const [reportCounts, setReportCounts] = useState({}); // Pre-calculated counts for coloring
   const [viewMode, setViewMode] = useState('map');      // 'map' | 'list'
   const [severityFilter, setSeverityFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const geoJsonRef = useRef(null);
+
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const markers = useRef([]);
 
   // Confirm pick — save to localStorage and go back to report
   const confirmPick = () => {
@@ -83,57 +50,74 @@ export default function Map() {
     navigate('/report?step=3&locationPicked=true');
   };
 
-  // Pick mode: clicking a ward also sets the pin
-  const handlePickModeWardClick = (e, wardProps) => {
-    const center = e.target.getBounds().getCenter();
-    const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
-    let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
-    if (!mlaData) {
-      mlaData = completeMLAList[Number(wardNo) % completeMLAList.length] || completeMLAList[0];
-    }
-    setPickedPin({ lat: center.lat, lng: center.lng });
-    setPickedWard({ ward: wardNo, name: wardProps.KGISWardName || wardProps.name, mla: mlaData });
-  };
-
-  // Normal mode: ward click → load reports for ward
-  const handleNormalWardClick = async (e, wardProps) => {
-    const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
-    let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
-    if (!mlaData) {
-      const baseMla = completeMLAList[Number(wardNo) % completeMLAList.length] || completeMLAList[0];
-      mlaData = { ...baseMla, ...getMPByConstituency(baseMla.constituency) };
-    }
-    setSelectedReport({
-      id: `ward-${wardNo}`,
-      title: `${wardProps.KGISWardName || wardProps.name} Ward`,
-      category: 'geographical area',
-      catColor: mlaData.partyColor || '#2B9348',
-      area: `BBMP Ward #${wardNo}`,
-      ward: wardNo,
-      authority: 'Bruhat Bengaluru Mahanagara Palike',
-      status: 'pending',
-      mlaDetails: {
-        ...mlaData,
-        mla: mlaData.mla || mlaData.name || 'BBMP Ward Officer'
-      },
+  // Filtered reports based on active dropdowns
+  const filteredReports = useMemo(() => {
+    return allReports.filter(report => {
+      const severityMatch = severityFilter === 'all' || (report.severity && report.severity.toLowerCase() === severityFilter.toLowerCase());
+      const statusMatch = statusFilter === 'all' || (report.status && report.status.toLowerCase() === statusFilter.toLowerCase());
+      return severityMatch && statusMatch;
     });
-    setWardReports([]);
-    setWardReportsLoading(true);
-    const reports = await getReports({ ward_no: wardNo });
-    setWardReports(reports);
-    setWardReportsLoading(false);
-  };
+  }, [allReports, severityFilter, statusFilter]);
+
+  // Sync Markers with filtered reports
+  useEffect(() => {
+    if (!map.current || viewMode !== 'map' || isPickMode) {
+      markers.current.forEach(m => m.remove());
+      markers.current = [];
+      return;
+    }
+
+    // Clear existing markers
+    markers.current.forEach(m => m.remove());
+    markers.current = [];
+
+    // Add new markers
+    filteredReports.forEach(report => {
+      if (!report.lat || !report.lng) return;
+
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      const bgColor = report.category === 'garbage' ? '#2B9348' : 
+                     (report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : 
+                     (report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'));
+      const size = report.category === 'garbage' ? '18px' : '14px';
+      const emoji = report.category === 'garbage' ? '♻️' : '';
+      
+      el.innerHTML = `<div style="background-color: ${bgColor}; width: ${size}; height: ${size}; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 8px; cursor: pointer;">${emoji}</div>`;
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([report.lng, report.lat])
+        .addTo(map.current);
+      
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleReportClick(report);
+      });
+
+      markers.current.push(marker);
+    });
+  }, [filteredReports, viewMode, isPickMode]);
+
+  // Pick mode pin
+  useEffect(() => {
+    if (!map.current || !isPickMode) return;
+    
+    // Static pin for pick mode
+    const pinEl = document.createElement('div');
+    pinEl.innerHTML = '<div style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); cursor: move;">📍</div>';
+    
+    const dragPin = new maplibregl.Marker({ element: pinEl, draggable: false });
+    
+    if (pickedPin) {
+      dragPin.setLngLat([pickedPin.lng, pickedPin.lat]).addTo(map.current);
+    }
+
+    return () => dragPin.remove();
+  }, [isPickMode, pickedPin]);
 
   const handleReportClick = (report) => {
-    // Attempt metadata recovery if database fields are missing
     let recoveredWard = null;
-    
-    // 1. Precise lookup by Ward Number
-    if (report.ward_no) {
-      recoveredWard = wardMLAData.find(w => Number(w.ward) === Number(report.ward_no));
-    }
-
-    // 2. Precise lookup by Area Name
+    if (report.ward_no) recoveredWard = wardMLAData.find(w => Number(w.ward) === Number(report.ward_no));
     if (!recoveredWard && report.area_name) {
       recoveredWard = wardMLAData.find(w => 
         w.name.toLowerCase().includes(report.area_name.toLowerCase()) || 
@@ -141,13 +125,6 @@ export default function Map() {
       );
     }
 
-    // 3. Precise lookup by Constituency
-    if (!recoveredWard && report.mla_constituency) {
-      recoveredWard = wardMLAData.find(w => w.constituency.toLowerCase() === report.mla_constituency.toLowerCase());
-    }
-
-    // 4. Parliamentary Mapping (The Core Fix)
-    // We prioritize the constituency mapping for MP names to avoid North/South swaps
     const constituency = report.mla_constituency || recoveredWard?.constituency || report.area_name || 'Central';
     const mpInfo = getMPByConstituency(constituency);
 
@@ -175,151 +152,175 @@ export default function Map() {
     setWardReports([]);
   };
 
+  const handleWardAction = async (wardProps, type = 'click') => {
+    const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
+    let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
+    if (!mlaData) {
+      const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
+      const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
+      mlaData = { ...fallbackMla, ...getMPByZone(zone) };
+    }
+
+    if (type === 'hover') {
+      const zone = wardProps.KGISWardName ? (wardProps.KGISWardName.split('(')[1]?.replace(')', '') || 'Central') : 'Central';
+      setHoveredReport({
+        id: `ward-${wardNo}`,
+        title: `${wardProps.KGISWardName || wardProps.name} | Ward #${wardNo} | ${zone}`,
+        category: "geographical area",
+        area: `Ward #${wardNo}`,
+        ward: wardNo,
+        mlaDetails: mlaData
+      });
+      // Pre-load reports for comparison while hovering
+      getReports({ ward_no: wardNo }).then(setWardReports);
+    } else {
+      setSelectedReport({
+        id: `ward-${wardNo}`,
+        title: `${wardProps.KGISWardName || wardProps.name} Overview`,
+        category: "geographical area",
+        catColor: mlaData.partyColor || "#2B9348",
+        area: `BBMP Ward #${wardNo}`,
+        ward: wardNo,
+        authority: "Bruhat Bengaluru Mahanagara Palike",
+        status: "pending",
+        mlaDetails: mlaData
+      });
+      setWardReports([]);
+      setWardReportsLoading(true);
+      const reports = await getReports({ ward_no: wardNo });
+      setWardReports(reports);
+      setWardReportsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch('/data/bangalore-wards.geojson?v=datameet_243')
-      .then(res => res.json())
-      .then(data => setGeoJsonData(data))
-      .catch(err => console.error("Could not load wards GeoJSON", err));
+    if (map.current) return; // Initialize only once
 
-    // Fetch all global reports to show markers and calculate counts
-    getReports().then(data => {
-      const reports = data || [];
-      setAllReports(reports);
-      
-      const counts = {};
-      reports.forEach(r => {
-        if (r.ward_no) {
-          counts[r.ward_no] = (counts[r.ward_no] || 0) + 1;
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      center: BENGALURU_CENTER,
+      zoom: 12,
+      minZoom: 10,
+      maxBounds: BENGALURU_BOUNDS
+    });
+
+    map.current.on('load', () => {
+      // Add Ward GeoJSON Source
+      map.current.addSource('bbmp-wards', {
+        type: 'geojson',
+        data: '/data/bangalore-wards.geojson?v=datameet_243'
+      });
+
+      // Ward Fills
+      map.current.addLayer({
+        id: 'ward-fills',
+        type: 'fill',
+        source: 'bbmp-wards',
+        layout: {},
+        paint: {
+          'fill-color': '#2B9348',
+          'fill-opacity': 0.05
         }
       });
-      setReportCounts(counts);
-    });
-  }, []);
 
-  // Filtered reports based on active dropdowns
-  const filteredReports = useMemo(() => {
-    return allReports.filter(report => {
-      const severityMatch = severityFilter === 'all' || (report.severity && report.severity.toLowerCase() === severityFilter.toLowerCase());
-      const statusMatch = statusFilter === 'all' || (report.status && report.status.toLowerCase() === statusFilter.toLowerCase());
-      return severityMatch && statusMatch;
-    });
-  }, [allReports, severityFilter, statusFilter]);
-
-  // NammaKasa Area Interaction Handlers
-  // Fix map hover interaction
-  const highlightWard = (e) => {
-    const layer = e.target;
-    layer.setStyle({
-      fillColor: '#55A630',
-      fillOpacity: 0.15,
-      weight: 2,
-      dashArray: '3, 6',
-      color: '#E9C46A',
-    });
-    
-    // Removed bringToFront to prevent event bubbling issues that cause 'stuck' highlights
-    
-    const wardProps = layer.feature.properties;
-    const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
-    
-    // Deterministic fallback system - if ward isn't explicitly defined, grab a stable MLA from the main list based on Modulo
-    let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
-    if (!mlaData) {
-      const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
-      const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
-      mlaData = { ...fallbackMla, ...getMPByZone(zone) };
-    }
-    
-    setHoveredData({ 
-      area: wardProps.KGISWardName || wardProps.name, 
-      ward: wardNo,
-      mla: mlaData
-    });
-
-    const zone = wardProps.KGISWardName ? (wardProps.KGISWardName.split('(')[1]?.replace(')', '') || 'Central') : 'Central';
-
-    setHoveredReport({
-      id: `ward-${wardNo}`,
-      title: `${wardProps.KGISWardName || wardProps.name} | Ward #${wardNo} | ${zone}`,
-      category: "geographical area",
-      area: `Ward #${wardNo}`,
-      ward: wardNo,
-      mlaDetails: mlaData
-    });
-
-    // Dynamically load reports for comparison while hovering
-    getReports({ ward_no: wardNo }).then(setWardReports);
-  };
-
-  const resetWard = (e) => {
-    const layer = e.target;
-    if (geoJsonRef.current) {
-       geoJsonRef.current.resetStyle(layer);
-    }
-    layer.setStyle(wardStyle);
-    setHoveredData(null);
-    setHoveredReport(null);
-  };
-
-  const handleWardClick = async (e) => {
-    const wardProps = e.target.feature.properties;
-    const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
-    
-    let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
-    if (!mlaData) {
-      const zone = wardProps.KGISWardName?.split('(')[1]?.replace(')', '') || 'Central';
-      const fallbackMla = completeMLAList.find(m => m.constituency === zone) || completeMLAList[Number(wardNo) % completeMLAList.length];
-      mlaData = { ...fallbackMla, ...getMPByZone(zone) };
-    }
-    
-    setSelectedReport({
-      id: `ward-${wardNo}`,
-      title: `${wardProps.KGISWardName || wardProps.name} Overview`,
-      category: "geographical area",
-      catColor: mlaData.partyColor || "#2B9348",
-      area: `BBMP Ward #${wardNo}`,
-      ward: wardNo,
-      authority: "Bruhat Bengaluru Mahanagara Palike",
-      status: "pending",
-      mlaDetails: mlaData
-    });
-
-    // Load reports for this ward asynchronously
-    setWardReports([]);
-    setWardReportsLoading(true);
-    const reports = await getReports({ ward_no: wardNo });
-    setWardReports(reports);
-    setWardReportsLoading(false);
-  };
-
-  const onEachWard = (feature, layer) => {
-    layer.on({
-      mouseover: highlightWard,
-      mouseout: resetWard,
-      click: (e) => {
-        const wardProps = e.target.feature.properties;
-        if (isPickMode) {
-          handlePickModeWardClick(e, wardProps);
-        } else {
-          handleNormalWardClick(e, wardProps);
+      // Ward Borders
+      map.current.addLayer({
+        id: 'ward-borders',
+        type: 'line',
+        source: 'bbmp-wards',
+        layout: {},
+        paint: {
+          'line-color': '#2B9348',
+          'line-width': 1,
+          'line-opacity': 0.2
         }
-      }
-    });
-  };
+      });
 
-  // Cache the GeoJSON layer to prevent React state changes (like hovering) from causing Leaflet to re-mount the multipolygons and flicker interactions.
-  const geoJsonLayer = useMemo(() => {
-    if (!geoJsonData) return null;
-    return (
-      <GeoJSON 
-         ref={geoJsonRef}
-         data={geoJsonData} 
-         style={wardStyle}
-         onEachFeature={onEachWard}
-      />
-    );
-  }, [geoJsonData]);
+      // Ward Highlight Layer
+      map.current.addLayer({
+        id: 'ward-highlight',
+        type: 'fill',
+        source: 'bbmp-wards',
+        layout: {},
+        paint: {
+          'fill-color': '#55A630',
+          'fill-opacity': 0.15
+        },
+        filter: ['==', ['get', 'KGISWardNo'], '']
+      });
+
+      // Ward Highlight Border
+      map.current.addLayer({
+          id: 'ward-highlight-border',
+          type: 'line',
+          source: 'bbmp-wards',
+          layout: {},
+          paint: {
+            'line-color': '#E9C46A',
+            'line-width': 2,
+            'line-dasharray': [3, 2]
+          },
+          filter: ['==', ['get', 'KGISWardNo'], '']
+      });
+
+      // Hover interactions
+      map.current.on('mousemove', 'ward-fills', (e) => {
+        if (e.features.length > 0) {
+          map.current.getCanvas().style.cursor = 'pointer';
+          const feature = e.features[0];
+          const wardNo = feature.properties.KGISWardNo;
+          map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
+          map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
+          handleWardAction(feature.properties, 'hover');
+        }
+      });
+
+      map.current.on('mouseleave', 'ward-fills', () => {
+        map.current.getCanvas().style.cursor = '';
+        map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
+        map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
+        setHoveredReport(null);
+      });
+
+      // Click interaction
+      map.current.on('click', (e) => {
+        // If pick mode, set pin
+        if (isPickMode) {
+          setPickedPin({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+          // Check if we clicked a ward
+          const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
+          if (features.length > 0) {
+            const wardProps = features[0].properties;
+            const wardNo = wardProps.KGISWardNo || 1;
+            let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
+            setPickedWard({ ward: wardNo, name: wardProps.KGISWardName, mla: mlaData });
+          } else {
+            setPickedWard(null);
+          }
+          return;
+        }
+
+        // Normal mode: check for ward clicks
+        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
+        if (features.length > 0) {
+          handleWardAction(features[0].properties, 'click');
+        }
+      });
+    });
+
+    // Handle global report fetch
+    getReports().then(data => {
+      setAllReports(data || []);
+    });
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, [isPickMode]);
 
   return (
     <div className="flex h-[calc(100vh-80px)] w-full relative">
@@ -327,7 +328,7 @@ export default function Map() {
       {/* Namma Kasa Style Filter Header */}
       {!isPickMode && (
         <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col gap-3 pointer-events-none">
-          {/* Top Row: Filters and Toggles (pointer-events-auto to keep them interactive) */}
+          {/* Top Row: Filters and Toggles */}
           <div className="flex justify-between items-center w-full pointer-events-auto">
             <div className="flex gap-2">
               <select 
@@ -386,7 +387,7 @@ export default function Map() {
             </div>
             <div className="bg-gold text-black font-black text-[9px] px-3 py-1 rounded-sm uppercase tracking-tighter animate-pulse flex items-center gap-2 shadow-lg">
                <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
-               Bengaluru Only Map
+               Bengaluru Maplibregl Engine
             </div>
           </div>
         </div>
@@ -400,50 +401,14 @@ export default function Map() {
             <div className="font-display font-black text-xl uppercase tracking-tighter leading-none mb-1">Select the Problem Spot</div>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Tap exactly where the issue is. We log GPS automatically.</div>
           </div>
-          <button onClick={() => setIsPickMode(false)} className="bg-black text-white px-3 py-1.5 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95 shrink-0">Cancel</button>
+          <button onClick={() => navigate('/map')} className="bg-black text-white px-3 py-1.5 rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest border border-white/20 transition-transform active:scale-95 shrink-0">Cancel</button>
         </div>
       )}
 
       {/* Main Content: Conditional Map or List */}
       <div className="flex-1 w-full h-full z-10 bg-black">
         {viewMode === 'map' ? (
-          <MapContainer 
-            center={BENGALURU_CENTER} 
-            zoom={12} 
-            minZoom={11}
-            maxBounds={BENGALURU_BOUNDS}
-            maxBoundsViscosity={1.0}
-            attributionControl={false}
-            style={{ height: '100%', width: '100%', background: '#F8F9FA' }}
-            className="z-0"
-            zoomControl={false}
-          >
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-            {geoJsonLayer}
-            
-            {/* Render real markers for filtered reports */}
-            {!isPickMode && filteredReports.map(report => (
-              <Marker 
-                key={report.id || report.ref_no} 
-                position={[report.lat, report.lng]}
-                eventHandlers={{ click: () => handleReportClick(report) }}
-                icon={L.divIcon({
-                  className: 'custom-div-icon',
-                  html: `<div style="background-color: ${report.category === 'garbage' ? '#2B9348' : report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'}; width: ${report.category === 'garbage' ? '18px' : '14px'}; height: ${report.category === 'garbage' ? '18px' : '14px'}; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 8px;">${report.category === 'garbage' ? '♻️' : ''}</div>`,
-                  iconSize: [20, 20],
-                  iconAnchor: [10, 10]
-                })}
-              />
-            ))}
-
-            {isPickMode && (
-              <MapClickPicker onPick={(latlng) => {
-                setPickedPin(latlng);
-                setPickedWard(null);
-              }} />
-            )}
-            {isPickMode && pickedPin && <Marker position={[pickedPin.lat, pickedPin.lng]} />}
-          </MapContainer>
+          <div ref={mapContainer} className="w-full h-full" />
         ) : (
           <div className="w-full h-full p-8 pt-32 overflow-y-auto bg-[#fdfbf6]">
              <div className="max-w-6xl mx-auto">
@@ -468,7 +433,7 @@ export default function Map() {
                 ) : (
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                       {filteredReports.map(report => (
-                        <div key={report.id || report.ref_no} className="bg-white border-[4px] border-black rounded-2xl p-6 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-2 hover:shadow-[15px_15px_0px_0px_rgba(255,182,0,1)] transition-all cursor-pointer group" onClick={() => { setViewMode('map'); navigate(`/map?ward=${report.ward_no}`); }}>
+                        <div key={report.id || report.ref_no} className="bg-white border-[4px] border-black rounded-2xl p-6 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-2 hover:shadow-[15px_15px_0px_0px_rgba(255,182,0,1)] transition-all cursor-pointer group" onClick={() => { setViewMode('map'); handleReportClick(report); }}>
                            <div className="flex justify-between items-start mb-6">
                               <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border-2 border-black ${report.status === 'resolved' ? 'bg-green-400 text-black' : 'bg-red-500 text-white'}`}>
                                  {report.status || 'open'}
@@ -552,7 +517,6 @@ export default function Map() {
         return (
           <div 
             className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[350px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
-            onMouseEnter={() => { if (!selectedReport && hoveredReport) setHoveredReport(hoveredReport); }}
           >
             <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
               <div className="flex items-center gap-2">
@@ -566,7 +530,6 @@ export default function Map() {
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-5 border-b border-forest/10">
-              {/* Stacked Information Hierarchy */}
                   <div className="flex flex-col gap-0.5 mb-6">
                     <div className="flex items-center gap-2 mb-1">
                        <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
@@ -605,7 +568,6 @@ export default function Map() {
                   </div>
                 )}
 
-                {/* Full Description for selected reports */}
                 {selectedReport && activeReport.description && (
                   <div className="mb-6 bg-cream/30 p-4 rounded-xl border border-forest/10 italic text-sm text-black/70">
                     "{activeReport.description}"
@@ -621,7 +583,7 @@ export default function Map() {
                     <h4 className="font-display font-black text-xl uppercase tracking-tighter text-gold leading-none">
                       {activeReport.mlaDetails?.mla && activeReport.mlaDetails.mla !== 'In Audit Zone' 
                         ? activeReport.mlaDetails.mla 
-                        : (wardMLAData.find(w => Number(w.ward) === Number(activeReport.ward))?.mla || 'BBMP Authority')
+                        : 'BBMP Authority'
                       }
                     </h4>
                     <span className="text-[10px] uppercase font-black text-white/50 tracking-widest">{activeReport.mlaDetails?.constituency || activeReport.area} (AC)</span>
@@ -642,13 +604,13 @@ export default function Map() {
                         <div className="text-xs font-bold text-white break-words">
                           {activeReport.mlaDetails?.mp && activeReport.mlaDetails.mp !== 'Bengaluru'
                             ? activeReport.mlaDetails.mp 
-                            : (getMPByConstituency(activeReport.mlaDetails?.constituency || activeReport.area || '').mp)
+                            : 'P. C. Mohan'
                           }
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-[8px] font-black uppercase text-white/30 tracking-widest mb-0.5">Constituency</div>
-                        <div className="text-xs font-bold text-white">{activeReport.mlaDetails?.mpConstituency || 'Bengaluru'}</div>
+                        <div className="text-xs font-bold text-white">{activeReport.mlaDetails?.mpConstituency || 'Central'}</div>
                       </div>
                     </div>
 

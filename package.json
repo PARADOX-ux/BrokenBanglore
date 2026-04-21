@@ -12,8 +12,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.103.3",
     "@turf/centroid": "^7.3.4",
+    "@turf/turf": "^7.3.5",
     "h3-js": "^4.4.0",
     "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.23.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-leaflet": "^5.0.0",
