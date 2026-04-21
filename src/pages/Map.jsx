@@ -267,7 +267,7 @@ export default function Map() {
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
 
-      // Ward Borders
+      // Ward Borders (Ultra subtle)
       map.current.addLayer({
         id: 'ward-borders',
         type: 'line',
@@ -275,8 +275,8 @@ export default function Map() {
         layout: {},
         paint: {
           'line-color': '#2B9348',
-          'line-width': 1,
-          'line-opacity': 0.2
+          'line-width': 0.5,
+          'line-opacity': 0.05 // Much more subtle
         }
       });
 
@@ -292,6 +292,19 @@ export default function Map() {
             'line-dasharray': [3, 2]
           },
           filter: ['==', ['get', 'KGISWardNo'], '']
+      });
+
+      // Dim Infrastructure (The "Whitish/Grey" lines)
+      const layers = map.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (layer.id.includes('road') || layer.id.includes('highway') || layer.id.includes('transportation') || layer.id.includes('boundary')) {
+          if (layer.type === 'line') {
+            map.current.setPaintProperty(layer.id, 'line-opacity', 0.1);
+          }
+        }
+        if (layer.id.includes('building')) {
+           map.current.setPaintProperty(layer.id, 'fill-opacity', 0.5);
+        }
       });
 
       // Hover interactions
@@ -590,22 +603,27 @@ export default function Map() {
         </div>
       )}
 
-      {/* Floating Ward Info (Namma Kasa Style Bottom Left) */}
+      {/* Floating Ward Info (Small & Reorganized) */}
       {!selectedReport && hoveredReport && (() => {
         const activeReport = hoveredReport;
+        const subArea = activeReport.mlaDetails?.area || activeReport.title.replace(' Overview', '');
+        const zone = activeReport.mlaDetails?.zone || 'Bengaluru';
+        const assembly = activeReport.mlaDetails?.constituency || 'East Bangalore';
+
         return (
           <div className="absolute bottom-10 left-4 md:left-8 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-            <div className="bg-white px-5 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-black/5 min-w-[200px]">
-               <h2 className="font-display font-black text-xl text-black leading-none mb-1">
-                  {activeReport.mlaDetails?.area || activeReport.title.replace(' Overview', '')}
+            <div className="bg-white/95 backdrop-blur-sm p-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] border border-black/5 w-48 flex flex-col">
+               <h2 className="font-display font-black text-sm text-black leading-tight mb-0.5 uppercase tracking-tighter">
+                  {subArea}
                </h2>
-               <div className="flex flex-col gap-0.5">
-                  <div className="text-[10px] font-bold text-black/40 uppercase tracking-wider">
-                    Ward #{activeReport.ward} • {activeReport.mlaDetails?.zone || 'Bengaluru'}
-                  </div>
-                  <div className="text-[11px] font-black text-forest uppercase tracking-widest leading-none mt-1">
-                    {activeReport.mlaDetails?.mla}
-                  </div>
+               <div className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none mb-0.5">
+                 Ward #{activeReport.ward}
+               </div>
+               <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mb-2">
+                 {zone}
+               </div>
+               <div className="text-[10px] font-black text-forest uppercase tracking-tight leading-none border-t border-black/5 pt-2">
+                 {assembly}
                </div>
             </div>
           </div>
