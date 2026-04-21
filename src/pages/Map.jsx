@@ -248,9 +248,9 @@ export default function Map() {
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#2B9348',
-          'fill-extrusion-height': 120, // Increased for visibility
+          'fill-extrusion-height': 80, 
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.1
+          'fill-extrusion-opacity': 0.03 // More transparent
         }
       });
 
@@ -261,9 +261,9 @@ export default function Map() {
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#E9C46A',
-          'fill-extrusion-height': 600, 
+          'fill-extrusion-height': 400, 
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.4
+          'fill-extrusion-opacity': 0.15 // Much more transparent as requested
         },
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
@@ -542,159 +542,205 @@ export default function Map() {
         </div>
       )}
 
-      {/* Floating Accountability Card */}
+      {/* Accountability Sidebars */}
       {(selectedReport || hoveredReport) && (() => {
         const activeReport = selectedReport || hoveredReport;
+        const isWardOverview = activeReport.id?.startsWith('ward-');
+
+        // IF IT'S JUST WARD INFO (Clicked empty area), show minimal info
+        if (isWardOverview && !selectedReport) {
+          return (
+            <div className="absolute top-24 right-4 md:right-8 w-full md:w-[320px] bg-white/95 backdrop-blur-md rounded-2xl shadow-xl z-[500] border border-black/5 p-4 flex flex-col gap-3 animate-in slide-in-from-right-4 duration-300">
+               <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-black uppercase text-forest tracking-widest">Ward Context</span>
+                  <button onClick={() => { setSelectedReport(null); setHoveredReport(null); }} className="text-black/20 hover:text-black">✕</button>
+               </div>
+               <h2 className="font-display font-black text-2xl text-black leading-none tracking-tighter">
+                  {activeReport.mlaDetails?.area || activeReport.title.replace(' Overview', '')}
+               </h2>
+               <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-forest/10">
+                    <img src={activeReport.mlaDetails?.photo} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[8px] font-black uppercase text-black/40 tracking-widest leading-none">Representative</span>
+                    <span className="text-[11px] font-black text-forest uppercase">{activeReport.mlaDetails?.mla}</span>
+                  </div>
+               </div>
+               <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="bg-forest/5 p-3 rounded-xl border border-forest/5">
+                    <div className="text-xl font-display font-black text-forest leading-none mb-1">{wardReports.length}</div>
+                    <div className="text-[8px] font-bold uppercase text-forest/40">Active Reports</div>
+                  </div>
+                  <div className="bg-gold/10 p-3 rounded-xl border border-gold/20">
+                    <div className="text-xl font-display font-black text-forest leading-none mb-1">14%</div>
+                    <div className="text-[8px] font-bold uppercase text-forest/40">Fix Rate</div>
+                  </div>
+               </div>
+               <button onClick={() => navigate(`/report?ward=${activeReport.ward}`)} className="w-full bg-black text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest mt-2 border-2 border-black hover:bg-forest transition-colors">Log New Issue Here</button>
+            </div>
+          );
+        }
+
+        // FULL NAMMA KASA STYLE CARD (For actual reports or explicit selection)
         return (
           <div 
-            className="absolute top-24 bottom-6 right-4 md:right-8 w-full md:w-[350px] bg-white rounded-xl shadow-2xl z-[500] flex flex-col border border-ash/40 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
+            className="absolute top-4 bottom-4 right-4 w-[calc(100%-2rem)] md:w-[420px] bg-[#fdfdfd] rounded-2xl shadow-2xl z-[500] flex flex-col border border-black/10 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
           >
-            <div className="flex justify-between items-center p-3 border-b border-forest/10 bg-white shrink-0">
-              <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-full bg-forest ${!selectedReport ? 'animate-pulse' : ''}`}></div>
-                <span className="uppercase text-[10px] font-bold tracking-wider text-forest">
-                  {activeReport.id?.startsWith('ward-') ? `Ward #${activeReport.ward}` : `Audit ID: ${activeReport.ref_no?.slice(-6) || 'LIVE'}`}
-                </span>
-              </div>
-              <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="text-forest/30 hover:text-forest">✕</button>
+            {/* Header / Badges */}
+            <div className="p-4 flex items-center justify-between border-b border-black/5 shrink-0">
+               <div className="flex gap-2">
+                  <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${activeReport.severity === 'critical' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gold/10 text-gold border-gold/20'}`}>
+                    {activeReport.severity || 'MODERATE'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border bg-ash/10 text-black/60 border-black/5">
+                    {activeReport.status || 'UNRESOLVED'}
+                  </span>
+               </div>
+               <div className="flex items-center gap-3">
+                  <button className="text-black/30 hover:text-black transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg></button>
+                  <button onClick={() => { setSelectedReport(null); setHoveredReport(null); setWardReports([]); }} className="p-1.5 hover:bg-black/5 rounded-full transition-colors text-black/40">✕</button>
+               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              <div className="p-5 border-b border-forest/10">
-                  <div className="flex flex-col gap-0.5 mb-6">
-                    <div className="flex items-center gap-2 mb-1">
-                       <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-                       <span className="font-display font-black text-[14px] uppercase tracking-tighter text-black">SPOT: {activeReport.area || activeReport.area_name || 'UNSPECIFIED LOCATION'}</span>
-                    </div>
-                    <span className="font-display font-medium text-[8px] uppercase tracking-[0.2em] text-black/40">Civic Audit Record » ID: {activeReport.ref_no?.slice(-6) || 'LIVE'}</span>
-                    <h2 className="font-display font-black text-2xl text-black leading-[0.95] tracking-tighter mt-1 mb-2">
-                      {activeReport.title}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-nav font-black text-[9px] bg-forest text-gold px-2 py-0.5 rounded-sm uppercase tracking-widest">
-                        {activeReport.ward ? `WARD #${activeReport.ward}` : 'GPS AUDIT'}
-                      </span>
-                      {activeReport.mlaDetails?.constituency && (
-                        <span className="font-nav font-black text-[9px] bg-black text-white px-2 py-0.5 rounded-sm uppercase tracking-widest">
-                          AC: {activeReport.mlaDetails.constituency}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+              <div className="p-6">
+                {/* Location Info */}
+                <h1 className="font-display font-black text-2xl text-black leading-tight tracking-tighter mb-1">{activeReport.area || 'Pulikeshinagar'}</h1>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-black/40 mb-6">
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                   <span>{activeReport.location_note || `Near ${activeReport.area || 'Ward'} Center`}</span>
+                </div>
 
-                {/* Evidence Photo */}
-                {activeReport.photo_url ? (
-                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-black shadow-lg aspect-auto min-h-[150px] bg-black/5">
-                    <img 
-                      src={activeReport.photo_url} 
-                      alt="Evidence" 
-                      className="w-full h-full object-contain bg-black" 
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                  </div>
-                ) : (
-                  <div className="mb-6 rounded-2xl border-4 border-dashed border-forest/10 p-8 flex flex-col items-center justify-center text-center opacity-40">
-                    <span className="text-3xl mb-2">📷</span>
-                    <p className="text-[10px] font-bold uppercase tracking-widest">No photo evidence attached</p>
-                  </div>
-                )}
+                {/* Evidence Image */}
+                <div className="relative rounded-2xl overflow-hidden border border-black/5 shadow-lg mb-6 group bg-black/5">
+                   {activeReport.photo_url ? (
+                      <img src={activeReport.photo_url} alt="Evidence" className="w-full h-80 object-cover" />
+                   ) : (
+                      <div className="w-full h-48 flex flex-col items-center justify-center opacity-30 italic text-xs font-bold bg-[#f8f8f8]">
+                         <span className="text-3xl mb-2">📷</span>
+                         No Photo Evidence
+                      </div>
+                   )}
+                   <button className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 border border-black/5 hover:bg-white transition-all">
+                      <span className="text-orange-500 text-lg">👍</span>
+                      I've seen this
+                   </button>
+                </div>
 
-                {selectedReport && activeReport.description && (
-                  <div className="mb-6 bg-cream/30 p-4 rounded-xl border border-forest/10 italic text-sm text-black/70">
-                    "{activeReport.description}"
-                  </div>
-                )}
-                <div className="bg-[#1a3a2a] text-white rounded-[2rem] p-6 mb-6 flex flex-col gap-5 border border-forest shadow-2xl relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-100 transition-opacity">
-                     <span className="text-4xl">⚖️</span>
-                  </div>
+                {/* Reports Stats Row */}
+                <div className="grid grid-cols-3 gap-3 mb-8">
+                   <div className="bg-white border border-black/5 p-4 rounded-2xl text-center shadow-sm">
+                      <div className="text-2xl font-display font-black text-orange-600 leading-none mb-1">1</div>
+                      <div className="text-[8px] font-black uppercase text-black/30 tracking-widest">Reports</div>
+                   </div>
+                   <div className="bg-white border border-black/5 p-4 rounded-2xl text-center shadow-sm">
+                      <div className="text-2xl font-display font-black text-orange-600 leading-none mb-1">3</div>
+                      <div className="text-[8px] font-black uppercase text-black/30 tracking-widest">Days ago</div>
+                   </div>
+                   <div className="bg-white border border-black/5 p-4 rounded-2xl text-center shadow-sm">
+                      <div className="text-[10px] font-display font-black text-blue-600 leading-tight mb-0.5">{activeReport.category || 'Maintenance'}</div>
+                      <div className="text-[8px] font-black uppercase text-black/30 tracking-widest">Issue Type</div>
+                   </div>
+                </div>
+
+                {/* Accountability Hierarchy Section */}
+                <div className="mb-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-6 border-b border-black/5 pb-2">Accountability Hierarchy</h3>
                   
-                  <div className="flex flex-col gap-0.5">
-                    <span className="font-display font-black text-[9px] uppercase tracking-[0.3em] text-white/40 mb-1">Local Accountability Metrics</span>
-                    <h4 className="font-display font-black text-xl uppercase tracking-tighter text-gold leading-none">
-                      {activeReport.mlaDetails?.mla && activeReport.mlaDetails.mla !== 'In Audit Zone' 
-                        ? activeReport.mlaDetails.mla 
-                        : 'BBMP Authority'
-                      }
-                    </h4>
-                    <span className="text-[10px] uppercase font-black text-white/50 tracking-widest">{activeReport.mlaDetails?.constituency || activeReport.area} (AC)</span>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                       <span className="font-nav font-black text-[9px] uppercase tracking-widest text-white/60">Resolution Score</span>
-                       <span className="font-display font-black text-bright text-lg">14%</span>
+                  <div className="flex flex-col items-center">
+                    {/* Your Ward Indicator */}
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest mb-4 shadow-sm relative">
+                       Your Ward
+                       <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-blue-200"></div>
+                       <div className="block text-[8px] opacity-70 mt-0.5 text-center">Ward #{activeReport.ward}</div>
                     </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden border border-white/5">
-                       <div className="h-full bg-bright rounded-full w-[14%] shadow-[0_0_10px_rgba(43,247,172,0.3)]"></div>
+
+                    {/* Authority Node */}
+                    <div className="flex justify-center gap-12 w-full mb-8 mt-2 relative">
+                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-0.5 bg-blue-100 -z-10 mt-[-1rem]"></div>
+                       
+                       <div className="flex flex-col items-center gap-2 group">
+                          <div className="w-14 h-14 rounded-full bg-white border-2 border-blue-500 shadow-lg flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
+                             <img src="https://brokenbanglore.in/bbmp_logo.png" alt="BSWML" className="w-full h-full object-contain" onError={e => e.target.src = '🏛️'} />
+                          </div>
+                          <div className="text-center">
+                             <div className="text-[10px] font-black text-black leading-none mb-0.5">BSWML</div>
+                             <div className="text-[7px] font-black text-black/30 uppercase tracking-widest">Garbage Authority</div>
+                          </div>
+                          <div className="absolute bottom-[-1.5rem] w-0.5 h-6 bg-blue-100"></div>
+                       </div>
+
+                       <div className="flex flex-col items-center gap-2 opacity-30">
+                          <div className="w-14 h-14 rounded-full bg-white border-2 border-ash/20 shadow-md flex items-center justify-center text-xl">⚠️</div>
+                          <div className="text-center">
+                             <div className="text-[10px] font-black text-black leading-none mb-0.5">Corporator</div>
+                             <div className="text-[7px] font-black text-black/30 uppercase tracking-widest">Vacant since 2015</div>
+                          </div>
+                       </div>
+                    </div>
+
+                    {/* Hierarchy Nodes */}
+                    <div className="space-y-12 w-full flex flex-col items-center mt-6">
+                       {[
+                         { id: 'SC', label: 'Special Commissioner', sub: 'BBMP HQ - City-wide SWM Head' },
+                         { id: 'ZC', label: 'Zonal Commissioner', sub: 'IAS Officer - East Zone' },
+                         { id: 'JHI', label: 'JHI & AEE', sub: 'Ward SWM staff - Monitors collection' }
+                       ].map((node, idx, arr) => (
+                         <div key={node.id} className="flex flex-col items-center gap-2 relative">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center font-black text-blue-600 text-sm shadow-sm">{node.id}</div>
+                            <div className="text-center">
+                               <div className="text-[10px] font-black text-black leading-none mb-0.5">{node.label}</div>
+                               <div className="text-[7px] font-black text-black/30 uppercase tracking-widest">{node.sub}</div>
+                            </div>
+                            {idx < arr.length - 1 && <div className="absolute bottom-[-2.5rem] w-0.5 h-10 bg-blue-100"></div>}
+                         </div>
+                       ))}
+                    </div>
+
+                    {/* Elected Representatives Divider */}
+                    <div className="w-full h-px bg-dashed border-b-2 border-black/5 border-dashed my-10"></div>
+                    
+                    {/* MLA / MP Cards */}
+                    <div className="grid grid-cols-2 gap-8 w-full px-4">
+                       <div className="flex flex-col items-center gap-3">
+                          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-100 shadow-md">
+                             <img src={activeReport.mlaDetails?.photo} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="text-center">
+                             <div className="text-[11px] font-black text-black leading-none mb-0.5">{activeReport.mlaDetails?.mla}</div>
+                             <div className="text-[8px] font-bold text-blue-600 uppercase tracking-wider">{activeReport.mlaDetails?.party} — MLA</div>
+                          </div>
+                       </div>
+                       <div className="flex flex-col items-center gap-3">
+                          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-orange-100 shadow-md">
+                             <img src={completeMLAList.find(m => m.constituency?.includes('Yelahanka'))?.photo} alt="" className="w-full h-full object-cover" onError={e => e.target.src = 'https://ui-avatars.com/api/?name=MP&background=f97316&color=fff'} />
+                          </div>
+                          <div className="text-center">
+                             <div className="text-[11px] font-black text-black leading-none mb-0.5">{activeReport.mlaDetails?.mp}</div>
+                             <div className="text-[8px] font-bold text-orange-600 uppercase tracking-wider">{activeReport.mlaDetails?.mpParty || 'BJP'} — MP</div>
+                          </div>
+                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-[8px] font-black uppercase text-white/30 tracking-widest mb-0.5">MP Oversight</div>
-                        <div className="text-xs font-bold text-white break-words">
-                          {activeReport.mlaDetails?.mp && activeReport.mlaDetails.mp !== 'Bengaluru'
-                            ? activeReport.mlaDetails.mp 
-                            : 'P. C. Mohan'
-                          }
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[8px] font-black uppercase text-white/30 tracking-widest mb-0.5">Constituency</div>
-                        <div className="text-xs font-bold text-white">{activeReport.mlaDetails?.mpConstituency || 'Central'}</div>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={() => navigate(`/accountability?search=${encodeURIComponent(activeReport.mlaDetails?.mla)}`)}
-                      className="w-full bg-gold text-forest py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all mt-2"
-                    >
-                      Audit Official Record →
-                    </button>
+                    <p className="text-[8px] text-black/20 font-bold uppercase tracking-widest text-center mt-8 px-8">Tap any card for contact options — Corporator elections expected mid-2026</p>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-forest/10">
-                  <div className="bg-forest/5 rounded-xl p-2.5 text-center border border-forest/10">
-                    <div className="font-display font-bold text-2xl text-forest">{activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.length || 0)}</div>
-                    <div className="text-[9px] font-bold uppercase text-forest/40">Total</div>
-                  </div>
-                  <div className="bg-gold/10 rounded-xl p-2.5 text-center border border-gold/20">
-                    <div className="font-display font-bold text-2xl text-forest">{activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'open').length || 0)}</div>
-                    <div className="text-[9px] font-bold uppercase text-forest/40">Open</div>
-                  </div>
-                  <div className="bg-bright/10 rounded-xl p-2.5 text-center border border-bright/20">
-                    <div className="font-display font-bold text-2xl text-bright">{activeReport.id.startsWith('ward-') && !selectedReport ? '…' : (wardReports.filter(r => r.status === 'resolved').length || 0)}</div>
-                    <div className="text-[9px] font-bold uppercase text-bright/60">Fixed</div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#1a3a2a]/50 mb-3">
-                    {wardReportsLoading ? 'Loading complaints…' : wardReports.length > 0 ? `${wardReports.length} Complaint${wardReports.length > 1 ? 's' : ''}` : 'No complaints filed yet'}
-                  </h3>
-                  {!wardReportsLoading && wardReports.length > 0 && (
-                    <div className="space-y-2">
-                      {wardReports.slice(0, 5).map(report => (
-                        <div key={report.id || report.ref_no} className="bg-white border border-[#1a3a2a]/10 rounded-xl p-3 hover:border-forest transition-colors">
-                          <div className="flex gap-2 items-start">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-bold text-xs text-[#1a3a2a] leading-tight line-clamp-2">{report.title}</p>
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{report.status === 'resolved' ? '✓ Fixed' : '● Open'}</span>
-                            </div>
-                            <button onClick={() => upvoteReport(report.id || report.ref_no).then(() => getReports({ ward_no: activeReport.ward }).then(setWardReports))} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl bg-forest/5 hover:bg-forest hover:text-gold text-forest font-bold text-xs transition-all shrink-0"><span>▲</span><span>{report.upvotes || 0}</span></button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
 
-            <div className="p-4 border-t border-forest/10 bg-white flex flex-col gap-2 shrink-0">
-              <a href={`/report?ward=${activeReport.ward}`} className="w-full bg-forest hover:bg-[#1a3a2a] text-gold py-3 rounded-lg font-bold text-sm text-center shadow-lg transition-colors">Report a Problem Here</a>
-              <div className="text-center text-[9px] text-forest/40 font-bold flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 bg-bright rounded-full"></span> Citizen-verified data</div>
+            {/* Footer Actions */}
+            <div className="p-6 border-t border-black/5 bg-white flex flex-col gap-3">
+               <div className="text-center text-[10px] font-bold text-black/30 mb-2">Reported <span className="text-black font-black">3d ago</span> — 1 citizen(s) reported</div>
+               <button className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white py-4 rounded-2xl font-black uppercase text-[12px] tracking-widest shadow-xl shadow-green-500/10 transition-all active:scale-95">File BBMP Complaint</button>
+               <button className="w-full bg-ash/10 hover:bg-ash/20 text-black/60 py-4 rounded-2xl font-black uppercase text-[12px] tracking-widest flex items-center justify-center gap-2 transition-all">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  It is Cleaned Up — Verify
+               </button>
+               <div className="flex items-center justify-center gap-2 mt-2 opacity-50">
+                  <div className="w-1.5 h-1.5 bg-[#22c55e] rounded-full"></div>
+                  <span className="text-[10px] font-bold text-[#22c55e] uppercase tracking-wider">All reports are anonymous</span>
+               </div>
             </div>
           </div>
         );
