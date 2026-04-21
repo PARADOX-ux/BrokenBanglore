@@ -241,29 +241,27 @@ export default function Map() {
         data: '/data/bangalore-wards.geojson?v=datameet_243'
       });
 
-      // 3D Ward Extrusion (Foundation)
+      // 3D Ward Extrusion (Foundation - Flattened for transparency)
       map.current.addLayer({
         id: 'ward-fills',
-        type: 'fill-extrusion',
+        type: 'fill', // Switched to flat fill for base
         source: 'bbmp-wards',
         paint: {
-          'fill-extrusion-color': '#2B9348',
-          'fill-extrusion-height': 80, 
-          'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.03 // More transparent
+          'fill-color': '#2B9348',
+          'fill-opacity': 0.02 
         }
       });
 
-      // Ward Highlight Layer (Extruded)
+      // Ward Highlight Layer (Extruded - Ultra Transparent)
       map.current.addLayer({
         id: 'ward-highlight',
         type: 'fill-extrusion',
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#E9C46A',
-          'fill-extrusion-height': 400, 
+          'fill-extrusion-height': 300, 
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.15 // Much more transparent as requested
+          'fill-extrusion-opacity': 0.04 // Ultra subtle
         },
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
