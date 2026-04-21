@@ -29,6 +29,7 @@ export default function Map() {
   const [viewMode, setViewMode] = useState('map');      // 'map' | 'list'
   const [severityFilter, setSeverityFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [is3D, setIs3D] = useState(true);
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -351,6 +352,39 @@ export default function Map() {
     };
   }, [isPickMode]);
 
+  // Handle 2D/3D Toggle Effect
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded()) return;
+
+    if (is3D) {
+      map.current.easeTo({
+        pitch: 55,
+        bearing: -15,
+        duration: 1000
+      });
+      // Show 3D layers
+      if (map.current.getLayer('3d-buildings')) {
+        map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0.8);
+      }
+      if (map.current.getLayer('ward-highlight')) {
+        map.current.setPaintProperty('ward-highlight', 'fill-extrusion-opacity', 0.04);
+      }
+    } else {
+      map.current.easeTo({
+        pitch: 0,
+        bearing: 0,
+        duration: 1000
+      });
+      // Hide 3D extrusions (visual flattening)
+      if (map.current.getLayer('3d-buildings')) {
+        map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0);
+      }
+      if (map.current.getLayer('ward-highlight')) {
+        map.current.setPaintProperty('ward-highlight', 'fill-extrusion-opacity', 0);
+      }
+    }
+  }, [is3D]);
+
   return (
     <div className="flex h-[calc(100vh-80px)] w-full relative">
       
@@ -395,6 +429,22 @@ export default function Map() {
               >
                 List
               </button>
+            </div>
+
+            {/* 2D/3D View Toggle */}
+            <div className="flex bg-white border border-black rounded-lg overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               <button 
+                 onClick={() => setIs3D(false)}
+                 className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-r border-black hover:bg-black/5 transition-colors ${!is3D ? 'bg-black text-white' : 'text-black'}`}
+               >
+                 2D
+               </button>
+               <button 
+                 onClick={() => setIs3D(true)}
+                 className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-black/5 transition-colors ${is3D ? 'bg-black text-white' : 'text-black'}`}
+               >
+                 3D
+               </button>
             </div>
           </div>
 
