@@ -590,47 +590,36 @@ export default function Map() {
         </div>
       )}
 
-      {/* Accountability Sidebars */}
-      {(selectedReport || hoveredReport) && (() => {
-        const activeReport = selectedReport || hoveredReport;
-        const isWardOverview = activeReport.id?.startsWith('ward-');
-
-        // IF IT'S JUST WARD INFO (Clicked empty area), show minimal info
-        if (isWardOverview && !selectedReport) {
-          return (
-            <div className="absolute top-24 right-4 md:right-8 w-full md:w-[320px] bg-white/95 backdrop-blur-md rounded-2xl shadow-xl z-[500] border border-black/5 p-4 flex flex-col gap-3 animate-in slide-in-from-right-4 duration-300">
-               <div className="flex justify-between items-center mb-1">
-                  <span className="text-[10px] font-black uppercase text-forest tracking-widest">Ward Context</span>
-                  <button onClick={() => { setSelectedReport(null); setHoveredReport(null); }} className="text-black/20 hover:text-black">✕</button>
-               </div>
-               <h2 className="font-display font-black text-2xl text-black leading-none tracking-tighter">
+      {/* Floating Ward Info (Namma Kasa Style Bottom Left) */}
+      {!selectedReport && hoveredReport && (() => {
+        const activeReport = hoveredReport;
+        return (
+          <div className="absolute bottom-10 left-4 md:left-8 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
+            <div className="bg-white px-5 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-black/5 min-w-[200px]">
+               <h2 className="font-display font-black text-xl text-black leading-none mb-1">
                   {activeReport.mlaDetails?.area || activeReport.title.replace(' Overview', '')}
                </h2>
-               <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-forest/10">
-                    <img src={activeReport.mlaDetails?.photo} alt="" className="w-full h-full object-cover" />
+               <div className="flex flex-col gap-0.5">
+                  <div className="text-[10px] font-bold text-black/40 uppercase tracking-wider">
+                    Ward #{activeReport.ward} • {activeReport.mlaDetails?.zone || 'Bengaluru'}
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-black uppercase text-black/40 tracking-widest leading-none">Representative</span>
-                    <span className="text-[11px] font-black text-forest uppercase">{activeReport.mlaDetails?.mla}</span>
-                  </div>
-               </div>
-               <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="bg-forest/5 p-3 rounded-xl border border-forest/5">
-                    <div className="text-xl font-display font-black text-forest leading-none mb-1">{wardReports.length}</div>
-                    <div className="text-[8px] font-bold uppercase text-forest/40">Active Reports</div>
-                  </div>
-                  <div className="bg-gold/10 p-3 rounded-xl border border-gold/20">
-                    <div className="text-xl font-display font-black text-forest leading-none mb-1">14%</div>
-                    <div className="text-[8px] font-bold uppercase text-forest/40">Fix Rate</div>
+                  <div className="text-[11px] font-black text-forest uppercase tracking-widest leading-none mt-1">
+                    {activeReport.mlaDetails?.mla}
                   </div>
                </div>
-               <button onClick={() => navigate(`/report?ward=${activeReport.ward}`)} className="w-full bg-black text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest mt-2 border-2 border-black hover:bg-forest transition-colors">Log New Issue Here</button>
             </div>
-          );
-        }
+          </div>
+        );
+      })()}
 
-        // FULL NAMMA KASA STYLE CARD (For actual reports or explicit selection)
+      {/* FULL ACCOUNTABILITY SIDEBAR (Only for selected reports or clicks) */}
+      {selectedReport && (() => {
+        const activeReport = selectedReport;
+        const isWardOverview = activeReport.id?.startsWith('ward-');
+
+        // IF IT'S WARD INFO (Clicked empty area), show the right sidebar but simplified if needed
+        // (Keeping the user request for "separate area info" from the previous turn)
+        
         return (
           <div 
             className="absolute top-4 bottom-4 right-4 w-[calc(100%-2rem)] md:w-[420px] bg-[#fdfdfd] rounded-2xl shadow-2xl z-[500] flex flex-col border border-black/10 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"
@@ -639,10 +628,10 @@ export default function Map() {
             <div className="p-4 flex items-center justify-between border-b border-black/5 shrink-0">
                <div className="flex gap-2">
                   <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${activeReport.severity === 'critical' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gold/10 text-gold border-gold/20'}`}>
-                    {activeReport.severity || 'MODERATE'}
+                    {activeReport.severity || (isWardOverview ? 'AREA OVERVIEW' : 'MODERATE')}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border bg-ash/10 text-black/60 border-black/5">
-                    {activeReport.status || 'UNRESOLVED'}
+                    {activeReport.status || (isWardOverview ? 'NAVIGATING' : 'UNRESOLVED')}
                   </span>
                </div>
                <div className="flex items-center gap-3">
