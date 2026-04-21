@@ -307,23 +307,26 @@ export default function Map() {
         }
       });
 
-      // Hover interactions
-      map.current.on('mousemove', 'ward-fills', (e) => {
-        if (e.features.length > 0) {
+      // Global Hover and Mouse Move Interaction
+      map.current.on('mousemove', (e) => {
+        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
+        
+        if (features.length > 0) {
           map.current.getCanvas().style.cursor = 'pointer';
-          const feature = e.features[0];
+          const feature = features[0];
           const wardNo = feature.properties.KGISWardNo;
+          
+          // Update Highlights
           map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
           map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
+          
           handleWardAction(feature.properties, 'hover');
+        } else {
+          map.current.getCanvas().style.cursor = '';
+          map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
+          map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
+          setHoveredReport(null);
         }
-      });
-
-      map.current.on('mouseleave', 'ward-fills', () => {
-        map.current.getCanvas().style.cursor = '';
-        map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
-        map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
-        setHoveredReport(null);
       });
 
       // Click interaction
@@ -608,29 +611,32 @@ export default function Map() {
         </div>
       )}
 
-      {/* Floating Ward Info (Vertical Hierarchy Fix) */}
-      {!selectedReport && hoveredReport && (() => {
+      {/* Floating Ward Info (Global Hover Fix) */}
+      {hoveredReport && (() => {
         const activeReport = hoveredReport;
         
         // Data Extraction
-        const subArea = activeReport.mlaDetails?.area || activeReport.wardName?.split('(')[0]?.trim() || 'Sector View';
+        const subArea = activeReport.mlaDetails?.area || activeReport.wardName?.split('(')[0]?.trim() || 'BBMP AREA';
         const wardNo = activeReport.ward;
-        const zone = activeReport.mlaDetails?.zone || activeReport.wardName?.split('(')[1]?.replace(')', '') || 'Bengaluru';
-        const mainArea = activeReport.mlaDetails?.constituency || 'East Bangalore';
+        const zone = activeReport.mlaDetails?.zone || activeReport.wardName?.split('(')[1]?.replace(')', '') || 'BENGALURU';
+        const mainArea = activeReport.mlaDetails?.constituency || 'EAST BANGALORE';
+
+        // Don't show hover card if we are overlapping with the main selected report sidebar on mobile
+        if (selectedReport && window.innerWidth < 768) return null;
 
         return (
-          <div className="absolute bottom-10 left-4 md:left-8 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-            <div className="bg-white px-4 py-4 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-l-4 border-[#2B9348] min-w-[180px] flex flex-col gap-0.5">
-               <div className="text-[13px] font-black text-black leading-tight uppercase tracking-tight">
+          <div className="absolute bottom-10 left-4 md:left-8 z-[1000] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
+            <div className="bg-white/95 backdrop-blur-md px-5 py-5 rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.4)] border-l-[6px] border-[#4ADE80] min-w-[200px] flex flex-col gap-0.5">
+               <div className="text-[16px] font-black text-black leading-tight uppercase tracking-tight mb-1">
                   {subArea}
                </div>
-               <div className="text-[10px] font-black text-black/50 uppercase tracking-widest leading-none">
+               <div className="text-[10px] font-black text-black/50 uppercase tracking-[0.2em] leading-none mb-0.5">
                  Ward #{wardNo}
                </div>
-               <div className="text-[10px] font-bold text-black/30 uppercase tracking-widest leading-none mb-1.5">
+               <div className="text-[10px] font-bold text-black/30 uppercase tracking-widest leading-none mb-3">
                  {zone}
                </div>
-               <div className="text-[10px] font-black text-forest uppercase tracking-[0.1em] leading-none pt-2 border-t border-black/5">
+               <div className="text-[11px] font-black text-forest uppercase tracking-[0.15em] leading-none pt-3 border-t border-black/5">
                  {mainArea}
                </div>
             </div>
