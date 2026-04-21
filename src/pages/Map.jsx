@@ -163,12 +163,9 @@ export default function Map() {
     }
 
     if (type === 'hover') {
-      const zone = wardProps.KGISWardName ? (wardProps.KGISWardName.split('(')[1]?.replace(')', '') || 'Central') : 'Central';
       setHoveredReport({
         id: `ward-${wardNo}`,
-        title: `${wardProps.KGISWardName || wardProps.name} | Ward #${wardNo} | ${zone}`,
-        category: "geographical area",
-        area: `Ward #${wardNo}`,
+        wardName: wardProps.KGISWardName || wardProps.name,
         ward: wardNo,
         mlaDetails: mlaData
       });
@@ -267,7 +264,7 @@ export default function Map() {
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
 
-      // Ward Borders (Distinct Forest Green)
+      // Ward Borders (High-Visibility Forest Green)
       map.current.addLayer({
         id: 'ward-borders',
         type: 'line',
@@ -278,8 +275,8 @@ export default function Map() {
         },
         paint: {
           'line-color': '#2B9348',
-          'line-width': 1.2,
-          'line-opacity': 0.3 // Increased visibility
+          'line-width': 1.5,
+          'line-opacity': 0.5 
         }
       });
 
@@ -606,29 +603,29 @@ export default function Map() {
         </div>
       )}
 
-      {/* Floating Ward Info (Small & Reorganized) */}
+      {/* Floating Ward Info (Vertical Hierarchy Fix) */}
       {!selectedReport && hoveredReport && (() => {
         const activeReport = hoveredReport;
         
-        // Match the user's specific request: Sub-area -> Ward # -> Zone -> Main Area (Assembly)
-        const subArea = activeReport.mlaDetails?.area || activeReport.title.replace(' Overview', '');
+        // Data Extraction
+        const subArea = activeReport.mlaDetails?.area || activeReport.wardName?.split('(')[0]?.trim() || 'Sector View';
         const wardNo = activeReport.ward;
-        const zone = activeReport.mlaDetails?.zone || 'Bengaluru';
-        const mainArea = activeReport.mlaDetails?.constituency || 'General Area';
+        const zone = activeReport.mlaDetails?.zone || activeReport.wardName?.split('(')[1]?.replace(')', '') || 'Bengaluru';
+        const mainArea = activeReport.mlaDetails?.constituency || 'East Bangalore';
 
         return (
           <div className="absolute bottom-10 left-4 md:left-8 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-[0_15px_50px_rgba(0,0,0,0.2)] border border-[#2B9348]/20 w-52 flex flex-col">
-               <div className="text-[14px] font-black text-black leading-none mb-1 tracking-tighter">
+            <div className="bg-white px-4 py-4 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-l-4 border-[#2B9348] min-w-[180px] flex flex-col gap-0.5">
+               <div className="text-[13px] font-black text-black leading-tight uppercase tracking-tight">
                   {subArea}
                </div>
-               <div className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none mb-0.5">
+               <div className="text-[10px] font-black text-black/50 uppercase tracking-widest leading-none">
                  Ward #{wardNo}
                </div>
-               <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mb-3">
+               <div className="text-[10px] font-bold text-black/30 uppercase tracking-widest leading-none mb-1.5">
                  {zone}
                </div>
-               <div className="text-[10px] font-black text-forest uppercase tracking-widest leading-none border-t border-forest/10 pt-2.5">
+               <div className="text-[10px] font-black text-forest uppercase tracking-[0.1em] leading-none pt-2 border-t border-black/5">
                  {mainArea}
                </div>
             </div>
