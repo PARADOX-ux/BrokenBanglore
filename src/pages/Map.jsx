@@ -198,26 +198,38 @@ export default function Map() {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      style: 'https://tiles.openfreemap.org/styles/dark', // High fidelity Open Source tiles
       center: BENGALURU_CENTER,
       zoom: 12.5,
-      pitch: 55, // 3D Tilt
-      bearing: -15, // Perspective rotation
+      pitch: 55,
+      bearing: -15,
       minZoom: 10,
       maxBounds: BENGALURU_BOUNDS,
       antialias: true
     });
 
     map.current.on('load', () => {
-      // Add Sky Layer for 3D depth
-      map.current.setSky({
-        "sky-color": "#1a3a2a",
-        "sky-horizon-blend": 0.5,
-        "horizon-color": "#fcc62d",
-        "horizon-fog-blend": 0.5,
-        "fog-color": "#1a3a2a",
-        "fog-ground-blend": 0.5,
-        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 11, 0, 13, 1]
+      // 3D Building Extrusion (The real city lift)
+      map.current.addLayer({
+        'id': '3d-buildings',
+        'source': 'openfreemap', // OpenFreeMap source id
+        'source-layer': 'building',
+        'type': 'fill-extrusion',
+        'minzoom': 15,
+        'paint': {
+          'fill-extrusion-color': '#1f2937',
+          'fill-extrusion-height': [
+            'interpolate', ['linear'], ['zoom'],
+            15, 0,
+            15.05, ['get', 'height']
+          ],
+          'fill-extrusion-base': [
+            'interpolate', ['linear'], ['zoom'],
+            15, 0,
+            15.05, ['get', 'min_height']
+          ],
+          'fill-extrusion-opacity': 0.6
+        }
       });
 
       // Add Ward GeoJSON Source
@@ -233,9 +245,9 @@ export default function Map() {
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#2B9348',
-          'fill-extrusion-height': 150, // Base height in meters
+          'fill-extrusion-height': 50, // Lower base height to separate from buildings
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.08
+          'fill-extrusion-opacity': 0.05
         }
       });
 
@@ -246,14 +258,14 @@ export default function Map() {
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#E9C46A',
-          'fill-extrusion-height': 500, // Higher when hovered
+          'fill-extrusion-height': 200, 
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.3
+          'fill-extrusion-opacity': 0.2
         },
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
 
-      // Ward Borders (Line remains for crispness)
+      // Ward Borders
       map.current.addLayer({
         id: 'ward-borders',
         type: 'line',
