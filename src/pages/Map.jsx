@@ -200,31 +200,60 @@ export default function Map() {
       container: mapContainer.current,
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: BENGALURU_CENTER,
-      zoom: 12,
+      zoom: 12.5,
+      pitch: 55, // 3D Tilt
+      bearing: -15, // Perspective rotation
       minZoom: 10,
-      maxBounds: BENGALURU_BOUNDS
+      maxBounds: BENGALURU_BOUNDS,
+      antialias: true
     });
 
     map.current.on('load', () => {
+      // Add Sky Layer for 3D depth
+      map.current.setSky({
+        "sky-color": "#1a3a2a",
+        "sky-horizon-blend": 0.5,
+        "horizon-color": "#fcc62d",
+        "horizon-fog-blend": 0.5,
+        "fog-color": "#1a3a2a",
+        "fog-ground-blend": 0.5,
+        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 11, 0, 13, 1]
+      });
+
       // Add Ward GeoJSON Source
       map.current.addSource('bbmp-wards', {
         type: 'geojson',
         data: '/data/bangalore-wards.geojson?v=datameet_243'
       });
 
-      // Ward Fills
+      // 3D Ward Extrusion (The "Slab" look)
       map.current.addLayer({
         id: 'ward-fills',
-        type: 'fill',
+        type: 'fill-extrusion',
         source: 'bbmp-wards',
-        layout: {},
         paint: {
-          'fill-color': '#2B9348',
-          'fill-opacity': 0.05
+          'fill-extrusion-color': '#2B9348',
+          'fill-extrusion-height': 150, // Base height in meters
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.08
         }
       });
 
-      // Ward Borders
+      // Ward Highlight Layer (Extruded)
+      map.current.addLayer({
+        id: 'ward-highlight',
+        type: 'fill-extrusion',
+        source: 'bbmp-wards',
+        paint: {
+          'fill-extrusion-color': '#E9C46A',
+          'fill-extrusion-height': 500, // Higher when hovered
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.3
+        },
+        filter: ['==', ['get', 'KGISWardNo'], '']
+      });
+
+      // Ward Borders (Line remains for crispness)
       map.current.addLayer({
         id: 'ward-borders',
         type: 'line',
@@ -235,19 +264,6 @@ export default function Map() {
           'line-width': 1,
           'line-opacity': 0.2
         }
-      });
-
-      // Ward Highlight Layer
-      map.current.addLayer({
-        id: 'ward-highlight',
-        type: 'fill',
-        source: 'bbmp-wards',
-        layout: {},
-        paint: {
-          'fill-color': '#55A630',
-          'fill-opacity': 0.15
-        },
-        filter: ['==', ['get', 'KGISWardNo'], '']
       });
 
       // Ward Highlight Border
