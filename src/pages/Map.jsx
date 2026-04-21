@@ -209,26 +209,29 @@ export default function Map() {
     });
 
     map.current.on('load', () => {
-      // 3D Building Extrusion (The real city lift)
+      // DEBUG: View available sources to ensure correct ID
+      console.log('Map Sources:', map.current.getStyle().sources);
+
+      // 3D Building Extrusion (Correction: source name is 'openmaptiles')
       map.current.addLayer({
         'id': '3d-buildings',
-        'source': 'openfreemap', // OpenFreeMap source id
+        'source': 'openmaptiles', 
         'source-layer': 'building',
         'type': 'fill-extrusion',
-        'minzoom': 15,
+        'minzoom': 13,
         'paint': {
-          'fill-extrusion-color': '#1f2937',
+          'fill-extrusion-color': '#2a3a4a',
           'fill-extrusion-height': [
             'interpolate', ['linear'], ['zoom'],
-            15, 0,
-            15.05, ['get', 'height']
+            13, 0,
+            14, ['coalesce', ['get', 'render_height'], ['get', 'height'], 20]
           ],
           'fill-extrusion-base': [
             'interpolate', ['linear'], ['zoom'],
-            15, 0,
-            15.05, ['get', 'min_height']
+            13, 0,
+            14, ['coalesce', ['get', 'render_min_height'], ['get', 'min_height'], 0]
           ],
-          'fill-extrusion-opacity': 0.6
+          'fill-extrusion-opacity': 0.8
         }
       });
 
@@ -238,16 +241,16 @@ export default function Map() {
         data: '/data/bangalore-wards.geojson?v=datameet_243'
       });
 
-      // 3D Ward Extrusion (The "Slab" look)
+      // 3D Ward Extrusion (Foundation)
       map.current.addLayer({
         id: 'ward-fills',
         type: 'fill-extrusion',
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#2B9348',
-          'fill-extrusion-height': 50, // Lower base height to separate from buildings
+          'fill-extrusion-height': 120, // Increased for visibility
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.05
+          'fill-extrusion-opacity': 0.1
         }
       });
 
@@ -258,9 +261,9 @@ export default function Map() {
         source: 'bbmp-wards',
         paint: {
           'fill-extrusion-color': '#E9C46A',
-          'fill-extrusion-height': 200, 
+          'fill-extrusion-height': 600, 
           'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.2
+          'fill-extrusion-opacity': 0.4
         },
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
