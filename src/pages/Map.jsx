@@ -264,7 +264,7 @@ export default function Map() {
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
 
-      // Ward Borders (High-Visibility Forest Green)
+      // Ward Borders (Subtle Emerald Glow)
       map.current.addLayer({
         id: 'ward-borders',
         type: 'line',
@@ -274,9 +274,9 @@ export default function Map() {
           'line-cap': 'round'
         },
         paint: {
-          'line-color': '#2B9348',
-          'line-width': 1.5,
-          'line-opacity': 0.5 
+          'line-color': '#4ADE80', // Brighter, lighter emerald
+          'line-width': 0.8,
+          'line-opacity': 0.15 
         }
       });
 
@@ -348,6 +348,11 @@ export default function Map() {
         const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
         if (features.length > 0) {
           handleWardAction(features[0].properties, 'click');
+        } else {
+          // Clicked background: Clear everything
+          setSelectedReport(null);
+          setHoveredReport(null);
+          setWardReports([]);
         }
       });
     });
