@@ -53,16 +53,29 @@ export const constituencyMPMap = {
 // Helper to get MP data by zone (as fallback)
 export const getMPByZone = (zoneName) => {
   const zone = zoneName?.toLowerCase() || '';
-  if (zone.includes('south') || zone.includes('bommanahalli') || zone.includes('rr nagar')) {
-    return { mp: 'Tejasvi Surya', mpConstituency: 'Bangalore South', mpParty: 'BJP' };
-  }
-  if (zone.includes('yelahanka') || zone.includes('north') || zone.includes('hebbal')) {
+  
+  // 1. Bangalore North (Shobha Karandlaje)
+  if (zone.includes('yelahanka') || zone.includes('north') || zone.includes('hebbal') || 
+      zone.includes('byatarayanapura') || zone.includes('yeshwanthpur') || 
+      zone.includes('malleshwaram') || zone.includes('dasarahalli') || zone.includes('mahalakshmi')) {
     return { mp: 'Shobha Karandlaje', mpConstituency: 'Bangalore North', mpParty: 'BJP' };
   }
-  if (zone.includes('rural') || zone.includes('anekal')) {
+  
+  // 2. Bangalore South (Tejasvi Surya)
+  if (zone.includes('south') || zone.includes('jayanagar') || zone.includes('basavanagudi') || 
+      zone.includes('padmanabhanagar') || zone.includes('btm') || zone.includes('vijayanagar') || 
+      zone.includes('govindraj') || zone.includes('chickpet') || zone.includes('bommanahalli')) {
+    return { mp: 'Tejasvi Surya', mpConstituency: 'Bangalore South', mpParty: 'BJP' };
+  }
+  
+  // 3. Bangalore Rural (Dr. C. N. Manjunath)
+  if (zone.includes('rural') || zone.includes('anekal') || zone.includes('rr nagar') || 
+      zone.includes('hoskote') || zone.includes('rajarajeshwari')) {
     return { mp: 'Dr. C. N. Manjunath', mpConstituency: 'Bangalore Rural', mpParty: 'BJP' };
   }
-  // Default to Central for East/West/Mahadevapura/Central
+  
+  // 4. Bangalore Central (P. C. Mohan) - Default
+  // Covers: Shivajinagar, Shanti Nagar, Sarvagnanagar, CV Raman Nagar, Gandhi Nagar, Rajaji Nagar, Chamrajpet, Mahadevapura
   return { mp: 'P. C. Mohan', mpConstituency: 'Bangalore Central', mpParty: 'BJP' };
 };
 

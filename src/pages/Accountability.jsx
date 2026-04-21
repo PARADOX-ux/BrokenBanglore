@@ -40,7 +40,15 @@ export default function Accountability() {
 
   // Process MLAs with real report data
   const processedMLAs = completeMLAList.map(mla => {
-    const mlaReports = reports.filter(r => Number(r.ward_no) === Number(mla.ward));
+    // Robust matching: Check ward number, handle name match (MLA), OR constituency match
+    const mlaReports = reports.filter(r => {
+      const wardMatch = r.ward_no && Number(r.ward_no) === Number(mla.ward);
+      const mlaNameMatch = r.mla_name && r.mla_name.toLowerCase().includes(mla.mla.toLowerCase());
+      const constituencyMatch = r.mla_constituency && r.mla_constituency.toLowerCase() === mla.constituency.toLowerCase();
+      
+      return wardMatch || mlaNameMatch || constituencyMatch;
+    });
+
     const mlaTotal = mlaReports.length;
     const mlaResolved = mlaReports.filter(r => r.status === 'resolved').length;
     return {

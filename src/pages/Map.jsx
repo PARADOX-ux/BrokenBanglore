@@ -133,30 +133,31 @@ export default function Map() {
       recoveredWard = wardMLAData.find(w => Number(w.ward) === Number(report.ward_no));
     }
 
-    // 2. Fuzzy lookup by Area Name (if no ward match)
+    // 2. Precise lookup by Area Name
     if (!recoveredWard && report.area_name) {
       recoveredWard = wardMLAData.find(w => 
         w.name.toLowerCase().includes(report.area_name.toLowerCase()) || 
-        report.area_name.toLowerCase().includes(w.name.toLowerCase()) ||
-        w.constituency.toLowerCase().includes(report.area_name.toLowerCase())
+        report.area_name.toLowerCase().includes(w.name.toLowerCase())
       );
     }
 
-    // 3. Last resort: Lookup by description mentions
-    if (!recoveredWard && report.description) {
-      recoveredWard = wardMLAData.find(w => report.description.toLowerCase().includes(w.name.toLowerCase()));
+    // 3. Precise lookup by Constituency
+    if (!recoveredWard && report.mla_constituency) {
+      recoveredWard = wardMLAData.find(w => w.constituency.toLowerCase() === report.mla_constituency.toLowerCase());
     }
 
     // 4. Parliamentary Mapping (The Core Fix)
-    const constituency = report.mla_constituency || recoveredWard?.constituency || report.area_name || 'Bengaluru';
-    const mpData = getMPByConstituency(constituency);
+    // We prioritize the constituency mapping for MP names to avoid North/South swaps
+    const constituency = report.mla_constituency || recoveredWard?.constituency || report.area_name || 'Central';
+    const mpInfo = getMPByConstituency(constituency);
 
     const mlaDetails = {
-      mla: report.mla_name || recoveredWard?.mla || 'In Audit Zone',
+      mla: report.mla_name || recoveredWard?.mla || 'BBMP Authority',
       party: report.mla_party || recoveredWard?.party || 'BBMP',
-      mp: report.mp_name || recoveredWard?.mp || mpData.mp,
-      mpConstituency: report.mp_constituency || recoveredWard?.mpConstituency || mpData.mpConstituency,
-      authority: report.authority || recoveredWard?.authority || 'BBMP'
+      mp: report.mp_name || recoveredWard?.mp || mpInfo.mp,
+      mpConstituency: report.mp_constituency || recoveredWard?.mpConstituency || mpInfo.mpConstituency,
+      authority: report.authority || recoveredWard?.authority || 'BBMP Authority',
+      constituency: constituency
     };
 
     setSelectedReport({
@@ -557,25 +558,26 @@ export default function Map() {
             <div className="flex-1 overflow-y-auto">
               <div className="p-5 border-b border-forest/10">
               {/* Stacked Information Hierarchy */}
-              <div className="flex flex-col gap-0.5 mb-4">
-                <span className="font-display font-medium text-[10px] uppercase tracking-[0.2em] text-black/40">Civic Audit Details</span>
-                <h2 className="font-display font-bold text-lg text-black leading-none tracking-tighter">
-                  {activeReport.title}
-                </h2>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="font-nav font-black text-[10px] bg-forest text-gold px-2 py-0.5 rounded-md uppercase tracking-widest">
-                    {activeReport.ward ? `Ward #${activeReport.ward}` : 'GPS Assigned Location'}
-                  </span>
-                  {activeReport.mlaDetails?.constituency && (
-                    <span className="font-nav font-bold text-[10px] bg-black text-white px-2 py-0.5 rounded-md uppercase tracking-widest">
-                      AC: {activeReport.mlaDetails.constituency}
-                    </span>
-                  )}
-                  <span className="font-nav font-bold text-[10px] text-black/30 uppercase tracking-[0.1em]">
-                    Type: {activeReport.category || 'General Audit'}
-                  </span>
-                </div>
-              </div>
+                  <div className="flex flex-col gap-0.5 mb-6">
+                    <div className="flex items-center gap-2 mb-1">
+                       <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                       <span className="font-display font-black text-[14px] uppercase tracking-tighter text-black">SPOT: {activeReport.area || activeReport.area_name || 'UNSPECIFIED LOCATION'}</span>
+                    </div>
+                    <span className="font-display font-medium text-[8px] uppercase tracking-[0.2em] text-black/40">Civic Audit Record » ID: {activeReport.ref_no?.slice(-6) || 'LIVE'}</span>
+                    <h2 className="font-display font-black text-2xl text-black leading-[0.95] tracking-tighter mt-1 mb-2">
+                      {activeReport.title}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-nav font-black text-[9px] bg-forest text-gold px-2 py-0.5 rounded-sm uppercase tracking-widest">
+                        {activeReport.ward ? `WARD #${activeReport.ward}` : 'GPS AUDIT'}
+                      </span>
+                      {activeReport.mlaDetails?.constituency && (
+                        <span className="font-nav font-black text-[9px] bg-black text-white px-2 py-0.5 rounded-sm uppercase tracking-widest">
+                          AC: {activeReport.mlaDetails.constituency}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
                 {/* Evidence Photo */}
                 {activeReport.photo_url ? (
