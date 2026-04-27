@@ -29,7 +29,7 @@ export default function Map() {
   const [viewMode, setViewMode] = useState('map');      // 'map' | 'list'
   const [severityFilter, setSeverityFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [is3D, setIs3D] = useState(true);
+  const [is3D, setIs3D] = useState(false); // Start in 2D — hover works correctly; user can switch to 3D
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -223,8 +223,8 @@ export default function Map() {
       style: 'https://tiles.openfreemap.org/styles/dark', // High fidelity Open Source tiles
       center: BENGALURU_CENTER,
       zoom: 12.5,
-      pitch: 55,
-      bearing: -15,
+      pitch: 0,
+      bearing: 0,
       minZoom: 10,
       maxBounds: BENGALURU_BOUNDS,
       antialias: true
@@ -263,33 +263,27 @@ export default function Map() {
         data: '/data/bangalore-wards.geojson?v=datameet_243'
       });
 
-      // Ward fill — kept at opacity 0 visually but MUST have fill-antialias:false
-      // so MapLibre's hit-testing registers mouse events on invisible polygons.
+      // Ward fill — transparent but present so MapLibre hit-tests it on mousemove.
+      // IMPORTANT: fill-opacity must be > 0 (even 0.001) for queryRenderedFeatures to work reliably.
       map.current.addLayer({
         id: 'ward-fills',
         type: 'fill',
         source: 'bbmp-wards',
         paint: {
           'fill-color': '#4ADE80',
-          'fill-opacity': [
-            'case',
-            ['boolean', ['feature-state', 'hovered'], false], 0.12,
-            0.0
-          ],
-          'fill-antialias': false
+          'fill-opacity': 0.001   // near-invisible but guarantees hit-testing
         }
       });
 
-      // Ward Highlight Layer (Extruded - Ultra Transparent)
+      // Ward Highlight Layer — flat fill (NOT fill-extrusion) so it never blocks mouse events
+      // even when the map is in 3D mode. Shown only on hovered ward via filter.
       map.current.addLayer({
         id: 'ward-highlight',
-        type: 'fill-extrusion',
+        type: 'fill',
         source: 'bbmp-wards',
         paint: {
-          'fill-extrusion-color': '#E9C46A',
-          'fill-extrusion-height': 300, 
-          'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.04 // Ultra subtle
+          'fill-color': '#E9C46A',
+          'fill-opacity': 0.18
         },
         filter: ['==', ['get', 'KGISWardNo'], '']
       });
@@ -421,12 +415,9 @@ export default function Map() {
         bearing: -15,
         duration: 1000
       });
-      // Show 3D layers
+      // Show 3D building extrusions
       if (map.current.getLayer('3d-buildings')) {
         map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0.8);
-      }
-      if (map.current.getLayer('ward-highlight')) {
-        map.current.setPaintProperty('ward-highlight', 'fill-extrusion-opacity', 0.04);
       }
     } else {
       map.current.easeTo({
@@ -434,14 +425,12 @@ export default function Map() {
         bearing: 0,
         duration: 1000
       });
-      // Hide 3D extrusions (visual flattening)
+      // Hide 3D building extrusions
       if (map.current.getLayer('3d-buildings')) {
         map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0);
       }
-      if (map.current.getLayer('ward-highlight')) {
-        map.current.setPaintProperty('ward-highlight', 'fill-extrusion-opacity', 0);
-      }
     }
+    // ward-highlight is a flat fill layer — hover works in BOTH 2D and 3D modes
   }, [is3D]);
 
   return (
