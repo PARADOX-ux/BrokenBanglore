@@ -163,10 +163,33 @@ export default function Map() {
     }
 
     if (type === 'hover') {
+      // Derive direction from authority string (e.g. "BBMP South Zone" → "South")
+      const authorityStr = mlaData?.authority || '';
+      const mpConst = mlaData?.mpConstituency || '';
+      let direction = '';
+      // Primary: authority field
+      if (/north/i.test(authorityStr) || /yelahanka/i.test(authorityStr)) direction = 'North';
+      else if (/south/i.test(authorityStr)) direction = 'South';
+      else if (/east/i.test(authorityStr)) direction = 'East';
+      else if (/west/i.test(authorityStr)) direction = 'West';
+      else if (/mahadevapura/i.test(authorityStr)) direction = 'East';
+      else if (/byatarayanapura/i.test(authorityStr)) direction = 'North';
+      else if (/dasarahalli/i.test(authorityStr)) direction = 'North';
+      else if (/bommanahalli/i.test(authorityStr)) direction = 'South';
+      // Fallback: MP constituency (e.g. "Bangalore North" → "North")
+      else if (/bangalore north/i.test(mpConst)) direction = 'North';
+      else if (/bangalore south/i.test(mpConst)) direction = 'South';
+      else if (/bangalore central/i.test(mpConst)) direction = 'Central';
+      else if (/bangalore rural/i.test(mpConst)) direction = 'Outer';
+      else direction = 'Central';
+
       setHoveredReport({
         id: `ward-${wardNo}`,
-        wardName: wardProps.KGISWardName || wardProps.name,
+        wardName: wardProps.KGISWardName || wardProps.name, // sub-area (e.g. "Jakkur")
         ward: wardNo,
+        direction,                                           // N/S/E/W direction
+        constituency: mlaData?.constituency || '',          // main area (e.g. "Yelahanka")
+        authority: authorityStr,                            // zone label
         mlaDetails: mlaData
       });
       // Pre-load reports for comparison while hovering
@@ -613,32 +636,53 @@ export default function Map() {
 
       {/* Floating Ward Info (Global Hover Fix) */}
       {hoveredReport && (() => {
-        const activeReport = hoveredReport;
+        const h = hoveredReport;
         
-        // Data Extraction
-        const subArea = activeReport.mlaDetails?.area || activeReport.wardName?.split('(')[0]?.trim() || 'BBMP AREA';
-        const wardNo = activeReport.ward;
-        const zone = activeReport.mlaDetails?.zone || activeReport.wardName?.split('(')[1]?.replace(')', '') || 'BENGALURU';
-        const mainArea = activeReport.mlaDetails?.constituency || 'EAST BANGALORE';
+        // Sub-area = the specific ward name (e.g. "Jakkur", "Bharathi Nagar")
+        const subArea = h.wardName || 'BBMP Area';
+        const wardNo = h.ward;
+        // Direction: N / S / E / W (full word from direction field)
+        const direction = h.direction || '';
+        // Main area = MLA constituency (e.g. "Yelahanka", "Byatarayanapura")
+        const mainArea = h.constituency || h.mlaDetails?.constituency || '';
+        // Broader zone label (authority minus "BBMP" prefix and "Zone" suffix)
+        const zoneLabel = (h.authority || '')
+          .replace(/^BBMP\s*/i, '')
+          .replace(/\s*Zone\s*$/i, '')
+          .trim() || mainArea;
 
         // Don't show hover card if we are overlapping with the main selected report sidebar on mobile
         if (selectedReport && window.innerWidth < 768) return null;
 
         return (
           <div className="absolute bottom-10 left-4 md:left-8 z-[1000] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-            <div className="bg-white/95 backdrop-blur-md px-5 py-5 rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.4)] border-l-[6px] border-[#4ADE80] min-w-[200px] flex flex-col gap-0.5">
-               <div className="text-[16px] font-black text-black leading-tight uppercase tracking-tight mb-1">
-                  {subArea}
+            <div className="bg-white/95 backdrop-blur-md px-5 py-5 rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.4)] border-l-[6px] border-[#4ADE80] min-w-[220px] flex flex-col gap-0.5">
+               {/* Line 1: Sub-area name (e.g. Jakkur) */}
+               <div className="text-[17px] font-black text-black leading-tight uppercase tracking-tight mb-0.5">
+                 {subArea}
                </div>
+               {/* Line 2: Ward No */}
                <div className="text-[10px] font-black text-black/50 uppercase tracking-[0.2em] leading-none mb-0.5">
                  Ward #{wardNo}
                </div>
-               <div className="text-[10px] font-bold text-black/30 uppercase tracking-widest leading-none mb-3">
-                 {zone}
-               </div>
-               <div className="text-[11px] font-black text-forest uppercase tracking-[0.15em] leading-none pt-3 border-t border-black/5">
+               {/* Line 3: Direction of Bangalore */}
+               {direction && (
+                 <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mb-2">
+                   {direction} Bengaluru
+                 </div>
+               )}
+               {/* Divider */}
+               <div className="w-full h-px bg-black/8 my-1" />
+               {/* Line 4: Main area (constituency) */}
+               <div className="text-[12px] font-black text-forest uppercase tracking-[0.12em] leading-none mt-0.5">
                  {mainArea}
                </div>
+               {/* Line 5: Broader zone if different from constituency */}
+               {zoneLabel && zoneLabel.toLowerCase() !== mainArea.toLowerCase() && (
+                 <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mt-0.5">
+                   {zoneLabel}
+                 </div>
+               )}
             </div>
           </div>
         );
