@@ -34,6 +34,7 @@ export default function Map() {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markers = useRef([]);
+  const lastHoveredWardNo = useRef(null); // track last ward to avoid re-firing on same ward
 
   // Confirm pick — save to localStorage and go back to report
   const confirmPick = () => {
@@ -153,6 +154,23 @@ export default function Map() {
     setWardReports([]);
   };
 
+  // Pure sync helper — derives direction from authority/mpConstituency
+  const getDirection = (authorityStr = '', mpConst = '') => {
+    if (/north/i.test(authorityStr) || /yelahanka/i.test(authorityStr)) return 'North';
+    if (/south/i.test(authorityStr)) return 'South';
+    if (/east/i.test(authorityStr)) return 'East';
+    if (/west/i.test(authorityStr)) return 'West';
+    if (/mahadevapura/i.test(authorityStr)) return 'East';
+    if (/byatarayanapura/i.test(authorityStr)) return 'North';
+    if (/dasarahalli/i.test(authorityStr)) return 'North';
+    if (/bommanahalli/i.test(authorityStr)) return 'South';
+    if (/bangalore north/i.test(mpConst)) return 'North';
+    if (/bangalore south/i.test(mpConst)) return 'South';
+    if (/bangalore central/i.test(mpConst)) return 'Central';
+    if (/bangalore rural/i.test(mpConst)) return 'Outer';
+    return 'Central';
+  };
+
   const handleWardAction = async (wardProps, type = 'click') => {
     const wardNo = wardProps.KGISWardNo || wardProps.ward || 1;
     let mlaData = wardMLAData.find(m => Number(m.ward) === Number(wardNo));
@@ -163,37 +181,20 @@ export default function Map() {
     }
 
     if (type === 'hover') {
-      // Derive direction from authority string (e.g. "BBMP South Zone" → "South")
       const authorityStr = mlaData?.authority || '';
       const mpConst = mlaData?.mpConstituency || '';
-      let direction = '';
-      // Primary: authority field
-      if (/north/i.test(authorityStr) || /yelahanka/i.test(authorityStr)) direction = 'North';
-      else if (/south/i.test(authorityStr)) direction = 'South';
-      else if (/east/i.test(authorityStr)) direction = 'East';
-      else if (/west/i.test(authorityStr)) direction = 'West';
-      else if (/mahadevapura/i.test(authorityStr)) direction = 'East';
-      else if (/byatarayanapura/i.test(authorityStr)) direction = 'North';
-      else if (/dasarahalli/i.test(authorityStr)) direction = 'North';
-      else if (/bommanahalli/i.test(authorityStr)) direction = 'South';
-      // Fallback: MP constituency (e.g. "Bangalore North" → "North")
-      else if (/bangalore north/i.test(mpConst)) direction = 'North';
-      else if (/bangalore south/i.test(mpConst)) direction = 'South';
-      else if (/bangalore central/i.test(mpConst)) direction = 'Central';
-      else if (/bangalore rural/i.test(mpConst)) direction = 'Outer';
-      else direction = 'Central';
+      const direction = getDirection(authorityStr, mpConst);
 
       setHoveredReport({
         id: `ward-${wardNo}`,
-        wardName: wardProps.KGISWardName || wardProps.name, // sub-area (e.g. "Jakkur")
+        wardName: wardProps.KGISWardName || wardProps.name,
         ward: wardNo,
-        direction,                                           // N/S/E/W direction
-        constituency: mlaData?.constituency || '',          // main area (e.g. "Yelahanka")
-        authority: authorityStr,                            // zone label
+        direction,
+        constituency: mlaData?.constituency || '',
+        authority: authorityStr,
         mlaDetails: mlaData
       });
-      // Pre-load reports for comparison while hovering
-      getReports({ ward_no: wardNo }).then(setWardReports);
+      // NOTE: do NOT call getReports here — it fires on every mouse pixel and kills performance
     } else {
       setSelectedReport({
         id: `ward-${wardNo}`,
@@ -262,14 +263,20 @@ export default function Map() {
         data: '/data/bangalore-wards.geojson?v=datameet_243'
       });
 
-      // 3D Ward Extrusion (Foundation - Flattened for transparency)
+      // Ward fill — kept at opacity 0 visually but MUST have fill-antialias:false
+      // so MapLibre's hit-testing registers mouse events on invisible polygons.
       map.current.addLayer({
         id: 'ward-fills',
-        type: 'fill', // Switched to flat fill for base
+        type: 'fill',
         source: 'bbmp-wards',
         paint: {
-          'fill-color': '#2B9348',
-          'fill-opacity': 0.02 
+          'fill-color': '#4ADE80',
+          'fill-opacity': [
+            'case',
+            ['boolean', ['feature-state', 'hovered'], false], 0.12,
+            0.0
+          ],
+          'fill-antialias': false
         }
       });
 
@@ -338,17 +345,25 @@ export default function Map() {
           map.current.getCanvas().style.cursor = 'pointer';
           const feature = features[0];
           const wardNo = feature.properties.KGISWardNo;
-          
-          // Update Highlights
-          map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
-          map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
-          
-          handleWardAction(feature.properties, 'hover');
+
+          // Guard: only re-process when moving to a DIFFERENT ward
+          if (wardNo !== lastHoveredWardNo.current) {
+            lastHoveredWardNo.current = wardNo;
+
+            // Update highlight filter
+            map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
+            map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
+
+            handleWardAction(feature.properties, 'hover');
+          }
         } else {
-          map.current.getCanvas().style.cursor = '';
-          map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
-          map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
-          setHoveredReport(null);
+          if (lastHoveredWardNo.current !== null) {
+            lastHoveredWardNo.current = null;
+            map.current.getCanvas().style.cursor = '';
+            map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], '']);
+            map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], '']);
+            setHoveredReport(null);
+          }
         }
       });
 
@@ -634,55 +649,63 @@ export default function Map() {
         </div>
       )}
 
-      {/* Floating Ward Info (Global Hover Fix) */}
+      {/* Floating Ward Hover Card — nammakasa.in style */}
       {hoveredReport && (() => {
         const h = hoveredReport;
-        
-        // Sub-area = the specific ward name (e.g. "Jakkur", "Bharathi Nagar")
-        const subArea = h.wardName || 'BBMP Area';
-        const wardNo = h.ward;
-        // Direction: N / S / E / W (full word from direction field)
-        const direction = h.direction || '';
-        // Main area = MLA constituency (e.g. "Yelahanka", "Byatarayanapura")
-        const mainArea = h.constituency || h.mlaDetails?.constituency || '';
-        // Broader zone label (authority minus "BBMP" prefix and "Zone" suffix)
-        const zoneLabel = (h.authority || '')
-          .replace(/^BBMP\s*/i, '')
-          .replace(/\s*Zone\s*$/i, '')
-          .trim() || mainArea;
-
-        // Don't show hover card if we are overlapping with the main selected report sidebar on mobile
         if (selectedReport && window.innerWidth < 768) return null;
 
+        const wardName   = h.wardName || 'BBMP Area';
+        const wardNo     = h.ward;
+        const direction  = h.direction || '';
+        const mainArea   = h.constituency || h.mlaDetails?.constituency || '';
+        // Sub-constituency / broader zone label
+        const zoneLabel  = (h.authority || '')
+          .replace(/^BBMP\s*/i, '').replace(/\s*Zone\s*$/i, '').trim();
+        const showZone   = zoneLabel && zoneLabel.toLowerCase() !== mainArea.toLowerCase();
+        const reportCount = wardReports.length;
+
         return (
-          <div className="absolute bottom-10 left-4 md:left-8 z-[1000] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-            <div className="bg-white/95 backdrop-blur-md px-5 py-5 rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.4)] border-l-[6px] border-[#4ADE80] min-w-[220px] flex flex-col gap-0.5">
-               {/* Line 1: Sub-area name (e.g. Jakkur) */}
-               <div className="text-[17px] font-black text-black leading-tight uppercase tracking-tight mb-0.5">
-                 {subArea}
-               </div>
-               {/* Line 2: Ward No */}
-               <div className="text-[10px] font-black text-black/50 uppercase tracking-[0.2em] leading-none mb-0.5">
-                 Ward #{wardNo}
-               </div>
-               {/* Line 3: Direction of Bangalore */}
-               {direction && (
-                 <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mb-2">
-                   {direction} Bengaluru
-                 </div>
-               )}
-               {/* Divider */}
-               <div className="w-full h-px bg-black/8 my-1" />
-               {/* Line 4: Main area (constituency) */}
-               <div className="text-[12px] font-black text-forest uppercase tracking-[0.12em] leading-none mt-0.5">
-                 {mainArea}
-               </div>
-               {/* Line 5: Broader zone if different from constituency */}
-               {zoneLabel && zoneLabel.toLowerCase() !== mainArea.toLowerCase() && (
-                 <div className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none mt-0.5">
-                   {zoneLabel}
-                 </div>
-               )}
+          <div className="absolute bottom-6 left-4 md:left-6 z-[1000] pointer-events-none">
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.97)',
+                backdropFilter: 'blur(12px)',
+                borderRadius: '14px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,0.1)',
+                borderLeft: '5px solid #4ADE80',
+                padding: '14px 18px',
+                minWidth: '210px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px'
+              }}
+            >
+              {/* Ward name */}
+              <div style={{ fontSize: '16px', fontWeight: 900, color: '#111', lineHeight: 1.2, letterSpacing: '-0.01em', textTransform: 'capitalize', marginBottom: '2px' }}>
+                {wardName}
+              </div>
+              {/* Ward # · Direction */}
+              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>
+                Ward #{wardNo}{direction ? ` · ${direction}` : ''}
+              </div>
+              {/* Constituency (main area) */}
+              {mainArea && (
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#2B9348', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                  {mainArea}
+                </div>
+              )}
+              {/* Broader zone (e.g. Yelahanka Zone) */}
+              {showZone && (
+                <div style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(0,0,0,0.28)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  {zoneLabel}
+                </div>
+              )}
+              {/* Report count */}
+              {reportCount > 0 && (
+                <div style={{ fontSize: '11px', fontWeight: 900, color: '#ef4444', marginTop: '4px' }}>
+                  {reportCount} report{reportCount !== 1 ? 's' : ''}
+                </div>
+              )}
             </div>
           </div>
         );
