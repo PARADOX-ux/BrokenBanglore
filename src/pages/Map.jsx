@@ -357,15 +357,20 @@ export default function Map() {
         }
       });
 
-      // Throttled Hover Handler
+      // High-Performance Hover Handler
       const handleMouseMove = throttle((e) => {
-        if (!map.current || !wardGeoJson.current) return;
+        if (!map.current) return;
         
-        const pt = [e.lngLat.lng, e.lngLat.lat];
-        const point = turf.point(pt);
-        
-        // Robust Turf spatial check (works in 2D and 3D)
-        const feature = wardGeoJson.current.features.find(f => turf.booleanPointInPolygon(point, f));
+        // 1. Native Hit-Testing (Fastest)
+        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
+        let feature = features[0];
+
+        // 2. Spatial Fallback (Turf) — only if native misses or we are in a complex 3D state
+        if (!feature && wardGeoJson.current) {
+          const pt = [e.lngLat.lng, e.lngLat.lat];
+          const point = turf.point(pt);
+          feature = wardGeoJson.current.features.find(f => turf.booleanPointInPolygon(point, f));
+        }
 
         if (feature) {
           map.current.getCanvas().style.cursor = 'pointer';
@@ -385,11 +390,11 @@ export default function Map() {
               subAreas: areaInfo.areas || []
             };
 
-            // Update hover card position for mouse-following behavior
+            // Update hover card position
             setMousePos({ x: e.point.x, y: e.point.y });
             handleWardAction(wardProps, 'hover');
           } else {
-            // Even if same ward, update position for smooth tracking
+            // Smoothly track mouse within the same ward
             setMousePos({ x: e.point.x, y: e.point.y });
           }
         } else {
@@ -401,7 +406,7 @@ export default function Map() {
             setHoveredReport(null);
           }
         }
-      }, 50); // 50ms throttle for smooth performance
+      }, 16); // 16ms = ~60fps for buttery smooth tracking like Namma Kasa
 
       map.current.on('mousemove', handleMouseMove);
 
