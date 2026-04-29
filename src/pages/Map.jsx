@@ -54,7 +54,8 @@ export default function Map() {
   const [viewMode, setViewMode] = useState('map');      // 'map' | 'list'
   const [severityFilter, setSeverityFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [is3D, setIs3D] = useState(false); // Start in 2D — hover works correctly; user can switch to 3D
+  const [is3D, setIs3D] = useState(false); 
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 }); // Track mouse for tooltip following
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -372,8 +373,9 @@ export default function Map() {
 
           if (wardNo !== lastHoveredWardNo.current) {
             lastHoveredWardNo.current = wardNo;
-            map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
-            map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
+            const wardNoStr = String(wardNo);
+            map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNoStr]);
+            map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNoStr]);
 
             // Enhanced area names from our accurate JSON
             const areaInfo = accurateAreaNames[wardNo] || {};
@@ -383,7 +385,12 @@ export default function Map() {
               subAreas: areaInfo.areas || []
             };
 
+            // Update hover card position for mouse-following behavior
+            setMousePos({ x: e.point.x, y: e.point.y });
             handleWardAction(wardProps, 'hover');
+          } else {
+            // Even if same ward, update position for smooth tracking
+            setMousePos({ x: e.point.x, y: e.point.y });
           }
         } else {
           if (lastHoveredWardNo.current !== null) {
@@ -700,59 +707,103 @@ export default function Map() {
         const showZone   = zoneLabel && zoneLabel.toLowerCase() !== mainArea.toLowerCase();
         const reportCount = wardReports.length;
 
+        // Mouse-following logic: offset from cursor to prevent blocking
+        const tooltipStyle = {
+          position: 'absolute',
+          left: mousePos.x + 20,
+          top: mousePos.y + 20,
+          zIndex: 1000,
+          pointerEvents: 'none',
+          transform: 'translate(0, 0)',
+          transition: 'transform 0.1s ease-out'
+        };
+
+        // For mobile/small screens, keep it fixed at bottom to avoid overlap
+        const isMobile = window.innerWidth < 768;
+        const finalStyle = isMobile ? {
+          position: 'absolute',
+          bottom: '24px',
+          left: '16px',
+          right: '16px',
+          zIndex: 1000,
+          pointerEvents: 'none'
+        } : tooltipStyle;
+
         return (
-          <div className="absolute bottom-6 left-4 md:left-6 z-[1000] pointer-events-none">
+          <div style={finalStyle}>
             <div
+              className="animate-in fade-in zoom-in-95 duration-200"
               style={{
-                background: 'rgba(255,255,255,0.97)',
-                backdropFilter: 'blur(12px)',
-                borderRadius: '14px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,0.1)',
-                borderLeft: '5px solid #4ADE80',
-                padding: '14px 18px',
-                minWidth: '210px',
+                background: 'rgba(255,255,255,0.98)',
+                backdropFilter: 'blur(16px)',
+                borderRadius: '16px',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(0,0,0,0.05)',
+                borderLeft: '6px solid #4ADE80',
+                padding: '16px 20px',
+                minWidth: '240px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '2px'
+                gap: '4px'
               }}
             >
               {/* Ward name */}
-              <div style={{ fontSize: '16px', fontWeight: 900, color: '#111', lineHeight: 1.2, letterSpacing: '-0.01em', textTransform: 'capitalize', marginBottom: '2px' }}>
+              <div style={{ fontSize: '18px', fontWeight: 900, color: '#000', lineHeight: 1.1, letterSpacing: '-0.02em', textTransform: 'capitalize' }}>
                 {wardName}
               </div>
+              
               {/* Ward # · Direction */}
-              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>
+              <div style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(0,0,0,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 Ward #{wardNo}{direction ? ` · ${direction}` : ''}
               </div>
+
+              {/* Stats Row */}
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 900, color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase' }}>Reports</span>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: reportCount > 0 ? '#ef4444' : '#22c55e' }}>{reportCount}</span>
+                </div>
+                <div style={{ width: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }}></div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 900, color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase' }}>Status</span>
+                  <span style={{ fontSize: '10px', fontWeight: 900, color: '#f97316', marginTop: '3px' }}>MONITORED</span>
+                </div>
+              </div>
+
               {/* Constituency (main area) */}
               {mainArea && (
-                <div style={{ fontSize: '11px', fontWeight: 800, color: '#2B9348', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                <div style={{ 
+                  fontSize: '11px', 
+                  fontWeight: 900, 
+                  color: '#2B9348', 
+                  letterSpacing: '0.05em', 
+                  textTransform: 'uppercase', 
+                  marginTop: '4px', 
+                  paddingTop: '8px', 
+                  borderTop: '1px solid rgba(0,0,0,0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2B9348' }}></div>
                   {mainArea}
                 </div>
               )}
-              {/* Broader zone (e.g. Yelahanka Zone) */}
-              {showZone && (
-                <div style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(0,0,0,0.28)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                  {zoneLabel}
-                </div>
-              )}
-              {/* Sub-areas list for verification */}
+              
+              {/* Sub-areas pill list */}
               {h.subAreas && h.subAreas.length > 0 && (
-                <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                  <div style={{ fontSize: '7px', fontWeight: 900, color: 'rgba(0,0,0,0.2)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>Coverage Includes</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                    {h.subAreas.map((area, i) => (
-                      <span key={i} style={{ fontSize: '8px', fontWeight: 800, color: 'rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.03)', padding: '2px 6px', borderRadius: '4px' }}>{area}</span>
-                    ))}
-                  </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
+                  {h.subAreas.slice(0, 3).map((area, i) => (
+                    <span key={i} style={{ fontSize: '8px', fontWeight: 800, color: 'rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '100px' }}>{area}</span>
+                  ))}
+                  {h.subAreas.length > 3 && <span style={{ fontSize: '8px', fontWeight: 800, color: 'rgba(0,0,0,0.3)' }}>+{h.subAreas.length - 3} more</span>}
                 </div>
               )}
-              {/* Report count */}
-              {reportCount > 0 && (
-                <div style={{ fontSize: '11px', fontWeight: 900, color: '#ef4444', marginTop: '4px' }}>
-                  {reportCount} report{reportCount !== 1 ? 's' : ''}
-                </div>
-              )}
+
+              {/* Action Hint */}
+              <div style={{ fontSize: '8px', fontWeight: 900, color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', textAlign: 'center', marginTop: '8px', borderTop: '1px dashed rgba(0,0,0,0.1)', paddingTop: '6px' }}>
+                Click to View Accountability
+              </div>
             </div>
           </div>
         );
