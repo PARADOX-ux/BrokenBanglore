@@ -7,6 +7,47 @@
 
 const getAvatar = (name, pColor) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${pColor.replace('#', '')}&color=fff&size=512&font-size=0.35&bold=true`;
 
+// Accurate Ward Area Data (Sync'd with BBMP 2024 ward boundaries)
+export const accurateAreaNames = {
+  1: { name: "Kempegowda Ward", areas: ["Govindapura", "Kulappa Layout", "Yelahanka Airport Area"] },
+  2: { name: "Chowdeswari Ward", areas: ["Harohalli", "Naganahalli", "Puttanahalli"] },
+  3: { name: "Atturu", areas: ["Ananthapura", "Atturu Village", "Doddaamaravathi"] },
+  4: { name: "Yelahanka Satellite Town", areas: ["Yelahanka New Town", "Sahakaranagara"] },
+  5: { name: "Jakkuru", areas: ["Jakkuru Village", "Hebbal Kempapura"] },
+  6: { name: "Thanisandra", areas: ["Thanisandra", "Nagavara", "HBR Layout"] },
+  7: { name: "Byatarayanapura", areas: ["Byatarayanapura", "Kodigehalli Gate"] },
+  8: { name: "Kodigehalli", areas: ["Kodigehalli", "Sahakaranagar Extension"] },
+  9: { name: "Vidyaranyapura", areas: ["Vidyaranyapura", "Doddabommasandra"] },
+  10: { name: "Dodda Bommasandra", areas: ["Doddabommasandra", "Chikkabanavara"] },
+  11: { name: "Kempapura", areas: ["Kempapura", "Hebbal", "Nagavara Lake"] },
+  12: { name: "Kogilu", areas: ["Kogilu Village", "Amruthahalli"] },
+  13: { name: "Amruthahalli", areas: ["Amruthahalli", "Sahakara Nagar"] },
+  14: { name: "Allalasandra", areas: ["Allalasandra", "GKVK Campus area"] },
+  15: { name: "HBR Layout", areas: ["HBR Layout 1st Block", "HBR Layout 6th Block"] },
+  16: { name: "Kammagondanahalli", areas: ["Kammagondanahalli", "Geddalahalli"] },
+  17: { name: "Kavalbyrasandra", areas: ["Kavalbyrasandra", "RT Nagar"] },
+  18: { name: "Vinnakota", areas: ["Vinnakota", "Sahakara Nagar"] },
+  19: { name: "Horamavu Agara", areas: ["Horamavu Agara", "Ramamurthy Nagar"] },
+  20: { name: "Horamavu Banaswadi", areas: ["Horamavu Banaswadi", "Banaswadi"] },
+  21: { name: "Kalkere", areas: ["Kalkere", "Krishnarajapura"] },
+  22: { name: "Ramamurthy Nagar", areas: ["Ramamurthy Nagar", "NGEF Layout"] },
+  23: { name: "Dodda Bidarakallu", areas: ["Dodda Bidarakallu", "Jalahalli West"] },
+  24: { name: "Rajagopal Nagar", areas: ["Rajagopal Nagar", "Yeshwanthpur"] },
+  25: { name: "Hegganahalli", areas: ["Hegganahalli", "Herohalli"] },
+  26: { name: "Herohalli", areas: ["Herohalli", "Peenya Industrial Area"] },
+  37: { name: "Yeshwanthpura", areas: ["Yeshwanthpura", "Jalahalli"] },
+  45: { name: "Rajarajeshwari Nagar", areas: ["RR Nagar", "ISRO Layout", "Kommaghatta"] },
+  48: { name: "Kengeri", areas: ["Kengeri", "Kengeri Satellite Town"] },
+  52: { name: "Indiranagar", areas: ["Indiranagar", "HAL 2nd Stage", "Doopanahalli"] },
+  102: { name: "Koramangala", areas: ["Koramangala 1st Block", "Koramangala 8th Block"] },
+  125: { name: "Bellandur", areas: ["Bellandur", "Outer Ring Road", "Green Glen Layout"] },
+  128: { name: "HSR Layout", areas: ["HSR Layout Sector 1", "HSR Layout Sector 7"] },
+  130: { name: "Singasandra", areas: ["Singasandra", "Electronic City access"] },
+  146: { name: "Marathahalli", areas: ["Marathahalli", "ORR", "Kundalahalli"] },
+  185: { name: "Electronic City", areas: ["Electronic City Phase 1", "Electronic City Phase 2"] },
+  193: { name: "Whitefield", areas: ["Whitefield", "ITPL Road", "Hope Farm"] }
+};
+
 // Constituency → Parliamentary Constituency mapping (2024 Lok Sabha Results)
 export const constituencyMPMap = {
   // Bangalore North (MP: Shobha Karandlaje, BJP)

@@ -1,9 +1,23 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import * as turf from '@turf/centroid';
+import * as turf from '@turf/turf';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { categories, wardMLAData, completeMLAList, getMPByConstituency, getMPByZone } from '../data/wardData';
+import { categories, wardMLAData, completeMLAList, getMPByConstituency, getMPByZone, accurateAreaNames } from '../data/wardData';
+
+// Performance Throttle
+const throttle = (func, limit) => {
+  let inThrottle;
+  return function() {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+};
 import { getReports, upvoteReport } from '../lib/reportsDb';
 
 // Bengaluru Strict Bounds
@@ -24,6 +38,17 @@ export default function Map() {
   const [pickedWard, setPickedWard] = useState(null);      // ward data from click
   const [wardReports, setWardReports] = useState([]);
   const [wardReportsLoading, setWardReportsLoading] = useState(false);
+  const lastHoveredWardNo = useRef(null);
+  const wardGeoJson = useRef(null);
+
+  // Pre-load GeoJSON for robust spatial querying
+  useEffect(() => {
+    fetch('/data/bangalore-wards.geojson?v=datameet_243')
+      .then(r => r.json())
+      .then(data => { wardGeoJson.current = data; })
+      .catch(err => console.error("Failed to load ward GeoJSON:", err));
+  }, []);
+
   const [hoveredReport, setHoveredReport] = useState(null);
   const [allReports, setAllReports] = useState([]);
   const [viewMode, setViewMode] = useState('map');      // 'map' | 'list'
@@ -34,7 +59,6 @@ export default function Map() {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markers = useRef([]);
-  const lastHoveredWardNo = useRef(null); // track last ward to avoid re-firing on same ward
 
   // Confirm pick — save to localStorage and go back to report
   const confirmPick = () => {
@@ -187,12 +211,13 @@ export default function Map() {
 
       setHoveredReport({
         id: `ward-${wardNo}`,
-        wardName: wardProps.KGISWardName || wardProps.name,
+        wardName: wardProps.wardName || wardProps.KGISWardName || wardProps.name,
         ward: wardNo,
         direction,
         constituency: mlaData?.constituency || '',
         authority: authorityStr,
-        mlaDetails: mlaData
+        mlaDetails: mlaData,
+        subAreas: wardProps.subAreas || []
       });
       // NOTE: do NOT call getReports here — it fires on every mouse pixel and kills performance
     } else {
@@ -331,24 +356,34 @@ export default function Map() {
         }
       });
 
-      // Global Hover and Mouse Move Interaction
-      map.current.on('mousemove', (e) => {
-        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
+      // Throttled Hover Handler
+      const handleMouseMove = throttle((e) => {
+        if (!map.current || !wardGeoJson.current) return;
         
-        if (features.length > 0) {
+        const pt = [e.lngLat.lng, e.lngLat.lat];
+        const point = turf.point(pt);
+        
+        // Robust Turf spatial check (works in 2D and 3D)
+        const feature = wardGeoJson.current.features.find(f => turf.booleanPointInPolygon(point, f));
+
+        if (feature) {
           map.current.getCanvas().style.cursor = 'pointer';
-          const feature = features[0];
           const wardNo = feature.properties.KGISWardNo;
 
-          // Guard: only re-process when moving to a DIFFERENT ward
           if (wardNo !== lastHoveredWardNo.current) {
             lastHoveredWardNo.current = wardNo;
-
-            // Update highlight filter
             map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNo]);
             map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNo]);
 
-            handleWardAction(feature.properties, 'hover');
+            // Enhanced area names from our accurate JSON
+            const areaInfo = accurateAreaNames[wardNo] || {};
+            const wardProps = {
+              ...feature.properties,
+              wardName: areaInfo.name || feature.properties.KGISWardName,
+              subAreas: areaInfo.areas || []
+            };
+
+            handleWardAction(wardProps, 'hover');
           }
         } else {
           if (lastHoveredWardNo.current !== null) {
@@ -359,7 +394,9 @@ export default function Map() {
             setHoveredReport(null);
           }
         }
-      });
+      }, 50); // 50ms throttle for smooth performance
+
+      map.current.on('mousemove', handleMouseMove);
 
       // Click interaction
       map.current.on('click', (e) => {
@@ -380,9 +417,19 @@ export default function Map() {
         }
 
         // Normal mode: check for ward clicks
-        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
-        if (features.length > 0) {
-          handleWardAction(features[0].properties, 'click');
+        const pt = [e.lngLat.lng, e.lngLat.lat];
+        const point = turf.point(pt);
+        const feature = wardGeoJson.current?.features.find(f => turf.booleanPointInPolygon(point, f));
+
+        if (feature) {
+          const wardNo = feature.properties.KGISWardNo;
+          const areaInfo = accurateAreaNames[wardNo] || {};
+          const wardProps = {
+            ...feature.properties,
+            wardName: areaInfo.name || feature.properties.KGISWardName,
+            subAreas: areaInfo.areas || []
+          };
+          handleWardAction(wardProps, 'click');
         } else {
           // Clicked background: Clear everything
           setSelectedReport(null);
@@ -687,6 +734,17 @@ export default function Map() {
               {showZone && (
                 <div style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(0,0,0,0.28)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                   {zoneLabel}
+                </div>
+              )}
+              {/* Sub-areas list for verification */}
+              {h.subAreas && h.subAreas.length > 0 && (
+                <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                  <div style={{ fontSize: '7px', fontWeight: 900, color: 'rgba(0,0,0,0.2)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>Coverage Includes</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {h.subAreas.map((area, i) => (
+                      <span key={i} style={{ fontSize: '8px', fontWeight: 800, color: 'rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.03)', padding: '2px 6px', borderRadius: '4px' }}>{area}</span>
+                    ))}
+                  </div>
                 </div>
               )}
               {/* Report count */}
