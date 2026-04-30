@@ -15,70 +15,22 @@ function AnimatedNumber({ value }) {
   return <motion.span>{display}</motion.span>;
 }
 
-// Premium Typewriter Component
-function Typewriter({ text, delay = 0 }) {
-  const letters = Array.from(text);
-  const container = {
-    hidden: { opacity: 0 },
-    visible: (i = 1) => ({
-      opacity: 1,
-      transition: { staggerChildren: 0.05, delayChildren: delay * i },
-    }),
-  };
-
-  const child = {
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      },
-    },
-    hidden: {
-      opacity: 0,
-      x: 20,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      },
-    },
-  };
-
-  return (
-    <motion.div
-      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
-      variants={container}
-      initial="hidden"
-      animate="visible"
-    >
-      {letters.map((letter, index) => (
-        <motion.span variants={child} key={index} style={{ marginRight: letter === ' ' ? '0.25em' : '0' }}>
-          {letter}
-        </motion.span>
-      ))}
-    </motion.div>
-  );
-}
 
 // Cinematic Ticker Component
 function Ticker({ reports }) {
   const latestReports = reports.slice(0, 10);
   return (
-    <div className="w-full bg-black py-3 overflow-hidden border-y border-white/10 relative z-20">
+    <div className="w-full bg-black py-4 overflow-hidden border-y border-white/5 relative z-20">
       <motion.div 
         animate={{ x: ["0%", "-50%"] }}
-        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
-        className="flex whitespace-nowrap gap-12 items-center"
+        transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+        className="flex whitespace-nowrap gap-20 items-center"
       >
         {[...latestReports, ...latestReports].map((report, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
-            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Live Audit:</span>
-            <span className="text-[10px] font-black text-gold uppercase tracking-widest">{report.category} reported in {report.area_name || 'Bengaluru'}</span>
-            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">— {new Date(report.created_at).toLocaleTimeString()}</span>
+          <div key={i} className="flex items-center gap-4">
+            <span className="w-1 h-1 rounded-full bg-gold"></span>
+            <span className="text-[9px] font-medium text-white/40 uppercase tracking-[0.3em] font-display">Live Audit:</span>
+            <span className="text-[9px] font-bold text-white uppercase tracking-[0.2em] font-display">{report.category} in {report.area_name || 'Central'}</span>
           </div>
         ))}
       </motion.div>
@@ -140,35 +92,33 @@ export default function Home() {
         </motion.div>
 
         <motion.div 
-          initial={{ y: -20, opacity: 0 }}
+          initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, type: 'spring' }}
-          className="relative z-10 mb-6 inline-flex items-center gap-2 bg-forest text-gold border border-black/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
-          <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse"></span>
-          Citizen Audit Platform · Beta 2.0
+          transition={{ delay: 0.4, type: 'spring' }}
+          className="relative z-10 mb-8 inline-flex items-center gap-3 bg-white border border-black/10 px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] shadow-sm">
+          <span className="w-1.5 h-1.5 bg-forest rounded-full"></span>
+          CIVIC ACCOUNTABILITY ENGINE
         </motion.div>
 
-        <div className="relative z-10 mb-8 overflow-hidden">
+        <div className="relative z-10 mb-6 px-4">
           <motion.h1 
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-black text-5xl md:text-7xl lg:text-8xl text-black tracking-tighter leading-[0.85] uppercase italic"
-            style={{ fontFamily: "'Syne', sans-serif" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="font-display font-light text-5xl md:text-8xl text-black tracking-tight leading-[0.9] uppercase"
           >
-            BENGALURU <br className="hidden md:block"/> IS YOURS.
+            BENGALURU <br className="hidden md:block"/> <span className="font-bold">REIMAGINED.</span>
           </motion.h1>
-          <motion.div 
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="h-2 w-full bg-gold mt-4 origin-left shadow-[0_10px_20px_rgba(233,196,106,0.3)]"
-          />
         </div>
 
-        <div className="relative z-10 mb-12 h-8 flex items-center justify-center">
-          <Typewriter text="Hold them accountable. Reclaim your streets." delay={1.2} />
-        </div>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.6 }}
+          transition={{ delay: 0.8, duration: 1 }}
+          className="relative z-10 text-sm md:text-xl text-black font-medium max-w-2xl mb-12 tracking-wide uppercase"
+        >
+          Your platform for transparency, accountability, and a better city.
+        </motion.p>
 
         <motion.div 
           variants={containerVariants}
