@@ -345,15 +345,23 @@ export default function Map() {
       });
 
       // Dim Infrastructure (The "Whitish/Grey" lines)
-      const layers = map.current.getStyle().layers;
-      layers.forEach(layer => {
-        if (layer.id.includes('road') || layer.id.includes('highway') || layer.id.includes('transportation') || layer.id.includes('boundary')) {
-          if (layer.type === 'line') {
-            map.current.setPaintProperty(layer.id, 'line-opacity', 0.1);
+      const currentLayers = map.current.getStyle().layers;
+      currentLayers.forEach(layer => {
+        try {
+          if (layer.id.includes('road') || layer.id.includes('highway') || layer.id.includes('transportation') || layer.id.includes('boundary')) {
+            if (layer.type === 'line') {
+              map.current.setPaintProperty(layer.id, 'line-opacity', 0.1);
+            }
           }
-        }
-        if (layer.id.includes('building')) {
-           map.current.setPaintProperty(layer.id, 'fill-opacity', 0.5);
+          if (layer.id.includes('building')) {
+            if (layer.type === 'fill') {
+              map.current.setPaintProperty(layer.id, 'fill-opacity', 0.5);
+            } else if (layer.type === 'fill-extrusion') {
+              map.current.setPaintProperty(layer.id, 'fill-extrusion-opacity', 0.5);
+            }
+          }
+        } catch (e) {
+          console.warn(`Could not set paint property for layer ${layer.id}:`, e);
         }
       });
 
@@ -379,14 +387,16 @@ export default function Map() {
           if (wardNo !== lastHoveredWardNo.current) {
             lastHoveredWardNo.current = wardNo;
             const wardNoStr = String(wardNo);
+            const wardNoNum = Number(wardNo);
+            
             map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNoStr]);
             map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNoStr]);
 
-            // Enhanced area names from our accurate JSON
-            const areaInfo = accurateAreaNames[wardNo] || {};
+            // Enhanced area names from our accurate JSON (Handle both string and number keys)
+            const areaInfo = accurateAreaNames[wardNoNum] || accurateAreaNames[wardNoStr] || {};
             const wardProps = {
               ...feature.properties,
-              wardName: areaInfo.name || feature.properties.KGISWardName,
+              wardName: areaInfo.name || feature.properties.KGISWardName || `Ward ${wardNo}`,
               subAreas: areaInfo.areas || []
             };
 
