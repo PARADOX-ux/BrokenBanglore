@@ -19,8 +19,9 @@ export const accurateAreaNames = {
   101: { name: "Indiranagar", areas: ["Indiranagar", "HAL 2nd Stage", "Doopanahalli"] },
   142: { name: "Shivajinagar", areas: ["Shivajinagar", "Commercial Street"] },
   172: { name: "Koramangala", areas: ["Koramangala 1st Block", "Koramangala 8th Block"] },
+  188: { name: "BTM Layout", areas: ["BTM 2nd Stage", "Madiwala", "Silk Board"] },
   190: { name: "HSR Layout", areas: ["HSR Layout Sector 1", "HSR Layout Sector 7"] },
-  193: { name: "Whitefield", areas: ["Whitefield", "ITPL Road", "Hope Farm"] },
+  206: { name: "Whitefield", areas: ["Whitefield", "ITPL Road", "Hope Farm"] },
   213: { name: "Mahadevapura", areas: ["Phoenix Marketcity", "Outer Ring Road"] },
 };
 
@@ -177,9 +178,9 @@ export const wardMLAData = [
     authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 193, name: "Whitefield", constituency: "Mahadevapura",
+    ward: 207, name: "Whitefield (Hagadur)", constituency: "Mahadevapura",
     mla: "Manjula S", party: "BJP", partyColor: "#f97316",
-    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
+    mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0
   },
   {
