@@ -4,18 +4,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-forest: #0a1f14; /* Extreme Deep Green (Nearly Black) */
-  --color-bright: #2B9348; /* Shifted the old forest to bright */
+  --color-forest: #0a1f14; 
+  --color-bright: #2B9348; 
   --color-strong: #1a3a2a; 
   --color-gold: #E9C46A;   
-  --color-cream: #fdfbf6;  /* Preferred True Cream */
-  --color-ash: #d1d5db;    /* Ash Gray */
-  --font-display: "Josefin Sans", sans-serif;
+  --color-cream: #fdfbf6;  
+  --color-ash: #d1d5db;    
+  --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-nav: "Inter", sans-serif;
   --animate-pulse-fast: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-marquee: marquee 25s linear infinite;
-
+  --shadow-neo: 4px 4px 0px 0px rgba(0,0,0,1);
+  --shadow-neo-lg: 8px 8px 0px 0px rgba(0,0,0,1);
 }
 
 @keyframes marquee {
@@ -50,7 +51,19 @@
   }
   
   .glass-card {
-    @apply bg-gold/30 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl rounded-tl-none;
+    @apply bg-white/80 backdrop-blur-xl border border-black/5 shadow-xl rounded-2xl;
+  }
+
+  .neo-button {
+    @apply bg-white border-2 border-black font-black uppercase tracking-widest text-[10px] px-5 py-2.5 shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-[0px] active:translate-y-[0px] active:shadow-none transition-all;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
