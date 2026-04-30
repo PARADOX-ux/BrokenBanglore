@@ -15,6 +15,21 @@ function AnimatedNumber({ value }) {
   return <motion.span>{display}</motion.span>;
 }
 
+// RetroGrid Background Component
+function RetroGrid() {
+  return (
+    <div className="absolute inset-0 overflow-hidden [perspective:300px] pointer-events-none opacity-40">
+      <div className="absolute inset-0 [transform:rotateX(45deg)] origin-center">
+        <div 
+          className="absolute [background-image:linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_0),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_0)] [background-size:60px_60px] [height:400vh] [width:200vw] -left-[50%] top-0"
+          style={{ animation: 'grid-scroll 4s linear infinite' }}
+        />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[#fdfbf6] via-[#fdfbf6]/20 to-transparent"></div>
+    </div>
+  );
+}
+
 
 // Cinematic Ticker Component
 function Ticker({ reports }) {
@@ -82,14 +97,8 @@ export default function Home() {
   return (
     <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-[#fdfbf6] text-black">
       {/* Hero Section */}
-      <section className="w-full bg-[#fdfbf6] px-4 md:px-8 py-20 md:py-32 flex flex-col items-center justify-center text-center relative overflow-hidden">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.04 }}
-          transition={{ duration: 2 }}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }}>
-        </motion.div>
+      <section className="w-full bg-[#fdfbf6] px-4 md:px-8 py-24 md:py-40 flex flex-col items-center justify-center text-center relative overflow-hidden">
+        <RetroGrid />
 
 
 
