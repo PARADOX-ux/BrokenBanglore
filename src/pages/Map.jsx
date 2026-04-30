@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as turf from '@turf/turf';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { categories, wardMLAData, completeMLAList, getMPByConstituency, getMPByZone, accurateAreaNames } from '../data/wardData';
 
 // Performance Throttle
@@ -442,11 +442,10 @@ export default function Map() {
 
       // Click interaction
       map.current.on('click', (e) => {
-        // If pick mode, set pin
+        const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
+        
         if (isPickMode) {
           setPickedPin({ lat: e.lngLat.lat, lng: e.lngLat.lng });
-          // Check if we clicked a ward
-          const features = map.current.queryRenderedFeatures(e.point, { layers: ['ward-fills'] });
           if (features.length > 0) {
             const wardProps = features[0].properties;
             const wardNo = wardProps.KGISWardNo || 1;
@@ -458,12 +457,8 @@ export default function Map() {
           return;
         }
 
-        // Normal mode: check for ward clicks
-        const pt = [e.lngLat.lng, e.lngLat.lat];
-        const point = turf.point(pt);
-        const feature = wardGeoJson.current?.features.find(f => turf.booleanPointInPolygon(point, f));
-
-        if (feature) {
+        if (features.length > 0) {
+          const feature = features[0];
           const wardNo = feature.properties.KGISWardNo;
           const wardNoStr = String(wardNo);
           const wardNoNum = Number(wardNo);
@@ -477,16 +472,13 @@ export default function Map() {
             subAreas: areaInfo.areas || []
           };
 
-          // On mobile, click = hover-card trigger
           if (isMobile) {
             handleWardAction(wardProps, 'hover');
           } else {
             handleWardAction(wardProps, 'click');
           }
         } else {
-          // Clicked outside — clear hover on mobile
           if (isMobile) setHoveredReport(null);
-          // Clicked background: Clear everything
           setSelectedReport(null);
           setHoveredReport(null);
           setWardReports([]);
