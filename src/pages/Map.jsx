@@ -277,31 +277,9 @@ export default function Map() {
     });
 
     map.current.on('load', () => {
-      // DEBUG: View available sources to ensure correct ID
-      console.log('Map Sources:', map.current.getStyle().sources);
-
-      // 3D Building Extrusion (Correction: source name is 'openmaptiles')
-      map.current.addLayer({
-        'id': '3d-buildings',
-        'source': 'openmaptiles', 
-        'source-layer': 'building',
-        'type': 'fill-extrusion',
-        'minzoom': 13,
-        'paint': {
-          'fill-extrusion-color': '#2a3a4a',
-          'fill-extrusion-height': [
-            'interpolate', ['linear'], ['zoom'],
-            13, 0,
-            14, ['coalesce', ['get', 'render_height'], ['get', 'height'], 20]
-          ],
-          'fill-extrusion-base': [
-            'interpolate', ['linear'], ['zoom'],
-            13, 0,
-            14, ['coalesce', ['get', 'render_min_height'], ['get', 'min_height'], 0]
-          ],
-          'fill-extrusion-opacity': 0.8
-        }
-      });
+      console.log('Map style loaded successfully');
+      
+      // Add Ward GeoJSON Source
 
       // Add Ward GeoJSON Source
       map.current.addSource('bbmp-wards', {
@@ -495,11 +473,6 @@ export default function Map() {
       });
     });
 
-    // Handle global report fetch
-    getReports().then(data => {
-      setAllReports(data || []);
-    });
-
     return () => {
       if (map.current) {
         map.current.remove();
@@ -507,6 +480,14 @@ export default function Map() {
       }
     };
   }, [isPickMode]);
+
+  // Handle global report fetch - Decoupled from map initialization
+  useEffect(() => {
+    getReports().then(data => {
+      console.log(`Fetched ${data?.length || 0} reports from database.`);
+      setAllReports(data || []);
+    });
+  }, []);
 
   // Handle 2D/3D Toggle Effect
   useEffect(() => {
