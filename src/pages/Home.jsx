@@ -18,14 +18,31 @@ function AnimatedNumber({ value }) {
 // RetroGrid Background Component
 function RetroGrid() {
   return (
-    <div className="absolute inset-0 overflow-hidden [perspective:300px] pointer-events-none opacity-40">
-      <div className="absolute inset-0 [transform:rotateX(45deg)] origin-center">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* The 3D Grid Plane */}
+      <div className="absolute inset-0 [perspective:1000px] [transform-style:preserve-3d]">
         <div 
-          className="absolute [background-image:linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_0),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_0)] [background-size:60px_60px] [height:400vh] [width:200vw] -left-[50%] top-0"
-          style={{ animation: 'grid-scroll 4s linear infinite' }}
+          className="absolute inset-0 [transform:rotateX(60deg)] origin-[50%_50%]"
+          style={{ 
+            backgroundImage: `
+              linear-gradient(to right, rgba(0,0,0,0.15) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px',
+            height: '400vh',
+            width: '400vw',
+            marginLeft: '-150vw',
+            marginTop: '-100vh',
+            animation: 'grid-scroll 6s linear infinite'
+          }}
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#fdfbf6] via-[#fdfbf6]/20 to-transparent"></div>
+
+      {/* Radial fade for focus */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,#fdfbf6_80%)]"></div>
+      
+      {/* Bottom fade to content */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#fdfbf6] via-transparent to-transparent"></div>
     </div>
   );
 }
