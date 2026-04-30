@@ -714,13 +714,7 @@ export default function Map() {
 
         const wardName   = h.wardName || 'BBMP Area';
         const wardNo     = h.ward;
-        const direction  = h.direction || '';
-        const mainArea   = h.constituency || h.mlaDetails?.constituency || '';
-        // Sub-constituency / broader zone label
-        const zoneLabel  = (h.authority || '')
-          .replace(/^BBMP\s*/i, '').replace(/\s*Zone\s*$/i, '').trim();
-        const showZone   = zoneLabel && zoneLabel.toLowerCase() !== mainArea.toLowerCase();
-        const reportCount = wardReports.length;
+        const bangalorePart = h.mlaDetails?.mpConstituency || h.constituency || 'Bengaluru';
 
         // Mouse-following logic: offset from cursor to prevent blocking
         const tooltipStyle = {
@@ -730,10 +724,9 @@ export default function Map() {
           zIndex: 1000,
           pointerEvents: 'none',
           transform: 'translate(0, 0)',
-          transition: 'transform 0.1s ease-out'
+          transition: 'transform 0.05s linear'
         };
 
-        // For mobile/small screens, keep it fixed at bottom to avoid overlap
         const isMobile = window.innerWidth < 768;
         const finalStyle = isMobile ? {
           position: 'absolute',
@@ -750,74 +743,27 @@ export default function Map() {
               className="animate-in fade-in zoom-in-95 duration-200"
               style={{
                 background: 'rgba(255,255,255,0.98)',
-                backdropFilter: 'blur(16px)',
-                borderRadius: '16px',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05)',
-                border: '1px solid rgba(0,0,0,0.05)',
-                borderLeft: '6px solid #4ADE80',
-                padding: '16px 20px',
-                minWidth: '240px',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '12px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                padding: '12px 16px',
+                minWidth: '200px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '4px'
+                gap: '2px'
               }}
             >
               {/* Ward name */}
-              <div style={{ fontSize: '18px', fontWeight: 900, color: '#000', lineHeight: 1.1, letterSpacing: '-0.02em', textTransform: 'capitalize' }}>
+              <div style={{ fontSize: '16px', fontVariantCaps: 'all-small-caps', fontWeight: 900, color: '#000', letterSpacing: '-0.01em' }}>
                 {wardName}
               </div>
               
-              {/* Ward # · Direction */}
-              <div style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(0,0,0,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                Ward #{wardNo}{direction ? ` · ${direction}` : ''}
-              </div>
-
-              {/* Stats Row */}
-              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', marginBottom: '4px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 900, color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase' }}>Reports</span>
-                  <span style={{ fontSize: '14px', fontWeight: 900, color: reportCount > 0 ? '#ef4444' : '#22c55e' }}>{reportCount}</span>
-                </div>
-                <div style={{ width: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }}></div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 900, color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase' }}>Status</span>
-                  <span style={{ fontSize: '10px', fontWeight: 900, color: '#f97316', marginTop: '3px' }}>MONITORED</span>
-                </div>
-              </div>
-
-              {/* Constituency (main area) */}
-              {mainArea && (
-                <div style={{ 
-                  fontSize: '11px', 
-                  fontWeight: 900, 
-                  color: '#2B9348', 
-                  letterSpacing: '0.05em', 
-                  textTransform: 'uppercase', 
-                  marginTop: '4px', 
-                  paddingTop: '8px', 
-                  borderTop: '1px solid rgba(0,0,0,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2B9348' }}></div>
-                  {mainArea}
-                </div>
-              )}
-              
-              {/* Sub-areas pill list */}
-              {h.subAreas && h.subAreas.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
-                  {h.subAreas.slice(0, 3).map((area, i) => (
-                    <span key={i} style={{ fontSize: '8px', fontWeight: 800, color: 'rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '100px' }}>{area}</span>
-                  ))}
-                  {h.subAreas.length > 3 && <span style={{ fontSize: '8px', fontWeight: 800, color: 'rgba(0,0,0,0.3)' }}>+{h.subAreas.length - 3} more</span>}
-                </div>
-              )}
-
-              {/* Action Hint */}
-              <div style={{ fontSize: '8px', fontWeight: 900, color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', textAlign: 'center', marginTop: '8px', borderTop: '1px dashed rgba(0,0,0,0.1)', paddingTop: '6px' }}>
-                Click to View Accountability
+              {/* Location Hierarchy: Part of Bangalore · Ward # */}
+              <div style={{ fontSize: '9px', fontWeight: 800, color: '#2B9348', letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span>{bangalorePart}</span>
+                <span style={{ opacity: 0.3 }}>•</span>
+                <span style={{ color: 'rgba(0,0,0,0.4)' }}>Ward #{wardNo}</span>
               </div>
             </div>
           </div>
