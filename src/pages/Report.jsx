@@ -231,15 +231,15 @@ export default function Report() {
                   <div className="absolute inset-0 border-[20px] border-white/10 pointer-events-none"></div>
                   
                   {/* Camera Controls */}
-                  <div className="absolute bottom-10 left-0 right-0 flex justify-center items-center gap-12">
-                    <button onClick={stopCamera} className="bg-black/50 text-white w-12 h-12 rounded-full border-2 border-white/20 hover:bg-black/80">✕</button>
+                  <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-8 md:gap-12 px-6">
+                    <button onClick={stopCamera} className="bg-black/50 text-white w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white/20 hover:bg-black/80 flex items-center justify-center font-bold">✕</button>
                     <button 
                       onClick={capturePhoto}
-                      className="w-24 h-24 bg-white rounded-full border-[10px] border-forest/20 flex items-center justify-center shadow-2xl active:scale-95 transition-all"
+                      className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-full border-[8px] border-forest/20 flex items-center justify-center shadow-2xl active:scale-90 transition-all"
                     >
-                      <div className="w-12 h-12 bg-red-600 rounded-full"></div>
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-red-600 rounded-full"></div>
                     </button>
-                    <div className="w-12 h-12"></div>
+                    <div className="w-10 h-10 md:w-12 md:h-12"></div>
                   </div>
                 </>
               ) : formData.photoPreview ? (
@@ -311,13 +311,18 @@ export default function Report() {
               </div>
             ) : (
               <div className="space-y-4 mb-6">
-                <button onClick={() => navigate('/map?pickMode=true')} className="w-full bg-[#1a3a2a] text-white rounded-2xl p-6 flex items-center gap-4 hover:opacity-90 transition-all shadow-lg border-2 border-gold/10">
-                  <div className="text-4xl">🗺️</div>
-                  <div className="text-left"><p className="font-display font-bold text-lg leading-tight uppercase">Open Live Map</p><p className="text-white/50 text-[10px] font-black uppercase tracking-widest mt-1">Pick exactly on the ward map</p></div>
+                <button onClick={() => navigate('/map?pickMode=true')} className="w-full bg-[#1a3a2a] text-white rounded-3xl p-6 flex items-center gap-4 hover:opacity-95 transition-all shadow-xl border-4 border-black/10 active:scale-95">
+                  <div className="text-4xl md:text-5xl">🗺️</div>
+                  <div className="text-left flex-1">
+                    <p className="font-display font-black text-lg md:text-xl leading-tight uppercase tracking-tighter">Open Live Map</p>
+                    <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mt-1">Pick exactly on the ward map</p>
+                  </div>
+                  <span className="text-gold font-black">→</span>
                 </button>
-                <button onClick={detectLocation} className="w-full border-2 border-forest/20 bg-white rounded-2xl p-5 flex items-center gap-4 hover:border-forest transition-all">
+                <button onClick={detectLocation} className="w-full border-2 border-forest/20 bg-white rounded-3xl p-5 flex items-center gap-4 hover:border-forest transition-all active:scale-95">
                   <div className="text-3xl text-forest">📡</div>
-                  <div className="text-left text-forest font-bold text-sm tracking-tight">Search via GPS Location</div>
+                  <div className="text-left text-forest font-bold text-sm tracking-tight flex-1">Search via GPS Location</div>
+                  <span className="text-forest/20">→</span>
                 </button>
               </div>
             )}

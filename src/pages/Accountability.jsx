@@ -244,9 +244,9 @@ export default function Accountability() {
                       <div className="flex gap-2 w-full mt-2">
                         <button
                            onClick={() => setSelectedMLA(mla)}
-                           className="w-full px-4 py-2.5 rounded-xl text-sm font-bold bg-forest/10 text-forest hover:bg-forest hover:text-gold transition-colors border border-forest/20"
+                           className="w-full px-4 py-3.5 rounded-2xl text-sm font-black uppercase tracking-widest bg-forest text-gold hover:bg-black transition-all shadow-lg"
                          >
-                           View Audit →
+                           View Audit Details →
                          </button>
                       </div>
 

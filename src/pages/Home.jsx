@@ -118,19 +118,19 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-display font-light text-5xl md:text-8xl text-black tracking-tight leading-[0.9] uppercase"
+            className="font-display font-black text-4xl md:text-8xl text-black tracking-tight leading-[0.85] uppercase"
           >
-            BENGALURU <br className="hidden md:block"/> <span className="font-bold">REIMAGINED.</span>
+            BENGALURU <br className="hidden md:block"/> <span className="text-forest">IS FOR US.</span>
           </motion.h1>
         </div>
 
         <motion.p 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.6 }}
+          animate={{ opacity: 0.8 }}
           transition={{ delay: 0.8, duration: 1 }}
-          className="relative z-10 text-sm md:text-xl text-black font-medium max-w-2xl mb-12 tracking-wide uppercase"
+          className="relative z-10 text-xs md:text-xl text-forest/60 font-black max-w-2xl mb-12 tracking-[0.2em] uppercase px-4"
         >
-          Your platform for transparency, accountability, and a better city.
+          THE ULTIMATE CIVIC ACCOUNTABILITY ENGINE.
         </motion.p>
 
         <motion.div 
@@ -178,10 +178,10 @@ export default function Home() {
               <div className="flex flex-col gap-2 mb-10">
                 <motion.span 
                   whileInView={{ x: [-20, 0], opacity: [0, 1] }}
-                  className="bg-gold text-black px-4 py-2 font-display font-black text-5xl leading-none w-fit shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-2 uppercase tracking-tighter">WE SEE</motion.span>
+                  className="bg-gold text-black px-4 py-2 font-display font-black text-4xl md:text-5xl leading-none w-fit shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-2 uppercase tracking-tighter">WE SEE</motion.span>
                 <motion.span 
                   whileInView={{ x: [20, 0], opacity: [0, 1] }}
-                  className="bg-white text-forest px-4 py-2 font-display font-black text-5xl leading-none w-fit shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -rotate-3 uppercase tracking-tighter">YOU.</motion.span>
+                  className="bg-white text-forest px-4 py-2 font-display font-black text-4xl md:text-5xl leading-none w-fit shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-3 uppercase tracking-tighter">YOU.</motion.span>
               </div>
               
               <div className="space-y-6">
