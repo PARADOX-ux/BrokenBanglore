@@ -15,6 +15,77 @@ function AnimatedNumber({ value }) {
   return <motion.span>{display}</motion.span>;
 }
 
+// Premium Typewriter Component
+function Typewriter({ text, delay = 0 }) {
+  const letters = Array.from(text);
+  const container = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.05, delayChildren: delay * i },
+    }),
+  };
+
+  const child = {
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+    hidden: {
+      opacity: 0,
+      x: 20,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+  };
+
+  return (
+    <motion.div
+      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
+      variants={container}
+      initial="hidden"
+      animate="visible"
+    >
+      {letters.map((letter, index) => (
+        <motion.span variants={child} key={index} style={{ marginRight: letter === ' ' ? '0.25em' : '0' }}>
+          {letter}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+}
+
+// Cinematic Ticker Component
+function Ticker({ reports }) {
+  const latestReports = reports.slice(0, 10);
+  return (
+    <div className="w-full bg-black py-3 overflow-hidden border-y border-white/10 relative z-20">
+      <motion.div 
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+        className="flex whitespace-nowrap gap-12 items-center"
+      >
+        {[...latestReports, ...latestReports].map((report, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Live Audit:</span>
+            <span className="text-[10px] font-black text-gold uppercase tracking-widest">{report.category} reported in {report.area_name || 'Bengaluru'}</span>
+            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">— {new Date(report.created_at).toLocaleTimeString()}</span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [selectedZoneMLA, setSelectedZoneMLA] = useState(null);
   const [reports, setReports] = useState([]);
@@ -72,35 +143,32 @@ export default function Home() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, type: 'spring' }}
-          className="relative z-10 mb-6 inline-flex items-center gap-2 bg-red-100 text-red-900 border border-red-200 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-tight">
-          <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
-          Your photo. Your ward. Their problem to fix.
+          className="relative z-10 mb-6 inline-flex items-center gap-2 bg-forest text-gold border border-black/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
+          <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse"></span>
+          Citizen Audit Platform · Beta 2.0
         </motion.div>
 
-        <motion.h1 
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95] uppercase">
-          Bengaluru Deserves <br className="hidden md:block"/> Better.
-          <span className="text-forest relative inline-block ml-3">
-            We are the Fix.
-            <motion.span 
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 1, duration: 0.8 }}
-              className="absolute -bottom-4 left-0 w-full h-1 md:h-1.5 bg-gold -z-10 origin-left">
-            </motion.span>
-          </span>
-        </motion.h1>
+        <div className="relative z-10 mb-8 overflow-hidden">
+          <motion.h1 
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="font-display font-black text-5xl md:text-7xl lg:text-8xl text-black tracking-tighter leading-[0.85] uppercase italic"
+            style={{ fontFamily: "'Syne', sans-serif" }}
+          >
+            BENGALURU <br className="hidden md:block"/> IS YOURS.
+          </motion.h1>
+          <motion.div 
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="h-2 w-full bg-gold mt-4 origin-left shadow-[0_10px_20px_rgba(233,196,106,0.3)]"
+          />
+        </div>
 
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-lg md:text-2xl text-black font-bold max-w-2xl mb-12 relative z-10">
-          Report problems. Sign petitions. Reach your MLA. <br className="hidden md:block" /> Make the government move.
-        </motion.p>
+        <div className="relative z-10 mb-12 h-8 flex items-center justify-center">
+          <Typewriter text="Hold them accountable. Reclaim your streets." delay={1.2} />
+        </div>
 
         <motion.div 
           variants={containerVariants}
@@ -120,6 +188,9 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Live Ticker */}
+      <Ticker reports={reports} />
 
       {/* Audit Hub - Structured Grid */}
       <section ref={auditHubRef} className="w-full pt-12 md:pt-20 pb-20 px-4 md:px-8 bg-black/5">
