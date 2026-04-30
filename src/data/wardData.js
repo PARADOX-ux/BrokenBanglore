@@ -9,11 +9,12 @@ const getAvatar = (name, pColor) => `https://ui-avatars.com/api/?name=${encodeUR
 
 // Accurate Ward Area Data (Sync'd with BBMP 243 ward boundaries)
 export const accurateAreaNames = {
-  1: { name: "Kempegowda", areas: ["Govindapura", "Kulappa Layout", "Yelahanka Airport Area"] },
-  2: { name: "Chowdeswari", areas: ["Harohalli", "Naganahalli", "Puttanahalli"] },
-  3: { name: "Atturu", areas: ["Ananthapura", "Atturu Village", "Doddaamaravathi"] },
-  4: { name: "Yelahanka Satellite Town", areas: ["Yelahanka New Town", "Sahakaranagara"] },
-  5: { name: "Chokkanahalli", areas: ["Jakkuru Village", "Hebbal Kempapura"] },
+  1: { name: "Kempegowda", areas: ["Govindapura", "Kulappa Layout", "Airport Road"] },
+  2: { name: "Chowdeswari", areas: ["Harohalli", "Naganahalli"] },
+  3: { name: "Someshwara", areas: ["Someshwara Village", "Agrahara"] },
+  4: { name: "Atturu", areas: ["Ananthapura", "Atturu Village"] },
+  5: { name: "Yelahanka Satellite Town", areas: ["Yelahanka New Town", "Sahakaranagara"] },
+  6: { name: "Chokkanahalli", areas: ["Jakkuru Village", "Hebbal Kempapura"] },
   28: { name: "Hebbal", areas: ["Hebbal", "Nagavara Lake"] },
   37: { name: "Yeshwanthpura", areas: ["Yeshwanthpura", "Jalahalli"] },
   101: { name: "Indiranagar", areas: ["Indiranagar", "HAL 2nd Stage", "Doopanahalli"] },
@@ -142,13 +143,19 @@ export const wardMLAData = [
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 4, name: "Yelahanka Satellite Town", constituency: "Yelahanka",
+    ward: 4, name: "Atturu", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 5, name: "Chokkanahalli", constituency: "Yelahanka",
+    ward: 5, name: "Yelahanka Satellite Town", constituency: "Yelahanka",
+    mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
+    mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
+    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0
+  },
+  {
+    ward: 6, name: "Chokkanahalli", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
     authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0

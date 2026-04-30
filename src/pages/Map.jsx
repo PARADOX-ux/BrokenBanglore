@@ -313,10 +313,10 @@ export default function Map() {
       
       // Add Ward GeoJSON Source
 
-      // Add Ward GeoJSON Source
       map.current.addSource('bbmp-wards', {
         type: 'geojson',
-        data: '/data/bangalore-wards.geojson?v=datameet_243'
+        data: '/data/bangalore-wards.geojson?v=datameet_243',
+        generateId: true // Required for setFeatureState to work correctly
       });
 
       // Ward fill — transparent but present so MapLibre hit-tests it on mousemove.
@@ -429,9 +429,12 @@ export default function Map() {
             lastHoveredWardNo.current = wardNo;
             const wardNoStr = String(wardNo);
             const wardNoNum = Number(wardNo);
+            
+            // Prioritize GeoJSON official names, then check our overrides
+            const geoName = feature.properties.KGISWardName;
             const areaInfo = accurateAreaNames[wardNoNum] || accurateAreaNames[wardNoStr] || {};
-            const rawName = areaInfo.name || feature.properties.KGISWardName || `Ward ${wardNo}`;
-            const cleanName = rawName.replace(/\sWard$/i, '');
+            const rawName = geoName || areaInfo.name || `Ward ${wardNo}`;
+            const cleanName = rawName.replace(/\sWard$/i, '').trim();
 
             const wardProps = {
               ...feature.properties,
