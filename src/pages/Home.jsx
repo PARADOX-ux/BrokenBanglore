@@ -91,14 +91,7 @@ export default function Home() {
           style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }}>
         </motion.div>
 
-        <motion.div 
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, type: 'spring' }}
-          className="relative z-10 mb-8 inline-flex items-center gap-3 bg-white border border-black/10 px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] shadow-sm">
-          <span className="w-1.5 h-1.5 bg-forest rounded-full"></span>
-          CIVIC ACCOUNTABILITY ENGINE
-        </motion.div>
+
 
         <div className="relative z-10 mb-6 px-4">
           <motion.h1 
