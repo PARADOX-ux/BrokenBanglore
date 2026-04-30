@@ -15,30 +15,6 @@ function AnimatedNumber({ value }) {
   return <motion.span>{display}</motion.span>;
 }
 
-function ScrambleText({ text }) {
-  const [displayText, setDisplayText] = useState(text);
-  const chars = '!<>-_\\/[]{}—=+*^?#________';
-  
-  useEffect(() => {
-    let iteration = 0;
-    const interval = setInterval(() => {
-      setDisplayText(prev => 
-        text.split('').map((char, index) => {
-          if (index < iteration) return text[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-      
-      if (iteration >= text.length) clearInterval(interval);
-      iteration += 1/3;
-    }, 30);
-    
-    return () => clearInterval(interval);
-  }, [text]);
-
-  return <span>{displayText}</span>;
-}
-
 export default function Home() {
   const [selectedZoneMLA, setSelectedZoneMLA] = useState(null);
   const [reports, setReports] = useState([]);
@@ -105,10 +81,10 @@ export default function Home() {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95]">
-          <ScrambleText text="Bengaluru is Broken." /> <br className="hidden md:block"/>
-          <span className="text-forest relative inline-block">
-            You are the Fix.
+          className="font-display font-black text-4xl md:text-6xl lg:text-7xl text-black mb-6 tracking-tighter relative z-10 max-w-5xl leading-[0.95] uppercase">
+          Bengaluru Deserves <br className="hidden md:block"/> Better.
+          <span className="text-forest relative inline-block ml-3">
+            We are the Fix.
             <motion.span 
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
