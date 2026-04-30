@@ -197,12 +197,13 @@ export default function Map() {
 
     Object.entries(counts).forEach(([wardNo, count]) => {
       try {
+        // MapLibre feature state IDs must match the promoteId type (Number in this GeoJSON)
         map.current.setFeatureState(
-          { source: 'bbmp-wards', id: String(wardNo) },
+          { source: 'bbmp-wards', id: Number(wardNo) },
           { reportCount: count }
         );
       } catch (e) {
-        // Ignore errors for invalid IDs
+        console.error('Error setting feature state for ward:', wardNo, e);
       }
     });
   }, [allReports, mapLoaded]);
@@ -532,7 +533,7 @@ export default function Map() {
               ['>', ['coalesce', ['feature-state', 'reportCount'], 0], 20], '#2d6a4f', // Deep Green
               ['>', ['coalesce', ['feature-state', 'reportCount'], 0], 5], '#40916c',  // Sea Green
               ['>', ['coalesce', ['feature-state', 'reportCount'], 0], 0], '#52b788',  // Mint
-              '#081c15' // Deepest Green
+              '#11261d' // Subtle Forest Green fallback (instead of pitch black)
             ],
             'fill-opacity': [
               'case',
