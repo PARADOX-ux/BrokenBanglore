@@ -20,11 +20,11 @@
     0% { transform: translateX(0%); }
     100% { transform: translateX(-50%); }
   }
+}
 
-  @keyframes grid-scroll {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(60px); }
-  }
+@keyframes grid-scroll {
+  from { background-position: 0 0; }
+  to { background-position: 0 80px; }
 }
 
 

@@ -22,27 +22,21 @@ function RetroGrid() {
       {/* The 3D Grid Plane */}
       <div className="absolute inset-0 [perspective:1000px] [transform-style:preserve-3d]">
         <div 
-          className="absolute inset-0 [transform:rotateX(60deg)] origin-[50%_50%]"
+          className="absolute inset-0 [transform:rotateX(65deg)] origin-center"
           style={{ 
             backgroundImage: `
-              linear-gradient(to right, rgba(0,0,0,0.15) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 1px)
+              linear-gradient(to right, rgba(233,196,106,0.2) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(233,196,106,0.2) 1px, transparent 1px)
             `,
             backgroundSize: '80px 80px',
-            height: '400vh',
-            width: '400vw',
-            marginLeft: '-150vw',
-            marginTop: '-100vh',
-            animation: 'grid-scroll 6s linear infinite'
+            animation: 'grid-scroll 5s linear infinite'
           }}
         />
       </div>
 
-      {/* Radial fade for focus */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,#fdfbf6_80%)]"></div>
-      
-      {/* Bottom fade to content */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#fdfbf6] via-transparent to-transparent"></div>
+      {/* Fade effects */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#fdfbf6] via-[#fdfbf6]/40 to-transparent"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,transparent_0%,#fdfbf6_100%)]"></div>
     </div>
   );
 }
