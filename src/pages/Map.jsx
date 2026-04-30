@@ -98,42 +98,71 @@ export default function Map() {
   }, [allReports, severityFilter, statusFilter]);
 
   // Sync Markers with filtered reports
+  // High-performance Marker Rendering using GeoJSON Layer (Handles 3000+ points smoothly)
   useEffect(() => {
-    if (!map.current || viewMode !== 'map' || isPickMode) {
-      markers.current.forEach(m => m.remove());
-      markers.current = [];
+    if (!map.current || !map.current.isStyleLoaded() || viewMode !== 'map' || isPickMode) {
+      if (map.current && map.current.getLayer('reports-layer')) {
+        map.current.setLayoutProperty('reports-layer', 'visibility', 'none');
+      }
       return;
     }
 
-    // Clear existing markers
-    markers.current.forEach(m => m.remove());
-    markers.current = [];
+    const sourceId = 'reports-points';
+    const layerId = 'reports-layer';
 
-    // Add new markers
-    filteredReports.forEach(report => {
-      if (!report.lat || !report.lng) return;
+    // Format reports as GeoJSON
+    const geojson = {
+      type: 'FeatureCollection',
+      features: filteredReports.map(r => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [r.lng, r.lat] },
+        properties: { ...r }
+      }))
+    };
 
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      const bgColor = report.category === 'garbage' ? '#2B9348' : 
-                     (report.severity === 'critical' || report.severity === 'emergency' ? '#ef4444' : 
-                     (report.severity === 'severe' || report.severity === 'high' ? '#f97316' : '#fbbf24'));
-      const size = report.category === 'garbage' ? '18px' : '14px';
-      const emoji = report.category === 'garbage' ? '♻️' : '';
+    if (map.current.getSource(sourceId)) {
+      map.current.getSource(sourceId).setData(geojson);
+      map.current.setLayoutProperty(layerId, 'visibility', 'visible');
+    } else {
+      map.current.addSource(sourceId, { type: 'geojson', data: geojson });
       
-      el.innerHTML = `<div style="background-color: ${bgColor}; width: ${size}; height: ${size}; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 8px; cursor: pointer;">${emoji}</div>`;
-
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([report.lng, report.lat])
-        .addTo(map.current);
-      
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleReportClick(report);
+      map.current.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            10, 4,
+            15, 10
+          ],
+          'circle-color': [
+            'match',
+            ['get', 'severity'],
+            'critical', '#ff4d4d',
+            'emergency', '#ff4d4d',
+            'severe', '#ff9f43',
+            'high', '#ff9f43',
+            '#feca57'
+          ],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-opacity': 0.9,
+          'circle-blur': 0.1
+        }
       });
 
-      markers.current.push(marker);
-    });
+      // Handle Point Click
+      map.current.on('click', layerId, (e) => {
+        const report = e.features[0].properties;
+        // Fix: GeoJSON properties are strings, parse them if needed or use directly
+        setSelectedReport(report);
+      });
+
+      // Pointer Cursor on Hover
+      map.current.on('mouseenter', layerId, () => { map.current.getCanvas().style.cursor = 'pointer'; });
+      map.current.on('mouseleave', layerId, () => { map.current.getCanvas().style.cursor = ''; });
+    }
   }, [filteredReports, viewMode, isPickMode]);
 
   // Pick mode pin
@@ -266,7 +295,7 @@ export default function Map() {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', // Premium NammaKasa-style tiles
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', // Premium Dark-Mode Tactical style
       center: BENGALURU_CENTER,
       zoom: 12.5,
       pitch: 0,
@@ -278,6 +307,9 @@ export default function Map() {
 
     map.current.on('load', () => {
       console.log('Map style loaded successfully');
+      
+      // Initial Marker Layer Setup (force trigger the marker effect)
+      getReports().then(data => setAllReports(data || []));
       
       // Add Ward GeoJSON Source
 
