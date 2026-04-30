@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import CustomCursor from './components/CustomCursor';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Report from './pages/Report';
@@ -11,6 +12,7 @@ import Petitions from './pages/Petitions';
 function App() {
   return (
     <div className="min-h-screen bg-cream font-body text-olive flex flex-col">
+      <CustomCursor />
       <Navbar />
       <main className="flex-1 w-full max-w-[2560px] mx-auto flex flex-col relative pb-20 md:pb-0 pt-16 md:pt-20">
         <Routes>
