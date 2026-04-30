@@ -33,6 +33,9 @@ export default function Map() {
   const [searchParams] = useSearchParams();
   const isPickMode = searchParams.get('pickMode') === 'true';
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedReport, setSelectedReport] = useState(null);
   const [pickedPin, setPickedPin] = useState(null);        // {lat, lng}
   const [pickedWard, setPickedWard] = useState(null);      // ward data from click
@@ -60,6 +63,12 @@ export default function Map() {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markers = useRef([]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Confirm pick — save to localStorage and go back to report
   const confirmPick = () => {
@@ -179,20 +188,29 @@ export default function Map() {
     setWardReports([]);
   };
 
-  // Pure sync helper — derives direction from authority/mpConstituency
-  const getDirection = (authorityStr = '', mpConst = '') => {
-    if (/north/i.test(authorityStr) || /yelahanka/i.test(authorityStr)) return 'North';
-    if (/south/i.test(authorityStr)) return 'South';
-    if (/east/i.test(authorityStr)) return 'East';
-    if (/west/i.test(authorityStr)) return 'West';
-    if (/mahadevapura/i.test(authorityStr)) return 'East';
-    if (/byatarayanapura/i.test(authorityStr)) return 'North';
-    if (/dasarahalli/i.test(authorityStr)) return 'North';
-    if (/bommanahalli/i.test(authorityStr)) return 'South';
-    if (/bangalore north/i.test(mpConst)) return 'North';
-    if (/bangalore south/i.test(mpConst)) return 'South';
-    if (/bangalore central/i.test(mpConst)) return 'Central';
-    if (/bangalore rural/i.test(mpConst)) return 'Outer';
+  // Pure sync helper — derives direction from ward number and authority
+  const getDirection = (wardNo, authorityStr = '', mpConst = '') => {
+    const n = Number(wardNo);
+    
+    // 243 Ward Range Mapping (Approximate AC/Zone boundaries)
+    if (n >= 1 && n <= 28) return 'North';
+    if (n >= 29 && n <= 76) return 'West';
+    if (n >= 77 && n <= 102) return 'Central';
+    if (n >= 103 && n <= 117) return 'North';
+    if (n >= 118 && n <= 141) return 'East';
+    if (n >= 142 && n <= 156) return 'Central';
+    if (n >= 157 && n <= 212) return 'South';
+    if (n >= 213 && n <= 230) return 'East';
+    if (n >= 231) return 'Outer';
+
+    // String fallbacks if range is uncertain
+    const combined = (authorityStr + ' ' + mpConst).toLowerCase();
+    if (combined.includes('north') || combined.includes('yelahanka') || combined.includes('hebbal')) return 'North';
+    if (combined.includes('south') || combined.includes('jayanagar') || combined.includes('basavanagudi')) return 'South';
+    if (combined.includes('east') || combined.includes('mahadevapura') || combined.includes('whitefield')) return 'East';
+    if (combined.includes('west') || combined.includes('vijayanagar')) return 'West';
+    if (combined.includes('central')) return 'Central';
+    
     return 'Central';
   };
 
@@ -208,7 +226,7 @@ export default function Map() {
     if (type === 'hover') {
       const authorityStr = mlaData?.authority || '';
       const mpConst = mlaData?.mpConstituency || '';
-      const direction = getDirection(authorityStr, mpConst);
+      const direction = getDirection(wardNo, authorityStr, mpConst);
 
       setHoveredReport({
         id: `ward-${wardNo}`,
@@ -391,12 +409,14 @@ export default function Map() {
             
             map.current.setFilter('ward-highlight', ['==', ['get', 'KGISWardNo'], wardNoStr]);
             map.current.setFilter('ward-highlight-border', ['==', ['get', 'KGISWardNo'], wardNoStr]);
-
-            // Enhanced area names from our accurate JSON (Handle both string and number keys)
             const areaInfo = accurateAreaNames[wardNoNum] || accurateAreaNames[wardNoStr] || {};
+            // Clean up ward name (remove " Ward" suffix if present)
+            const rawName = areaInfo.name || feature.properties.KGISWardName || `Ward ${wardNo}`;
+            const cleanName = rawName.replace(/\sWard$/i, '');
+
             const wardProps = {
               ...feature.properties,
-              wardName: areaInfo.name || feature.properties.KGISWardName || `Ward ${wardNo}`,
+              wardName: cleanName,
               subAreas: areaInfo.areas || []
             };
 
@@ -445,14 +465,27 @@ export default function Map() {
 
         if (feature) {
           const wardNo = feature.properties.KGISWardNo;
-          const areaInfo = accurateAreaNames[wardNo] || {};
+          const wardNoStr = String(wardNo);
+          const wardNoNum = Number(wardNo);
+          const areaInfo = accurateAreaNames[wardNoNum] || accurateAreaNames[wardNoStr] || {};
+          const rawName = areaInfo.name || feature.properties.KGISWardName || `Ward ${wardNo}`;
+          const cleanName = rawName.replace(/\sWard$/i, '');
+          
           const wardProps = {
             ...feature.properties,
-            wardName: areaInfo.name || feature.properties.KGISWardName,
+            wardName: cleanName,
             subAreas: areaInfo.areas || []
           };
-          handleWardAction(wardProps, 'click');
+
+          // On mobile, click = hover-card trigger
+          if (isMobile) {
+            handleWardAction(wardProps, 'hover');
+          } else {
+            handleWardAction(wardProps, 'click');
+          }
         } else {
+          // Clicked outside — clear hover on mobile
+          if (isMobile) setHoveredReport(null);
           // Clicked background: Clear everything
           setSelectedReport(null);
           setHoveredReport(null);
@@ -508,82 +541,67 @@ export default function Map() {
       {/* Namma Kasa Style Filter Header */}
       {!isPickMode && (
         <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col gap-3 pointer-events-none">
-          {/* Top Row: Filters and Toggles */}
-          <div className="flex justify-between items-center w-full pointer-events-auto">
-            <div className="flex gap-2">
-              <select 
-                value={severityFilter}
-                onChange={(e) => setSeverityFilter(e.target.value)}
-                className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest"
-              >
-                <option value="all">All Severity</option>
-                <option value="minor">Minor</option>
-                <option value="moderate">Moderate</option>
-                <option value="severe">Severe</option>
-                <option value="critical">Critical</option>
-              </select>
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-white border border-ash/30 rounded-lg px-3 py-1.5 text-[10px] font-bold text-black outline-none shadow-sm focus:border-forest"
-              >
-                <option value="all">All Status</option>
-                <option value="unresolved">Unresolved</option>
-                <option value="resolved">Resolved</option>
-              </select>
-            </div>
-            
-            <div className="flex bg-white border border-ash/30 rounded-lg overflow-hidden shadow-sm">
-              <button 
-                onClick={() => setViewMode('map')}
-                className={`px-3 py-1.5 text-[10px] font-bold border-r border-ash/30 uppercase ${viewMode === 'map' ? 'bg-forest text-gold' : 'text-black hover:bg-ash/10'}`}
-              >
-                Map
-              </button>
-              <button 
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-1.5 text-[10px] font-bold uppercase ${viewMode === 'list' ? 'bg-forest text-gold' : 'text-black hover:bg-ash/10'}`}
-              >
-                List
-              </button>
+          {/* Filter Header Row */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <Link to="/" className="bg-forest text-gold p-2 md:p-3 rounded-xl md:rounded-2xl shadow-xl hover:scale-105 transition-transform border border-gold/10">
+                <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              </Link>
+              <div className="bg-white/95 backdrop-blur-md px-3 md:px-5 py-2 md:py-3.5 rounded-xl md:rounded-2xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                <span className="font-display font-black text-xs md:text-sm uppercase tracking-tight text-black">Audit Live</span>
+              </div>
             </div>
 
-            {/* 2D/3D View Toggle */}
-            <div className="flex bg-white border border-black rounded-lg overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-               <button 
-                 onClick={() => setIs3D(false)}
-                 className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-r border-black hover:bg-black/5 transition-colors ${!is3D ? 'bg-black text-white' : 'text-black'}`}
-               >
-                 2D
-               </button>
-               <button 
-                 onClick={() => setIs3D(true)}
-                 className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-black/5 transition-colors ${is3D ? 'bg-black text-white' : 'text-black'}`}
-               >
-                 3D
-               </button>
+            <div className="flex items-center gap-2 pointer-events-auto">
+              {isMobile && (
+                <button 
+                  onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+                  className={`p-2.5 rounded-xl border-2 border-black font-black text-[10px] uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors ${showFiltersMobile ? 'bg-forest text-gold' : 'bg-white text-black'}`}
+                >
+                  {showFiltersMobile ? 'Close' : 'Filter'}
+                </button>
+              )}
+              <div className={`flex items-center gap-2 ${isMobile && !showFiltersMobile ? 'hidden' : 'flex'}`}>
+                <div className="bg-white px-3 py-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-black/30">Mode</span>
+                  <select 
+                    value={is3D ? '3D' : '2D'}
+                    onChange={(e) => setIs3D(e.target.value === '3D')}
+                    className="bg-transparent border-none outline-none font-black text-[10px] uppercase tracking-widest text-black cursor-pointer"
+                  >
+                    <option value="2D">2D</option>
+                    <option value="3D">3D View</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Bottom Row: Key Stats & Scope */}
-          <div className="flex justify-between items-center px-1">
-            <div className="flex gap-6">
-               <div className="flex items-center gap-2">
-                  <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                     {allReports.filter(r => r.status === 'open' || !r.status || r.status === 'pending').length}
-                  </span>
-                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Active</span>
-               </div>
-               <div className="flex items-center gap-2">
-                  <span className="text-xl md:text-3xl font-black text-white drop-shadow-md">
-                     {allReports.length}
-                  </span>
-                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Reports</span>
-               </div>
+          {/* Expanded Filters Row */}
+          <div className={`${(isMobile && !showFiltersMobile) ? 'hidden' : 'flex'} items-center gap-2 pointer-events-auto overflow-x-auto pb-1 no-scrollbar max-w-full`}>
+            <div className="bg-white px-3 py-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2 shrink-0">
+               <span className="text-[10px] font-black uppercase tracking-widest text-black/30">Area</span>
+               <select className="bg-transparent border-none outline-none font-black text-[10px] uppercase tracking-widest text-black cursor-pointer">
+                 <option>All Bengaluru</option>
+                 <option>Central Zone</option>
+                 <option>East Zone</option>
+                 <option>South Zone</option>
+                 <option>West Zone</option>
+               </select>
             </div>
-            <div className="bg-gold text-black font-black text-[9px] px-3 py-1 rounded-sm uppercase tracking-tighter animate-pulse flex items-center gap-2 shadow-lg">
-               <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
-               Bengaluru Maplibregl Engine
+
+            <div className="bg-white px-3 py-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2 shrink-0">
+               <span className="text-[10px] font-black uppercase tracking-widest text-black/30">Show</span>
+               <select 
+                 value={statusFilter}
+                 onChange={(e) => setStatusFilter(e.target.value)}
+                 className="bg-transparent border-none outline-none font-black text-[10px] uppercase tracking-widest text-black cursor-pointer"
+               >
+                 <option value="all">Every Issue</option>
+                 <option value="resolved">Fixed Issues</option>
+                 <option value="open">Pending Only</option>
+               </select>
             </div>
           </div>
         </div>
@@ -710,14 +728,19 @@ export default function Map() {
       {/* Floating Ward Hover Card — nammakasa.in style */}
       {hoveredReport && (() => {
         const h = hoveredReport;
-        if (selectedReport && window.innerWidth < 768) return null;
-
         const wardName   = h.wardName || 'BBMP Area';
         const wardNo     = h.ward;
-        const bangalorePart = h.mlaDetails?.mpConstituency || h.constituency || 'Bengaluru';
+        const bangalorePart = h.direction ? `${h.direction} Bengaluru` : (h.mlaDetails?.mpConstituency || 'Bengaluru');
 
-        // Mouse-following logic: offset from cursor to prevent blocking
-        const tooltipStyle = {
+        const isMobile = window.innerWidth < 768;
+        const tooltipStyle = isMobile ? {
+          position: 'absolute',
+          bottom: '24px',
+          left: '16px',
+          right: '16px',
+          zIndex: 1000,
+          pointerEvents: 'none'
+        } : {
           position: 'absolute',
           left: mousePos.x + 20,
           top: mousePos.y + 20,
@@ -727,18 +750,8 @@ export default function Map() {
           transition: 'transform 0.05s linear'
         };
 
-        const isMobile = window.innerWidth < 768;
-        const finalStyle = isMobile ? {
-          position: 'absolute',
-          bottom: '24px',
-          left: '16px',
-          right: '16px',
-          zIndex: 1000,
-          pointerEvents: 'none'
-        } : tooltipStyle;
-
         return (
-          <div style={finalStyle}>
+          <div style={tooltipStyle}>
             <div
               className="animate-in fade-in zoom-in-95 duration-200"
               style={{
@@ -775,9 +788,6 @@ export default function Map() {
         const activeReport = selectedReport;
         const isWardOverview = activeReport.id?.startsWith('ward-');
 
-        // IF IT'S WARD INFO (Clicked empty area), show the right sidebar but simplified if needed
-        // (Keeping the user request for "separate area info" from the previous turn)
-        
         return (
           <div 
             className="absolute top-4 bottom-4 right-4 w-[calc(100%-2rem)] md:w-[420px] bg-[#fdfdfd] rounded-2xl shadow-2xl z-[500] flex flex-col border border-black/10 overflow-hidden transform transition-all animate-in slide-in-from-right-8 duration-300"

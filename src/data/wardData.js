@@ -7,45 +7,21 @@
 
 const getAvatar = (name, pColor) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${pColor.replace('#', '')}&color=fff&size=512&font-size=0.35&bold=true`;
 
-// Accurate Ward Area Data (Sync'd with BBMP 2024 ward boundaries)
+// Accurate Ward Area Data (Sync'd with BBMP 243 ward boundaries)
 export const accurateAreaNames = {
-  1: { name: "Kempegowda Ward", areas: ["Govindapura", "Kulappa Layout", "Yelahanka Airport Area"] },
-  2: { name: "Chowdeswari Ward", areas: ["Harohalli", "Naganahalli", "Puttanahalli"] },
+  1: { name: "Kempegowda", areas: ["Govindapura", "Kulappa Layout", "Yelahanka Airport Area"] },
+  2: { name: "Chowdeswari", areas: ["Harohalli", "Naganahalli", "Puttanahalli"] },
   3: { name: "Atturu", areas: ["Ananthapura", "Atturu Village", "Doddaamaravathi"] },
   4: { name: "Yelahanka Satellite Town", areas: ["Yelahanka New Town", "Sahakaranagara"] },
-  5: { name: "Jakkuru", areas: ["Jakkuru Village", "Hebbal Kempapura"] },
-  6: { name: "Thanisandra", areas: ["Thanisandra", "Nagavara", "HBR Layout"] },
-  7: { name: "Byatarayanapura", areas: ["Byatarayanapura", "Kodigehalli Gate"] },
-  8: { name: "Kodigehalli", areas: ["Kodigehalli", "Sahakaranagar Extension"] },
-  9: { name: "Vidyaranyapura", areas: ["Vidyaranyapura", "Doddabommasandra"] },
-  10: { name: "Dodda Bommasandra", areas: ["Doddabommasandra", "Chikkabanavara"] },
-  11: { name: "Kempapura", areas: ["Kempapura", "Hebbal", "Nagavara Lake"] },
-  12: { name: "Kogilu", areas: ["Kogilu Village", "Amruthahalli"] },
-  13: { name: "Amruthahalli", areas: ["Amruthahalli", "Sahakara Nagar"] },
-  14: { name: "Allalasandra", areas: ["Allalasandra", "GKVK Campus area"] },
-  15: { name: "HBR Layout", areas: ["HBR Layout 1st Block", "HBR Layout 6th Block"] },
-  16: { name: "Kammagondanahalli", areas: ["Kammagondanahalli", "Geddalahalli"] },
-  17: { name: "Kavalbyrasandra", areas: ["Kavalbyrasandra", "RT Nagar"] },
-  18: { name: "Vinnakota", areas: ["Vinnakota", "Sahakara Nagar"] },
-  19: { name: "Horamavu Agara", areas: ["Horamavu Agara", "Ramamurthy Nagar"] },
-  20: { name: "Horamavu Banaswadi", areas: ["Horamavu Banaswadi", "Banaswadi"] },
-  21: { name: "Kalkere", areas: ["Kalkere", "Krishnarajapura"] },
-  22: { name: "Ramamurthy Nagar", areas: ["Ramamurthy Nagar", "NGEF Layout"] },
-  23: { name: "Dodda Bidarakallu", areas: ["Dodda Bidarakallu", "Jalahalli West"] },
-  24: { name: "Rajagopal Nagar", areas: ["Rajagopal Nagar", "Yeshwanthpur"] },
-  25: { name: "Hegganahalli", areas: ["Hegganahalli", "Herohalli"] },
-  26: { name: "Herohalli", areas: ["Herohalli", "Peenya Industrial Area"] },
+  5: { name: "Chokkanahalli", areas: ["Jakkuru Village", "Hebbal Kempapura"] },
+  28: { name: "Hebbal", areas: ["Hebbal", "Nagavara Lake"] },
   37: { name: "Yeshwanthpura", areas: ["Yeshwanthpura", "Jalahalli"] },
-  45: { name: "Rajarajeshwari Nagar", areas: ["RR Nagar", "ISRO Layout", "Kommaghatta"] },
-  48: { name: "Kengeri", areas: ["Kengeri", "Kengeri Satellite Town"] },
-  52: { name: "Indiranagar", areas: ["Indiranagar", "HAL 2nd Stage", "Doopanahalli"] },
-  102: { name: "Koramangala", areas: ["Koramangala 1st Block", "Koramangala 8th Block"] },
-  125: { name: "Bellandur", areas: ["Bellandur", "Outer Ring Road", "Green Glen Layout"] },
-  128: { name: "HSR Layout", areas: ["HSR Layout Sector 1", "HSR Layout Sector 7"] },
-  130: { name: "Singasandra", areas: ["Singasandra", "Electronic City access"] },
-  146: { name: "Marathahalli", areas: ["Marathahalli", "ORR", "Kundalahalli"] },
-  185: { name: "Electronic City", areas: ["Electronic City Phase 1", "Electronic City Phase 2"] },
-  193: { name: "Whitefield", areas: ["Whitefield", "ITPL Road", "Hope Farm"] }
+  101: { name: "Indiranagar", areas: ["Indiranagar", "HAL 2nd Stage", "Doopanahalli"] },
+  142: { name: "Shivajinagar", areas: ["Shivajinagar", "Commercial Street"] },
+  172: { name: "Koramangala", areas: ["Koramangala 1st Block", "Koramangala 8th Block"] },
+  190: { name: "HSR Layout", areas: ["HSR Layout Sector 1", "HSR Layout Sector 7"] },
+  193: { name: "Whitefield", areas: ["Whitefield", "ITPL Road", "Hope Farm"] },
+  213: { name: "Mahadevapura", areas: ["Phoenix Marketcity", "Outer Ring Road"] },
 };
 
 // Constituency → Parliamentary Constituency mapping (2024 Lok Sabha Results)
@@ -162,141 +138,55 @@ export const wardMLAData = [
     ward: 1, name: "Kempegowda", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
-    lat: 13.1250, lng: 77.5950
+    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0
   },
   {
     ward: 4, name: "Yelahanka Satellite Town", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
-    lat: 13.0980, lng: 77.5866
+    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0
   },
   {
     ward: 5, name: "Chokkanahalli", constituency: "Yelahanka",
     mla: "S R Vishwanath", party: "BJP", partyColor: "#f97316",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
-    lat: 13.1020, lng: 77.6250
+    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 7, name: "Byatarayanapura", constituency: "Byatarayanapura",
-    mla: "Krishna Byregowda", party: "INC", partyColor: "#2563eb",
+    ward: 28, name: "Hebbal", constituency: "Hebbal",
+    mla: "Byrathi Suresh", party: "INC", partyColor: "#2563eb",
     mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP Yelahanka Zone", totalReports: 0, resolvedReports: 0,
-    lat: 13.0640, lng: 77.5950
+    authority: "BBMP North Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 52, name: "Indiranagar", constituency: "C V Raman Nagar",
+    ward: 101, name: "Indiranagar", constituency: "C V Raman Nagar",
     mla: "S Raghu", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9719, lng: 77.6412
+    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 150, name: "HSR Layout", constituency: "Bommanahalli",
-    mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
-    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
-    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9128, lng: 77.6387
-  },
-  {
-    ward: 149, name: "Koramangala", constituency: "B.T.M. Layout",
+    ward: 172, name: "Koramangala", constituency: "B.T.M. Layout",
     mla: "Ramalinga Reddy", party: "INC", partyColor: "#2563eb",
     mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
-    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9352, lng: 77.6245
+    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0
+  },
+  {
+    ward: 190, name: "HSR Layout", constituency: "Bommanahalli",
+    mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
+    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
+    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0
   },
   {
     ward: 193, name: "Whitefield", constituency: "Mahadevapura",
     mla: "Manjula S", party: "BJP", partyColor: "#f97316",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9698, lng: 77.7499
+    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0
   },
   {
-    ward: 165, name: "Hebbal", constituency: "Hebbal",
-    mla: "Byrathi Suresh", party: "INC", partyColor: "#2563eb",
-    mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP North Zone", totalReports: 0, resolvedReports: 0,
-    lat: 13.0358, lng: 77.5970
-  },
-  {
-    ward: 37, name: "Yeshwanthpur", constituency: "Yeshvanthapura",
-    mla: "S T Somashekar", party: "BJP", partyColor: "#f97316",
-    mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP West Zone", totalReports: 0, resolvedReports: 0,
-    lat: 13.0285, lng: 77.5401
-  },
-  {
-    ward: 153, name: "Jayanagar", constituency: "Jayanagar",
-    mla: "C K Ramamurthy", party: "BJP", partyColor: "#f97316",
-    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
-    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9300, lng: 77.5800
-  },
-  {
-    ward: 172, name: "BTM Layout", constituency: "B.T.M. Layout",
-    mla: "Ramalinga Reddy", party: "INC", partyColor: "#2563eb",
-    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
-    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9160, lng: 77.6050
-  },
-  {
-    ward: 151, name: "Bellandur", constituency: "Mahadevapura",
-    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
-    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9304, lng: 77.6784
-  },
-  {
-    ward: 149, name: "Varthur", constituency: "Mahadevapura",
-    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
-    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9389, lng: 77.7497
-  },
-  {
-    ward: 192, name: "Marathahalli", constituency: "Mahadevapura",
-    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
-    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9592, lng: 77.7011
-  },
-  {
-    ward: 151, name: "HSR Layout", constituency: "Bommanahalli",
-    mla: "Satish Reddy M", party: "BJP", partyColor: "#f97316",
-    mp: "Tejasvi Surya", mpConstituency: "Bangalore South", mpParty: "BJP",
-    authority: "BBMP South Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9128, lng: 77.6387
-  },
-  {
-    ward: 174, name: "Mahadevapura", constituency: "Mahadevapura",
-    mla: "Manjula S", party: "BJP", partyColor: "#f97316",
-    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP Mahadevapura Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9920, lng: 77.7020
-  },
-  {
-    ward: 18, name: "Malleshwaram", constituency: "Malleshwaram",
-    mla: "Dr C N Ashwathnarayan", party: "BJP", partyColor: "#f97316",
-    mp: "Shobha Karandlaje", mpConstituency: "Bangalore North", mpParty: "BJP",
-    authority: "BBMP West Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9980, lng: 77.5710
-  },
-  {
-    ward: 110, name: "Sampangiram Nagar", constituency: "Shivajinagar",
+    ward: 142, name: "Shivajinagar", constituency: "Shivajinagar",
     mla: "Rizwan Arshad", party: "INC", partyColor: "#2563eb",
     mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9700, lng: 77.5900
-  },
-  {
-    ward: 160, name: "Indiranagar", constituency: "C V Raman Nagar",
-    mla: "S Raghu", party: "BJP", partyColor: "#f97316",
-    mp: "P. C. Mohan", mpConstituency: "Bangalore Central", mpParty: "BJP",
-    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0,
-    lat: 12.9719, lng: 77.6412
+    authority: "BBMP East Zone", totalReports: 0, resolvedReports: 0
   }
 ];
 
