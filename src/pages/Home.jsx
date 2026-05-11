@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView, useSpring, useTransform } from 'motion/react';
+import { motion, AnimatePresence, useInView, useSpring, useTransform, useScroll } from 'motion/react';
 import { completeMLAList, getStats } from '../data/wardData';
 
 // Helper component for premium-feel numbers
@@ -15,50 +15,48 @@ function AnimatedNumber({ value }) {
   return <motion.span>{display}</motion.span>;
 }
 
-// RetroGrid Background Component
-function RetroGrid() {
+// Minimal Rain Overlay Component
+function RainOverlay() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* The 3D Grid Plane */}
-      <div className="absolute inset-0 [perspective:1000px] [transform-style:preserve-3d]">
-        <div 
-          className="absolute inset-0 [transform:rotateX(60deg)] origin-center"
-          style={{ 
-            backgroundImage: `
-              linear-gradient(to right, rgba(0,0,0,0.12) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(0,0,0,0.12) 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px',
-            animation: 'grid-scroll 4s linear infinite'
-          }}
-        />
-      </div>
-
-      {/* Fade effects */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#fdfbf6] via-[#fdfbf6]/30 to-transparent"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,transparent_0%,#fdfbf6_100%)]"></div>
+    <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-screen" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")', animation: 'rain 0.3s linear infinite' }}>
+      <style>{`
+        @keyframes rain {
+          0% { background-position: 0% 0%; }
+          100% { background-position: 10% 100%; }
+        }
+      `}</style>
     </div>
   );
 }
-
 
 // Cinematic Ticker Component
 function Ticker({ reports }) {
   const latestReports = reports.slice(0, 10);
   return (
-    <div className="w-full bg-black py-4 overflow-hidden border-y border-white/5 relative z-20">
+    <div className="w-full bg-[#050505] py-5 overflow-hidden border-y border-white/10 relative z-20">
       <motion.div 
         animate={{ x: ["0%", "-50%"] }}
-        transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+        transition={{ repeat: Infinity, duration: 50, ease: "linear" }}
         className="flex whitespace-nowrap gap-20 items-center"
       >
         {[...latestReports, ...latestReports].map((report, i) => (
-          <div key={i} className="flex items-center gap-4">
-            <span className="w-1 h-1 rounded-full bg-gold"></span>
-            <span className="text-[9px] font-medium text-white/40 uppercase tracking-[0.3em] font-display">Live Audit:</span>
-            <span className="text-[9px] font-bold text-white uppercase tracking-[0.2em] font-display">{report.category} in {report.area_name || 'Central'}</span>
+          <div key={i} className="flex items-center gap-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em] font-body">Live Pulse:</span>
+            <span className="text-[11px] font-black text-white uppercase tracking-[0.1em] font-display">
+              {report.category} reported in {report.area_name || 'Central Bengaluru'}
+            </span>
           </div>
         ))}
+        {latestReports.length === 0 && (
+          <div className="flex items-center gap-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+            <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em] font-body">Live Pulse:</span>
+            <span className="text-[11px] font-black text-white uppercase tracking-[0.1em] font-display">
+              City is currently peaceful.
+            </span>
+          </div>
+        )}
       </motion.div>
     </div>
   );
@@ -71,17 +69,18 @@ export default function Home() {
   const auditHubRef = useRef(null);
   const isAuditHubInView = useInView(auditHubRef, { once: true, margin: "-100px" });
 
+  const { scrollYProgress } = useScroll();
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+
   useEffect(() => {
-    // Fetch real reports for accurate live counters
     import('../lib/reportsDb').then(m => {
       m.getReports().then(fetchedReports => {
         setReports(fetchedReports);
-        
-        // Calculate dynamic stats from all reports
         const baseStats = getStats();
         setStats({
           reports: fetchedReports.length || baseStats.reports,
-          citizens: Math.max(fetchedReports.length + 10, baseStats.citizens), // Estimate active citizens
+          citizens: Math.max(fetchedReports.length + 10, baseStats.citizens),
           resolved: fetchedReports.filter(r => r.status === 'resolved').length || baseStats.resolved
         });
       });
@@ -92,211 +91,191 @@ export default function Home() {
     return () => window.removeEventListener('bb-stats-update', handler);
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.3 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
-  };
-
   return (
-    <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-[#fdfbf6] text-black">
-      {/* Hero Section */}
-      <section className="w-full bg-[#fdfbf6] px-4 md:px-8 py-24 md:py-40 flex flex-col items-center justify-center text-center relative overflow-hidden">
-        <RetroGrid />
-
-
-
-        <div className="relative z-10 mb-6 px-4">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-display font-black text-4xl md:text-8xl text-black tracking-tight leading-[0.85] uppercase"
-          >
-            BENGALURU <br className="hidden md:block"/> <span className="text-forest">IS FOR US.</span>
-          </motion.h1>
-        </div>
-
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.8 }}
-          transition={{ delay: 0.8, duration: 1 }}
-          className="relative z-10 text-xs md:text-xl text-forest/60 font-black max-w-2xl mb-12 tracking-[0.2em] uppercase px-4"
-        >
-          THE ULTIMATE CIVIC ACCOUNTABILITY ENGINE.
-        </motion.p>
-
+    <div className="w-full flex-col flex overflow-x-hidden min-h-screen bg-[#050505] text-[#e8e6e3] selection:bg-amber-600/30 selection:text-amber-500">
+      
+      {/* 1. ARRIVAL: Cinematic Hero */}
+      <section className="relative w-full h-[100svh] flex flex-col justify-end pb-24 md:pb-32 px-6 md:px-12 overflow-hidden">
+        {/* Background Layer */}
         <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col md:flex-row gap-4 relative z-10 w-full md:w-auto px-6">
-          <motion.div variants={itemVariants}>
-            <Link to="/report" className="bg-forest text-gold px-10 py-5 rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl hover:-translate-y-1 block text-center uppercase tracking-tight group">
-              Report a Problem 
-              <motion.span className="inline-block ml-2" animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>→</motion.span>
-            </Link>
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <Link to="/map" className="bg-white text-black border-4 border-black px-10 py-5 rounded-2xl font-black text-lg hover:bg-black hover:text-white transition-all block text-center uppercase tracking-tight">
-              Explore the Map
-            </Link>
-          </motion.div>
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="absolute inset-0 z-0"
+        >
+          <div className="absolute inset-0 bg-black/60 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/80 z-10" />
+          <img 
+            src="https://images.unsplash.com/photo-1596414438341-2a1c430ab285?q=80&w=2070&auto=format&fit=crop" 
+            alt="Bengaluru City" 
+            className="w-full h-full object-cover scale-105"
+          />
+          <RainOverlay />
         </motion.div>
+
+        {/* Hero Content */}
+        <div className="relative z-20 max-w-7xl mx-auto w-full">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="text-amber-500 font-bold text-xs md:text-sm tracking-[0.4em] uppercase mb-4">Namma Ooru. Our Voice.</h2>
+            <h1 className="font-display font-black text-6xl md:text-[8rem] leading-[0.85] tracking-tighter uppercase text-white drop-shadow-2xl">
+              The Soul of <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40">Bengaluru.</span>
+            </h1>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1.5 }}
+            className="mt-12 flex flex-col md:flex-row gap-6 items-start md:items-center"
+          >
+            <Link to="/map" className="relative group overflow-hidden bg-white text-black px-8 py-4 rounded-full font-bold text-xs uppercase tracking-widest transition-transform hover:scale-105">
+              <span className="relative z-10">Enter The City Map</span>
+              <div className="absolute inset-0 bg-amber-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+            </Link>
+            
+            <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 border-l border-white/20 pl-8">
+              <div>
+                <span className="block text-white mb-1">Weather</span>
+                24°C / Rain
+              </div>
+              <div>
+                <span className="block text-amber-500 mb-1">Traffic</span>
+                Heavy / Silk Board
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Live Ticker */}
       <Ticker reports={reports} />
 
-      {/* Audit Hub - Structured Grid */}
-      <section ref={auditHubRef} className="w-full pt-12 md:pt-20 pb-20 px-4 md:px-8 bg-black/5">
-        <motion.div 
-          initial={{ y: 100, opacity: 0 }}
-          animate={isAuditHubInView ? { y: 0, opacity: 1 } : {}}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-7xl mx-auto flex flex-col md:flex-row bg-white rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-black">
-          
-          {/* Left Panel: High Energy Citizen Voice */}
-          <div className="md:w-[320px] bg-forest p-6 md:p-10 flex flex-col justify-between border-b-4 md:border-b-0 md:border-r-4 border-black shrink-0 relative overflow-hidden">
+      {/* 2. CHAOS & BEAUTY: The Reality */}
+      <section className="w-full py-32 px-6 md:px-12 bg-[#050505] relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <motion.div 
-              animate={{ 
-                scale: [1, 1.1, 1],
-                opacity: [0.05, 0.1, 0.05]
-              }}
-              transition={{ repeat: Infinity, duration: 4 }}
-              className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 pointer-events-none">
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1 }}
+              className="space-y-8"
+            >
+              <h3 className="font-display font-black text-4xl md:text-6xl uppercase tracking-tighter leading-[0.9] text-white">
+                Beneath the <span className="text-amber-500">Silicon</span>.
+              </h3>
+              <p className="text-lg md:text-xl text-white/60 font-body leading-relaxed max-w-md">
+                A city of builders, dreamers, and endless traffic. We love Bengaluru, but we cannot ignore its broken pieces. It's time to bridge the gap between our tech parks and our streets.
+              </p>
+              <div className="pt-4">
+                <Link to="/report" className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group">
+                  Report a broken street 
+                  <span className="w-8 h-[1px] bg-amber-500 group-hover:bg-white transition-colors group-hover:w-12 duration-300"></span>
+                </Link>
+              </div>
             </motion.div>
-            
-            <div>
-              <div className="flex flex-col gap-2 mb-10">
-                <motion.span 
-                  whileInView={{ x: [-20, 0], opacity: [0, 1] }}
-                  className="bg-gold text-black px-4 py-2 font-display font-black text-4xl md:text-5xl leading-none w-fit shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-2 uppercase tracking-tighter">WE SEE</motion.span>
-                <motion.span 
-                  whileInView={{ x: [20, 0], opacity: [0, 1] }}
-                  className="bg-white text-forest px-4 py-2 font-display font-black text-4xl md:text-5xl leading-none w-fit shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-3 uppercase tracking-tighter">YOU.</motion.span>
-              </div>
-              
-              <div className="space-y-6">
-                <p className="text-xl md:text-2xl font-black text-white leading-[1.1] uppercase tracking-tight">
-                  No more <span className="text-gold">Broken Roads</span><br/>
-                  No more <span className="text-gold">Garbage</span><br/>
-                  No more <span className="text-gold">Dark Streets</span>
-                </p>
-                
-                <div className="h-1 w-full bg-white/10 rounded-full">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "75%" }}
-                    transition={{ duration: 2, delay: 0.5 }}
-                    className="h-full bg-gold rounded-full">
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-12 space-y-4">
-              <div className="flex flex-col gap-3">
-                 <div className="bg-white/10 border-2 border-dashed border-white/20 p-4 rounded-2xl">
-                    <p className="text-xs font-black text-gold uppercase tracking-[0.2em] mb-1">Live Audit:</p>
-                    <p className="text-3xl font-black text-white uppercase leading-tight tracking-tighter">
-                      <AnimatedNumber value={stats.reports} />
-                    </p>
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Reports Tracked</p>
-                 </div>
-                 
-                 <div className="flex flex-wrap gap-2 text-white">
-                    <span className="bg-black text-white px-3 py-1.5 rounded-lg border border-white/10 text-[9px] font-black uppercase tracking-widest italic shadow-lg">Good Water</span>
-                    <span className="bg-bright text-white px-3 py-1.5 rounded-lg border border-white/10 text-[9px] font-black uppercase tracking-widest italic shadow-lg">Clean Parks</span>
-                    <span className="bg-gold text-black px-3 py-1.5 rounded-lg border border-black text-[9px] font-black uppercase tracking-widest italic shadow-lg">Safe Walks</span>
-                 </div>
-              </div>
 
-              <div className="pt-6 border-t border-white/10">
-                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-3">Message To Government:</p>
-                 <motion.div 
-                    whileHover={{ scale: 1.05, rotate: -1 }}
-                    className="bg-white p-4 rounded-xl border-4 border-black text-black text-xs font-bold uppercase tracking-tighter leading-tight flex items-center gap-3 shadow-[8px_8px_0px_0px_rgba(212,175,55,1)] cursor-pointer">
-                    <span className="text-2xl animate-bounce">📢</span>
-                    WE ARE ALL <br/> WATCHING YOU.
-                 </motion.div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <motion.img 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                src="https://images.unsplash.com/photo-1610471243171-ec44aee50bba?q=80&w=1000&auto=format&fit=crop" 
+                alt="Bengaluru Auto" 
+                className="w-full h-[300px] object-cover rounded-sm grayscale hover:grayscale-0 transition-all duration-700"
+              />
+              <motion.img 
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                src="https://images.unsplash.com/photo-1580227181519-9430c51ce604?q=80&w=1000&auto=format&fit=crop" 
+                alt="Bengaluru Traffic" 
+                className="w-full h-[300px] object-cover rounded-sm mt-12 grayscale hover:grayscale-0 transition-all duration-700"
+              />
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Right Panel: Clean Interactive Grid */}
-          <div className="flex-1 p-8 md:p-12 relative">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-              <div>
-                <h3 className="font-display font-black text-3xl md:text-5xl text-black uppercase tracking-tighter leading-tight">ACCOUNTABILITY <br className="hidden md:block"/> HUB</h3>
-                <p className="text-black/40 font-bold text-xs uppercase tracking-widest mt-4">Pick a zone. See who is working — or ignoring you.</p>
-              </div>
-              <Link to="/accountability" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all hover:scale-105 shadow-xl shrink-0">Full Audit →</Link>
+      {/* 3. ACCOUNTABILITY HUB: Cinematic & Clean */}
+      <section ref={auditHubRef} className="w-full py-32 px-6 md:px-12 bg-[#0a0a0a] border-t border-white/5 relative overflow-hidden">
+        {/* Subtle glowing orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={isAuditHubInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6"
+          >
+            <div>
+              <div className="text-amber-500 text-[10px] font-bold tracking-[0.3em] uppercase mb-4">The Real Audit</div>
+              <h3 className="font-display font-black text-4xl md:text-6xl text-white uppercase tracking-tighter leading-none">
+                Who runs your <br className="hidden md:block"/> neighborhood?
+              </h3>
             </div>
+            <Link to="/accountability" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white border-b border-white/20 hover:border-white pb-1 transition-all">
+              View Full City Index
+            </Link>
+          </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 h-[350px] md:h-[450px] overflow-y-auto overflow-x-hidden pr-1 md:pr-2 custom-scrollbar bg-black/5 p-2 md:p-4 rounded-2xl md:rounded-[2rem] border-2 border-dashed border-black/10">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* The Grid */}
+            <div className="lg:w-2/3 grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
               {completeMLAList.map((mla) => {
                 const isSelected = selectedZoneMLA?.constituency === mla.constituency;
                 return (
                   <motion.button
                     layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    whileHover={{ y: -4 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     key={mla.constNo}
                     onClick={() => setSelectedZoneMLA(mla)}
-                    className={`p-2 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-0 md:min-h-[200px] group relative overflow-hidden ${isSelected ? 'border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'border-black/5 bg-white hover:border-black/20'}`}
+                    className={`p-4 md:p-5 text-left flex flex-col justify-between min-h-[160px] relative overflow-hidden transition-all duration-300 ${isSelected ? 'bg-white text-black rounded-lg' : 'bg-white/5 text-white hover:bg-white/10 rounded-sm border border-white/5'}`}
                   >
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-black opacity-[0.02] -mr-6 -mt-6 rounded-full"></div>
-                    
-                    <div className={`w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden mb-1 md:mb-2 border-2 transition-transform group-hover:scale-105 shrink-0 ${isSelected ? 'border-forest' : 'border-black/5'}`}>
-                      <img src={mla.photo} alt={mla.mla} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
-                    </div>
-
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="text-[7px] md:text-[9px] font-black text-black/30 uppercase tracking-[0.1em] mb-0.5 md:mb-1 truncate">{mla.constituency}</div>
-                      <div className="font-body font-bold text-[9px] md:text-sm text-black uppercase leading-tight group-hover:text-forest transition-colors line-clamp-2">
+                    <div className="flex-1">
+                      <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-2 ${isSelected ? 'text-black/40' : 'text-white/40'}`}>
+                        {mla.constituency}
+                      </div>
+                      <div className={`font-display font-black text-lg md:text-xl uppercase leading-[1.1] ${isSelected ? 'text-black' : 'text-white/90'}`}>
                           {mla.mla}
                       </div>
                     </div>
-
-                    <div className="flex justify-between items-center mt-3">
-                       <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border border-black/10 ${mla.party === 'BJP' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <div className="mt-4">
+                       <span className={`text-[8px] font-black px-2 py-1 uppercase tracking-widest ${isSelected ? 'bg-black/10 text-black' : 'bg-white/10 text-white/70'}`}>
                          {mla.party}
                        </span>
-                       {isSelected && <motion.div layoutId="active-dot" className="w-1.5 h-1.5 rounded-full bg-forest"></motion.div>}
                     </div>
                   </motion.button>
                 );
               })}
             </div>
 
-            <AnimatePresence mode="wait">
-              {selectedZoneMLA ? (
-                <motion.div 
-                  key={selectedZoneMLA.constituency}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -20, opacity: 0 }}
-                  className="mt-8 bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border-4 border-black flex flex-col md:flex-row items-center gap-6 md:gap-8 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]"
-                >
+            {/* Selected Card */}
+            <div className="lg:w-1/3">
+              <AnimatePresence mode="wait">
+                {selectedZoneMLA ? (
                   <motion.div 
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-black bg-black">
-                    <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover" />
-                  </motion.div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h4 className="font-display font-black text-xl md:text-3xl text-black mb-1 uppercase tracking-tight leading-none break-words">{selectedZoneMLA.mla}</h4>
-                    <div className="text-xs font-black text-black/50 uppercase tracking-widest mb-4 mt-2">{selectedZoneMLA.constituency} • {selectedZoneMLA.party}</div>
-                    <div className="flex gap-8 justify-center md:justify-start">
+                    key={selectedZoneMLA.constituency}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="bg-white/5 border border-white/10 p-8 rounded-sm backdrop-blur-md sticky top-8"
+                  >
+                    <div className="w-24 h-24 mb-6 grayscale brightness-75">
+                      <img src={selectedZoneMLA.photo} alt={selectedZoneMLA.mla} className="w-full h-full object-cover rounded-sm" />
+                    </div>
+                    
+                    <h4 className="font-display font-black text-3xl text-white mb-1 uppercase tracking-tighter leading-none">{selectedZoneMLA.mla}</h4>
+                    <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-8 mt-2">{selectedZoneMLA.party} Representative</div>
+                    
+                    <div className="space-y-6">
                       {(() => {
                         const mlaReports = reports.filter(r => Number(r.ward_no) === Number(selectedZoneMLA.ward));
                         const total = mlaReports.length;
@@ -305,98 +284,95 @@ export default function Home() {
                         
                         return (
                           <>
-                            <div>
-                              <div className="text-2xl font-display font-black text-black">
-                                <AnimatedNumber value={fixed} />/<AnimatedNumber value={total} />
+                            <div className="border-t border-white/10 pt-4">
+                              <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Fixed Issues / Total</div>
+                              <div className="text-2xl font-display font-black text-white tracking-tighter">
+                                <AnimatedNumber value={fixed} /> <span className="text-white/30">/</span> <AnimatedNumber value={total} />
                               </div>
-                              <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Fixed Issues</div>
                             </div>
-                            <div>
-                              <div className={`text-2xl font-display font-black ${score >= 50 ? 'text-forest' : 'text-red-600'}`}>
+                            <div className="border-t border-white/10 pt-4">
+                              <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Performance Score</div>
+                              <div className={`text-4xl font-display font-black tracking-tighter ${score >= 50 ? 'text-emerald-500' : 'text-amber-500'}`}>
                                 <AnimatedNumber value={score} />%
                               </div>
-                              <div className="text-[10px] font-black text-black/40 uppercase tracking-widest">Audit Score</div>
                             </div>
                           </>
                         );
                       })()}
                     </div>
-                  </div>
-                  <Link to="/map" className="w-full md:w-auto bg-forest text-gold px-10 py-5 rounded-2xl font-black text-sm hover:scale-105 transition-transform shadow-lg uppercase tracking-widest border-2 border-black">
-                    ACT NOW →
-                  </Link>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-8 bg-black/[0.02] border-4 border-dashed border-black/10 rounded-[32px] py-16 flex flex-col items-center justify-center text-center">
-                   <span className="text-4xl mb-4 grayscale">🏛️</span>
-                   <p className="text-black font-black uppercase tracking-[0.2em] text-sm opacity-20 italic">Select your area to begin the audit</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    
+                    <div className="mt-10">
+                      <Link to="/map" className="block text-center w-full bg-white text-black py-4 font-bold text-xs uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-colors duration-300">
+                        View Ward Map
+                      </Link>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="h-full min-h-[300px] border border-white/5 bg-white/[0.02] rounded-sm flex flex-col items-center justify-center text-center p-8"
+                  >
+                     <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center mb-4">
+                        <span className="block w-1.5 h-1.5 bg-white/40 rounded-full animate-ping"></span>
+                     </div>
+                     <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Select a representative<br/>to view the audit</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* THE DEMANDS - Simple & Powerful */}
-      <section className="w-full py-20 px-4 md:px-8 bg-forest text-white border-t-8 border-black">
+      {/* 4. THE DEMANDS: Emotive Text */}
+      <section className="w-full py-32 px-6 md:px-12 bg-black border-t border-white/5">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div 
-            whileInView={{ rotate: [-2, 1], scale: [0.9, 1] }}
-            className="bg-gold text-black px-6 py-3 font-display font-black text-3xl md:text-5xl leading-none w-fit mx-auto shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] uppercase tracking-tighter mb-12">
-            WHAT WE ALL WANT
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-amber-500 text-[10px] font-bold tracking-[0.3em] uppercase mb-8"
+          >
+            The Voice of the City
           </motion.div>
           
-          <div className="grid gap-8 text-left">
+          <div className="space-y-12 md:space-y-16 text-left border-l border-white/10 pl-6 md:pl-12">
             {[
-              { title: "1. FIX THE ROADS", desc: "Stop the potholes. Stop the dust. We want smooth roads for our kids and family.", color: "text-gold" },
-              { title: "2. CLEAN OUR CITY", desc: "Pick up the garbage. Clean the drains. We want a green and fresh Bengaluru.", color: "text-white" },
-              { title: "3. LIGHT THE STREETS", desc: "No more dark corners. We want safe streets for everyone to walk at night.", color: "text-gold" }
-            ].map((demand, i) => (
+              { text: "We are tired of dodging potholes on our way to build the future.", author: "Tech Worker, Bellandur" },
+              { text: "The metro brings hope, but the last mile brings only frustration.", author: "Student, Jayanagar" },
+              { text: "Bengaluru gave us everything. It's time we demand better for it.", author: "Resident, Indiranagar" }
+            ].map((quote, i) => (
               <motion.div 
                 key={i}
-                initial={{ x: -50, opacity: 0 }}
+                initial={{ x: -20, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
-                transition={{ delay: i * 0.2 }}
-                className="bg-white/5 p-6 rounded-3xl border-2 border-dashed border-white/20 hover:bg-white/10 transition-colors">
-                 <div className={`text-3xl font-black uppercase tracking-tight ${demand.color} mb-2`}>{demand.title}</div>
-                 <p className="text-sm md:text-lg font-bold opacity-80">{demand.desc}</p>
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.2, duration: 0.8 }}
+                className="relative"
+              >
+                 <div className="absolute -left-[24px] md:-left-[48px] top-2 w-4 h-[1px] bg-amber-500"></div>
+                 <h4 className="text-2xl md:text-4xl font-display font-black text-white uppercase tracking-tighter leading-tight mb-4">
+                   "{quote.text}"
+                 </h4>
+                 <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">— {quote.author}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CALL THE GOVT - Simple Action */}
-      <section className="w-full py-16 px-4 md:px-8 bg-white border-y-8 border-black">
-        <div className="max-w-5xl mx-auto text-center">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="text-4xl md:text-6xl font-display font-black text-black uppercase tracking-tighter mb-6">
-            TIME FOR ACTION
-          </motion.div>
-          <p className="text-xl font-bold text-black/60 mb-10">Choose who to reach out to. They must listen to us.</p>
-          <div className="flex flex-wrap gap-4 justify-center">
-             <motion.a whileHover={{ scale: 1.1 }} href="https://bbmp.gov.in" target="_blank" rel="noreferrer" className="bg-black text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all">Report to BBMP</motion.a>
-             <motion.a whileHover={{ scale: 1.1 }} href="https://bwssb.karnataka.gov.in" target="_blank" rel="noreferrer" className="bg-black text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-forest transition-all">Contact BWSSB</motion.a>
-          </div>
-        </div>
-      </section>
-
       {/* Footer Info */}
-      <footer className="w-full py-12 px-4 md:px-8 bg-white">
-        <div className="max-w-6xl mx-auto border-t border-black/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+      <footer className="w-full py-16 px-6 md:px-12 bg-[#050505] border-t border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col items-center md:items-start">
-             <div className="font-display font-black text-2xl text-black uppercase tracking-tighter">BROKENBENGALURU</div>
-             <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mt-1">Built for Bengaluru by Citizens • Established 2024</p>
+             <div className="font-display font-black text-xl text-white uppercase tracking-tighter">BROKENBENGALURU</div>
+             <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-2">Built for Namma Ooru. By the Citizens.</p>
           </div>
-          <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-black/60">
-             <a href="https://bbmp.gov.in" target="_blank" rel="noreferrer" className="hover:text-forest transition-colors">BBMP</a>
-             <a href="https://bwssb.karnataka.gov.in" target="_blank" rel="noreferrer" className="hover:text-forest transition-colors">BWSSB</a>
-             <a href="https://bescom.karnataka.gov.in" target="_blank" rel="noreferrer" className="hover:text-forest transition-colors">BESCOM</a>
+          <div className="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-white/50">
+             <a href="https://bbmp.gov.in" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">BBMP</a>
+             <a href="https://bwssb.karnataka.gov.in" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">BWSSB</a>
+             <a href="https://bescom.karnataka.gov.in" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">BESCOM</a>
           </div>
         </div>
       </footer>

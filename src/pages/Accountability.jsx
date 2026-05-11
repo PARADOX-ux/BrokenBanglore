@@ -368,7 +368,7 @@ export default function Accountability() {
           : `Dear ${mla.mla} (MLA, ${mla.constituency}),\n\nAs a citizen of ${mla.constituency} constituency, I am formally requesting your attention to unresolved civic issues in our area.\n\nPublic Audit Report: https://brokenbengaluru.in/accountability\n\nWe request acknowledgement and an action plan within 7 working days.\n\nRegards,\nA Bengaluru Citizen`;
         const tweetText = isAuthority
           ? `${mla.name} has ${mla.openTickets} unresolved civic complaints. Citizens of Bengaluru demand accountability. Review the public audit → https://brokenbengaluru.in/accountability #BrokenBengaluru #FixBengaluru`
-          : `${mla.mla} (MLA, ${mla.constituency}) has resolved 0 out of 0 civic complaints filed. The citizens of ${mla.constituency} deserve better. Public audit → https://brokenbengaluru.in/accountability @NammaKarnataka #BrokenBengaluru`;
+          : `${mla.mla} (MLA, ${mla.constituency}) has resolved 0 out of 0 civic complaints filed. The citizens of ${mla.constituency} deserve better. Public audit → https://brokenbengaluru.in/accountability @CMofKarnataka #BrokenBengaluru`;
 
         return (
           <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={() => setSelectedMLA(null)}>
@@ -456,7 +456,7 @@ export default function Accountability() {
                   <span className="text-xl font-bold text-[#1a3a2a]">𝕏</span>
                   <div>
                     <div className="font-bold text-[#1a3a2a] text-sm">Tweet — Public Accountability</div>
-                    <div className="text-xs text-[#1a3a2a]/50">Pre-drafted. Tags @NammaKarnataka + @BBMPgov</div>
+                    <div className="text-xs text-[#1a3a2a]/50">Pre-drafted. Tags @CMofKarnataka + @BBMPgov</div>
                   </div>
                   <span className="ml-auto text-[#1a3a2a]/30 text-sm">↗</span>
                 </a>

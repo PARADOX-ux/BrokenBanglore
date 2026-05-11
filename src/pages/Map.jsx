@@ -189,12 +189,6 @@ export default function Map() {
       if (r.ward_no) counts[r.ward_no] = (counts[r.ward_no] || 0) + 1;
     });
 
-    if (Object.keys(counts).length === 0) {
-      for (let i = 1; i <= 243; i++) {
-        counts[i] = Math.floor(Math.random() * 50) + 5;
-      }
-    }
-
     Object.entries(counts).forEach(([wardNo, count]) => {
       try {
         // MapLibre feature state IDs must match the promoteId type (Number in this GeoJSON)
@@ -338,12 +332,7 @@ export default function Map() {
       if (reports && reports.length > 0) {
         setWardReports(reports);
       } else {
-        const dummyReports = [
-          { id: 'd1', title: 'Pothole on Main Road', severity: 'high', status: 'open' },
-          { id: 'd2', title: 'Street light not working', severity: 'medium', status: 'open' },
-          { id: 'd3', title: 'Garbage pile-up near park', severity: 'low', status: 'open' }
-        ];
-        setWardReports(dummyReports);
+        setWardReports([]);
       }
       setWardReportsLoading(false);
     }
@@ -533,7 +522,7 @@ export default function Map() {
               ['>', ['coalesce', ['feature-state', 'reportCount'], 0], 20], '#2d6a4f', // Deep Green
               ['>', ['coalesce', ['feature-state', 'reportCount'], 0], 5], '#40916c',  // Sea Green
               ['>', ['coalesce', ['feature-state', 'reportCount'], 0], 0], '#52b788',  // Mint
-              '#11261d' // Subtle Forest Green fallback (instead of pitch black)
+              '#1e3f2b' // Subtle Forest Green fallback
             ],
             'fill-opacity': [
               'case',
@@ -621,7 +610,7 @@ export default function Map() {
   return (
     <div className="flex h-[calc(100vh-80px)] w-full relative overflow-hidden bg-[#0a0a0a]">
       
-      {/* Dynamic Header & View Toggle (Namma Kasa Style) */}
+      {/* Dynamic Header & View Toggle */}
       <div className="absolute top-4 left-4 z-[500] flex flex-col gap-3 pointer-events-none">
         <div className="pointer-events-auto">
           <Link to="/" className="bg-white/95 backdrop-blur-md shadow-2xl border-2 border-black p-3 rounded-2xl flex items-center gap-3 group hover:bg-white transition-all duration-300">
@@ -796,7 +785,7 @@ export default function Map() {
             </>
           ) : (
             <>
-              {/* ISSUE REPORT CARD UI (Namma Kasa Style) */}
+              {/* ISSUE REPORT CARD UI */}
               <div className="p-4 flex items-center justify-between border-b-4 border-black shrink-0">
                  <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-white ${selectedReport.status === 'resolved' ? 'bg-emerald-600' : 'bg-amber-500'}`}>
                     {selectedReport.status || 'Pending'}
